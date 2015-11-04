@@ -1,0 +1,239 @@
+Terminais não utilizados na gramática
+
+   ABRE_PARENTESES
+   FECHA_PARENTESES
+
+
+Gramática
+
+    0 $accept: expr $end
+
+    1 expr: expr MAIS termo
+    2     | expr MENOS termo
+    3     | termo
+
+    4 termo: termo ASTERISCO fator
+    5      | termo AND fator
+    6      | termo OR fator
+    7      | termo DIV fator
+    8      | fator
+
+    9 fator: IDENTA
+   10      | IDENTB
+
+
+Terminais, com as regras onde eles aparecem
+
+$end (0) 0
+error (256)
+IDENTA (258) 9
+IDENTB (259) 10
+MAIS (260) 1
+MENOS (261) 2
+AND (262) 5
+OR (263) 6
+ASTERISCO (264) 4
+DIV (265) 7
+ABRE_PARENTESES (266)
+FECHA_PARENTESES (267)
+
+
+Não-terminais com as regras onde eles aparecem
+
+$accept (13)
+    à esquerda: 0
+expr (14)
+    à esquerda: 1 2 3, à direita: 0 1 2
+termo (15)
+    à esquerda: 4 5 6 7 8, à direita: 1 2 3 4 5 6 7
+fator (16)
+    à esquerda: 9 10, à direita: 4 5 6 7 8
+
+
+State 0
+
+    0 $accept: . expr $end
+
+    IDENTA  deslocar, e ir ao estado 1
+    IDENTB  deslocar, e ir ao estado 2
+
+    expr   ir ao estado 3
+    termo  ir ao estado 4
+    fator  ir ao estado 5
+
+
+State 1
+
+    9 fator: IDENTA .
+
+    $padrão  reduzir usando a regra 9 (fator)
+
+
+State 2
+
+   10 fator: IDENTB .
+
+    $padrão  reduzir usando a regra 10 (fator)
+
+
+State 3
+
+    0 $accept: expr . $end
+    1 expr: expr . MAIS termo
+    2     | expr . MENOS termo
+
+    $end   deslocar, e ir ao estado 6
+    MAIS   deslocar, e ir ao estado 7
+    MENOS  deslocar, e ir ao estado 8
+
+
+State 4
+
+    3 expr: termo .
+    4 termo: termo . ASTERISCO fator
+    5      | termo . AND fator
+    6      | termo . OR fator
+    7      | termo . DIV fator
+
+    AND        deslocar, e ir ao estado 9
+    OR         deslocar, e ir ao estado 10
+    ASTERISCO  deslocar, e ir ao estado 11
+    DIV        deslocar, e ir ao estado 12
+
+    $padrão  reduzir usando a regra 3 (expr)
+
+
+State 5
+
+    8 termo: fator .
+
+    $padrão  reduzir usando a regra 8 (termo)
+
+
+State 6
+
+    0 $accept: expr $end .
+
+    $padrão  aceitar
+
+
+State 7
+
+    1 expr: expr MAIS . termo
+
+    IDENTA  deslocar, e ir ao estado 1
+    IDENTB  deslocar, e ir ao estado 2
+
+    termo  ir ao estado 13
+    fator  ir ao estado 5
+
+
+State 8
+
+    2 expr: expr MENOS . termo
+
+    IDENTA  deslocar, e ir ao estado 1
+    IDENTB  deslocar, e ir ao estado 2
+
+    termo  ir ao estado 14
+    fator  ir ao estado 5
+
+
+State 9
+
+    5 termo: termo AND . fator
+
+    IDENTA  deslocar, e ir ao estado 1
+    IDENTB  deslocar, e ir ao estado 2
+
+    fator  ir ao estado 15
+
+
+State 10
+
+    6 termo: termo OR . fator
+
+    IDENTA  deslocar, e ir ao estado 1
+    IDENTB  deslocar, e ir ao estado 2
+
+    fator  ir ao estado 16
+
+
+State 11
+
+    4 termo: termo ASTERISCO . fator
+
+    IDENTA  deslocar, e ir ao estado 1
+    IDENTB  deslocar, e ir ao estado 2
+
+    fator  ir ao estado 17
+
+
+State 12
+
+    7 termo: termo DIV . fator
+
+    IDENTA  deslocar, e ir ao estado 1
+    IDENTB  deslocar, e ir ao estado 2
+
+    fator  ir ao estado 18
+
+
+State 13
+
+    1 expr: expr MAIS termo .
+    4 termo: termo . ASTERISCO fator
+    5      | termo . AND fator
+    6      | termo . OR fator
+    7      | termo . DIV fator
+
+    AND        deslocar, e ir ao estado 9
+    OR         deslocar, e ir ao estado 10
+    ASTERISCO  deslocar, e ir ao estado 11
+    DIV        deslocar, e ir ao estado 12
+
+    $padrão  reduzir usando a regra 1 (expr)
+
+
+State 14
+
+    2 expr: expr MENOS termo .
+    4 termo: termo . ASTERISCO fator
+    5      | termo . AND fator
+    6      | termo . OR fator
+    7      | termo . DIV fator
+
+    AND        deslocar, e ir ao estado 9
+    OR         deslocar, e ir ao estado 10
+    ASTERISCO  deslocar, e ir ao estado 11
+    DIV        deslocar, e ir ao estado 12
+
+    $padrão  reduzir usando a regra 2 (expr)
+
+
+State 15
+
+    5 termo: termo AND fator .
+
+    $padrão  reduzir usando a regra 5 (termo)
+
+
+State 16
+
+    6 termo: termo OR fator .
+
+    $padrão  reduzir usando a regra 6 (termo)
+
+
+State 17
+
+    4 termo: termo ASTERISCO fator .
+
+    $padrão  reduzir usando a regra 4 (termo)
+
+
+State 18
+
+    7 termo: termo DIV fator .
+
+    $padrão  reduzir usando a regra 7 (termo)
