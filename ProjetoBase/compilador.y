@@ -12,6 +12,26 @@
 
 int num_vars;
 
+typedef struct item
+{
+  char *identificador;
+  char *categoria;
+  int  nivel_lexico;
+  int  deslocamento;
+  char *passagem;
+  char *rotulo;
+} item;
+
+typedef struct tabela_simbolos
+{
+  int n_itens;
+  item *topo_pilha;
+  item *itens;
+
+} tabela_simbolos;
+
+tabela_simbolos *tbs;
+
 %}
 
 %token PROGRAM ABRE_PARENTESES FECHA_PARENTESES 
@@ -74,6 +94,22 @@ lista_id_var: lista_id_var VIRGULA IDENT
               { /* insere última vars na tabela de símbolos */ 
                 num_vars++;}
             | IDENT { /* insere vars na tabela de símbolos */
+                if(tbs->itens == NULL){
+                  tbs->itens = (item *) malloc (sizeof(item));
+                }
+                else
+                  tbs->itens = (item *) realloc (tbs->itens,sizeof(item));
+
+                printf("Aqui foi\n");
+                tbs->itens[tbs->n_itens].identificador = (char *) malloc (256 * sizeof(char));
+                tbs->itens[tbs->n_itens].categoria = (char *) malloc (256 * sizeof(char));
+                strcpy(tbs->itens[tbs->n_itens].identificador,"Teste");
+                printf("1 strcpy\n");
+                strcpy(tbs->itens[tbs->n_itens].categoria,"Variavel Simples");
+                printf("2 strcpy\n");
+                tbs->itens[tbs->n_itens].nivel_lexico = 0;
+                tbs->itens[tbs->n_itens].deslocamento = num_vars;
+                tbs->n_itens = tbs->n_itens++;
                 num_vars++;
               }
 ;
@@ -110,7 +146,9 @@ main (int argc, char** argv) {
 /* -------------------------------------------------------------------
  *  Inicia a Tabela de Símbolos
  * ------------------------------------------------------------------- */
-
+   tbs = (tabela_simbolos *) malloc (sizeof(tabela_simbolos));
+   tbs->itens = NULL;
+   tbs->n_itens = 0;
    yyin=fp;
    yyparse();
 
