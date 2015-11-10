@@ -1,0 +1,16 @@
+
+O arquivo mepa.s contém uma série de macro-operações. Uma macro para
+cada instrução MEPA. Para gerar um arquivo executável a partir de um
+arquivo contendo as instruções MEPA, faça o seguinte:
+
+1. Renomeie o arquivo-fonte para MEPA. 
+2. Gere o arquivo objeto: as mepa.s -o mepa.o
+3. Gere o arquivo executável: ld mepa.o -o mepa -lc -dynamic-linker /lib/ld-linux.so.2  
+4. Execute o arquivo: ./mepa
+
+Coloquei anexo também um arquivo MEPA (visto em sala) como modelo. Ele
+é o resultado que o meu compilador gerou a partir do programa "pgma.pas".
+
+Divirtam-se
+
+        Bruno

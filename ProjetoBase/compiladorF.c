@@ -23,16 +23,49 @@
  * ------------------------------------------------------------------- */
 
 FILE* fp=NULL;
-void geraCodigo (char* rot, char* comando) {
+void geraCodigo (char* rot, char* comando,char* param1,char* param2,char* param3) {
 
   if (fp == NULL) {
     fp = fopen ("MEPA", "w");
   }
 
+  printf("Comando Traduzido: %s\n",comando);
+
   if ( rot == NULL ) {
-    fprintf(fp, "     %s\n", comando); fflush(fp);
+    if(param1 == NULL){
+      fprintf(fp, "     %s\n", comando); fflush(fp);
+    }
+    else{
+      if(param2 == NULL){
+        fprintf(fp, "     %s %s\n", comando,param1); fflush(fp);
+      }
+      else{
+        if(param3 == NULL){
+          fprintf(fp, "     %s %s,%s\n", comando,param1,param2); fflush(fp);
+        }
+        else{
+          fprintf(fp, "     %s %s,%s,%s\n", comando,param1,param2,param3); fflush(fp);
+        }
+      }
+    }
+
   } else {
-    fprintf(fp, "%s: %s \n", rot, comando); fflush(fp);
+    if(param1 == NULL){
+      fprintf(fp, "%s: %s \n", rot, comando); fflush(fp);
+    }
+    else{
+      if(param2 == NULL){
+         fprintf(fp, "%s: %s %s\n", rot, comando,param1); fflush(fp);
+      }
+      else{
+        if(param3 == NULL){
+           fprintf(fp, "%s: %s %s,%s\n", rot, comando,param1,param2); fflush(fp);
+        }
+        else{
+          fprintf(fp, "%s: %s %s,%s,%s\n", rot, comando,param1,param2,param3); fflush(fp);
+        }
+      }
+    }
   }
 }
 

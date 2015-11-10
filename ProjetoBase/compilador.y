@@ -21,12 +21,13 @@ int num_vars;
 %%
 
 programa    :{ 
-             geraCodigo (NULL, "INPP"); 
+                num_vars=0;
+                geraCodigo (NULL, "INPP",NULL,NULL,NULL); 
              }
              PROGRAM IDENT 
              ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
              bloco PONTO {
-             geraCodigo (NULL, "PARA"); 
+              geraCodigo (NULL, "PARA",NULL,NULL,NULL); 
              }
 ;
 
@@ -49,14 +50,19 @@ var         : { } VAR declara_vars
             |
 ;
 
-declara_vars: declara_vars declara_var 
-            | declara_var 
+declara_vars:
+              declara_vars declara_var |
+              declara_var 
 ;
 
 declara_var : { } 
               lista_id_var DOIS_PONTOS 
               tipo 
               { /* AMEM */
+                char *param1 = (char *) malloc (4 * sizeof(char));
+                sprintf(param1, "%d", num_vars);
+                num_vars=0;
+                geraCodigo (NULL, "AMEM",param1,NULL,NULL); 
               }
               PONTO_E_VIRGULA
 ;
@@ -65,8 +71,11 @@ tipo        : IDENT
 ;
 
 lista_id_var: lista_id_var VIRGULA IDENT 
-              { /* insere última vars na tabela de símbolos */ }
-            | IDENT { /* insere vars na tabela de símbolos */}
+              { /* insere última vars na tabela de símbolos */ 
+                num_vars++;}
+            | IDENT { /* insere vars na tabela de símbolos */
+                num_vars++;
+              }
 ;
 
 lista_idents: lista_idents VIRGULA IDENT  
