@@ -11,8 +11,10 @@
 #include "compilador.h"
 
 int num_vars;
+int desl;
+typedef struct item item;
 
-typedef struct item
+struct item
 {
   char *identificador;
   char *categoria;
@@ -20,12 +22,15 @@ typedef struct item
   int  deslocamento;
   char *passagem;
   char *rotulo;
-} item;
+  item *itemAnt;
+  item *itemProx;
+};
 
 typedef struct tabela_simbolos
 {
   int n_itens;
   item *topo_pilha;
+  item *fim_pilha;
   item *itens;
 
 } tabela_simbolos;
@@ -92,21 +97,36 @@ tipo        : IDENT
 
 lista_id_var: lista_id_var VIRGULA IDENT 
               { /* insere última vars na tabela de símbolos */ 
-                num_vars++;}
+                if(tbs->topo_pilha == NULL){
+                  item auxItem = (item *) malloc (sizeof(item));
+                  tbs->topo_pilha->itemProx = auxItem;
+                  auxItem->itemAnt = tbs->topo_pilha;
+                  auxItem->itemProx = NULL;
+                  tbs->topo_pilha = auxItem;
+                }
+                else
+                  tbs->itens = (item *) realloc (tbs->itens,sizeof(item));
+                tbs->itens[tbs->n_itens].identificador = (char *) malloc (256 * sizeof(char));
+                tbs->itens[tbs->n_itens].categoria = (char *) malloc (256 * sizeof(char));
+                printf("\n\nToken: %s\n\n",token);
+                strcpy(tbs->itens[tbs->n_itens].identificador,token);
+                strcpy(tbs->itens[tbs->n_itens].categoria,"Variavel Simples");
+                tbs->itens[tbs->n_itens].nivel_lexico = 0;
+                tbs->itens[tbs->n_itens].deslocamento = num_vars;
+                tbs->n_itens = tbs->n_itens++;
+                num_vars++;
+              }
             | IDENT { /* insere vars na tabela de símbolos */
                 if(tbs->itens == NULL){
                   tbs->itens = (item *) malloc (sizeof(item));
                 }
                 else
                   tbs->itens = (item *) realloc (tbs->itens,sizeof(item));
-
-                printf("Aqui foi\n");
                 tbs->itens[tbs->n_itens].identificador = (char *) malloc (256 * sizeof(char));
                 tbs->itens[tbs->n_itens].categoria = (char *) malloc (256 * sizeof(char));
-                strcpy(tbs->itens[tbs->n_itens].identificador,"Teste");
-                printf("1 strcpy\n");
+                printf("\n\nToken: %s\n\n",token);
+                strcpy(tbs->itens[tbs->n_itens].identificador,token);
                 strcpy(tbs->itens[tbs->n_itens].categoria,"Variavel Simples");
-                printf("2 strcpy\n");
                 tbs->itens[tbs->n_itens].nivel_lexico = 0;
                 tbs->itens[tbs->n_itens].deslocamento = num_vars;
                 tbs->n_itens = tbs->n_itens++;
@@ -147,6 +167,8 @@ main (int argc, char** argv) {
  *  Inicia a Tabela de Símbolos
  * ------------------------------------------------------------------- */
    tbs = (tabela_simbolos *) malloc (sizeof(tabela_simbolos));
+   tbs->topo_pilha = NULL;
+   tbs->fim_pilha = NULL;
    tbs->itens = NULL;
    tbs->n_itens = 0;
    yyin=fp;

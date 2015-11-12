@@ -71,8 +71,10 @@
 #include "compilador.h"
 
 int num_vars;
+int desl;
+typedef struct item item;
 
-typedef struct item
+struct item
 {
   char *identificador;
   char *categoria;
@@ -80,12 +82,15 @@ typedef struct item
   int  deslocamento;
   char *passagem;
   char *rotulo;
-} item;
+  item *itemAnt;
+  item *itemProx;
+};
 
 typedef struct tabela_simbolos
 {
   int n_itens;
   item *topo_pilha;
+  item *fim_pilha;
   item *itens;
 
 } tabela_simbolos;
@@ -93,7 +98,7 @@ typedef struct tabela_simbolos
 tabela_simbolos *tbs;
 
 
-#line 97 "compilador.tab.c" /* yacc.c:339  */
+#line 102 "compilador.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -159,7 +164,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 163 "compilador.tab.c" /* yacc.c:358  */
+#line 168 "compilador.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -457,9 +462,9 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    43,    43,    43,    56,    55,    65,    69,    69,    70,
-      74,    75,    78,    81,    78,    90,    93,    96,   117,   118,
-     122,   124
+       0,    48,    48,    48,    61,    60,    70,    74,    74,    75,
+      79,    80,    83,    86,    83,    95,    98,   117,   135,   136,
+     140,   142
 };
 #endif
 
@@ -1249,85 +1254,98 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 43 "compilador.y" /* yacc.c:1646  */
+#line 48 "compilador.y" /* yacc.c:1646  */
     { 
                 num_vars=0;
                 geraCodigo (NULL, "INPP",NULL,NULL,NULL); 
              }
-#line 1258 "compilador.tab.c" /* yacc.c:1646  */
+#line 1263 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 49 "compilador.y" /* yacc.c:1646  */
+#line 54 "compilador.y" /* yacc.c:1646  */
     {
               geraCodigo (NULL, "PARA",NULL,NULL,NULL); 
              }
-#line 1266 "compilador.tab.c" /* yacc.c:1646  */
+#line 1271 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 56 "compilador.y" /* yacc.c:1646  */
+#line 61 "compilador.y" /* yacc.c:1646  */
     { 
               }
-#line 1273 "compilador.tab.c" /* yacc.c:1646  */
+#line 1278 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 69 "compilador.y" /* yacc.c:1646  */
+#line 74 "compilador.y" /* yacc.c:1646  */
     { }
-#line 1279 "compilador.tab.c" /* yacc.c:1646  */
+#line 1284 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 78 "compilador.y" /* yacc.c:1646  */
+#line 83 "compilador.y" /* yacc.c:1646  */
     { }
-#line 1285 "compilador.tab.c" /* yacc.c:1646  */
+#line 1290 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 81 "compilador.y" /* yacc.c:1646  */
+#line 86 "compilador.y" /* yacc.c:1646  */
     { /* AMEM */
                 char *param1 = (char *) malloc (4 * sizeof(char));
                 sprintf(param1, "%d", num_vars);
                 num_vars=0;
                 geraCodigo (NULL, "AMEM",param1,NULL,NULL); 
               }
-#line 1296 "compilador.tab.c" /* yacc.c:1646  */
+#line 1301 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 94 "compilador.y" /* yacc.c:1646  */
+#line 99 "compilador.y" /* yacc.c:1646  */
     { /* insere última vars na tabela de símbolos */ 
-                num_vars++;}
-#line 1303 "compilador.tab.c" /* yacc.c:1646  */
+                if(tbs->topo_pilha == NULL){
+                  tbs->itens = (item *) malloc (sizeof(item));
+                  tbs->topo_pilha = tbs->itens[];
+                  tbs->fim_pilha = tbs->itens
+                }
+                else
+                  tbs->itens = (item *) realloc (tbs->itens,sizeof(item));
+                tbs->itens[tbs->n_itens].identificador = (char *) malloc (256 * sizeof(char));
+                tbs->itens[tbs->n_itens].categoria = (char *) malloc (256 * sizeof(char));
+                printf("\n\nToken: %s\n\n",token);
+                strcpy(tbs->itens[tbs->n_itens].identificador,token);
+                strcpy(tbs->itens[tbs->n_itens].categoria,"Variavel Simples");
+                tbs->itens[tbs->n_itens].nivel_lexico = 0;
+                tbs->itens[tbs->n_itens].deslocamento = num_vars;
+                tbs->n_itens = tbs->n_itens++;
+                num_vars++;
+              }
+#line 1324 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 96 "compilador.y" /* yacc.c:1646  */
+#line 117 "compilador.y" /* yacc.c:1646  */
     { /* insere vars na tabela de símbolos */
                 if(tbs->itens == NULL){
                   tbs->itens = (item *) malloc (sizeof(item));
                 }
                 else
                   tbs->itens = (item *) realloc (tbs->itens,sizeof(item));
-
-                printf("Aqui foi\n");
                 tbs->itens[tbs->n_itens].identificador = (char *) malloc (256 * sizeof(char));
                 tbs->itens[tbs->n_itens].categoria = (char *) malloc (256 * sizeof(char));
-                strcpy(tbs->itens[tbs->n_itens].identificador,"Teste");
-                printf("1 strcpy\n");
+                printf("\n\nToken: %s\n\n",token);
+                strcpy(tbs->itens[tbs->n_itens].identificador,token);
                 strcpy(tbs->itens[tbs->n_itens].categoria,"Variavel Simples");
-                printf("2 strcpy\n");
                 tbs->itens[tbs->n_itens].nivel_lexico = 0;
                 tbs->itens[tbs->n_itens].deslocamento = num_vars;
                 tbs->n_itens = tbs->n_itens++;
                 num_vars++;
               }
-#line 1327 "compilador.tab.c" /* yacc.c:1646  */
+#line 1345 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1331 "compilador.tab.c" /* yacc.c:1646  */
+#line 1349 "compilador.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1555,7 +1573,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 128 "compilador.y" /* yacc.c:1906  */
+#line 146 "compilador.y" /* yacc.c:1906  */
 
 
 main (int argc, char** argv) {
@@ -1578,6 +1596,8 @@ main (int argc, char** argv) {
  *  Inicia a Tabela de Símbolos
  * ------------------------------------------------------------------- */
    tbs = (tabela_simbolos *) malloc (sizeof(tabela_simbolos));
+   tbs->topo_pilha = NULL;
+   tbs->fim_pilha = NULL;
    tbs->itens = NULL;
    tbs->n_itens = 0;
    yyin=fp;
