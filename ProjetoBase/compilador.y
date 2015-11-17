@@ -57,10 +57,14 @@ item * procura_tbsimb(char * token){
 
 %}
 
-%token PROGRAM ABRE_PARENTESES FECHA_PARENTESES 
+%token PROGRAM ABRE_PARENTESES FECHA_PARENTESES WRITE
 %token VIRGULA PONTO_E_VIRGULA DOIS_PONTOS PONTO
 %token T_BEGIN T_END VAR IDENT ATRIBUICAO
 %token NUMERO SOMA SUB MUL DIV
+%token IF THEN ELSE
+
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
 
 %%
 
@@ -79,6 +83,13 @@ programa    :{
 bloco       : 
               parte_declara_vars
               { 
+                free(param1);
+                free(param2);
+                free(param3);
+                param1 = (char *) malloc (4 * sizeof(char));
+                sprintf(param1, "%d", num_vars);
+                num_vars=0;
+                geraCodigo (NULL, "AMEM",param1,NULL,NULL); 
               }
 
               comando_composto 
@@ -91,7 +102,8 @@ parte_declara_vars:  var
 ;
 
 
-var         : { } VAR declara_vars
+var         : { } VAR declara_vars {
+                }
             |
 ;
 
@@ -104,13 +116,7 @@ declara_var : { }
               lista_id_var DOIS_PONTOS 
               tipo 
               { /* AMEM */
-                free(param1);
-                free(param2);
-                free(param3);
-                param1 = (char *) malloc (4 * sizeof(char));
-                sprintf(param1, "%d", num_vars);
-                num_vars=0;
-                geraCodigo (NULL, "AMEM",param1,NULL,NULL); 
+               
               }
               PONTO_E_VIRGULA
 ;
@@ -159,6 +165,8 @@ lista_idents: lista_idents VIRGULA IDENT
             | IDENT
 ;
 
+// Comandos a serem executados.
+
 comando_composto: T_BEGIN comandos_total T_END 
 
 
@@ -182,6 +190,11 @@ comando:
           } ATRIBUICAO expr PONTO_E_VIRGULA{
             geraCodigo (NULL, "ARMZ",param1Aux,param2Aux,NULL);
           }
+          | rep_while
+          | cond_if
+          | comando_goto
+          | comando_write
+
 ;
 
 expr       :ABRE_PARENTESES expr FECHA_PARENTESES|
@@ -223,6 +236,42 @@ fator      :  ABRE_PARENTESES expr FECHA_PARENTESES|
               }
 ;
 
+
+cond_if     : if_then cond_else 
+            { 
+              em_if_finaliza (); 
+            }
+;
+
+if_then     : IF expressao 
+            {
+              em_if_apos_expr ();
+            }
+             THEN comando_sem_rotulo
+            {
+              em_if_apos_then ();
+            }
+;
+
+cond_else   : ELSE comando_sem_rotulo
+            | %prec LOWER_THAN_ELSE
+;
+
+comando_write : WRITE IDENT {
+                  item *item = procura_tbsimb(token);
+                  if(item!=NULL){
+                    free(param1);
+                    free(param2);
+                    free(param3);
+                    param1 = (char *) malloc (4 * sizeof(char));
+                    param2 = (char *) malloc (4 * sizeof(char));
+                    sprintf(param1, "%d", item->nivel_lexico);
+                    sprintf(param2, "%d", item->deslocamento);
+                    geraCodigo (NULL, "CRVL",param1,param2,NULL);
+                    geraCodigo (NULL, "IMPR",NULL,NULL,NULL);
+                  } 
+                } PONTO_E_VIRGULA |
+                WRITE NUMERO PONTO_E_VIRGULA 
 
 %%
 

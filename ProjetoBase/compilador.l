@@ -62,6 +62,34 @@ end { simbolo = simb_end;
           return ATRIBUICAO;  
  }
 
+if { 
+     simbolo = simb_if;  
+     strncpy (token, yytext, TAM_TOKEN);
+     IMPRIME(" if  ");
+     return IF;  
+   }
+
+then { 
+     simbolo = simb_then;  
+     strncpy (token, yytext, TAM_TOKEN);
+     IMPRIME(" then  ");
+     return THEN;  
+   }
+
+else { 
+     simbolo = simb_else;  
+     strncpy (token, yytext, TAM_TOKEN);
+     IMPRIME(" else  ");
+     return ELSE;  
+   }
+
+write{
+     simbolo = simb_write;
+     strncpy (token, yytext, TAM_TOKEN);
+     IMPRIME(" write  ");
+     return WRITE;  
+}
+
 \; { simbolo = simb_ponto_e_virgula;  
           strncpy (token, yytext, TAM_TOKEN);
           IMPRIME(" pt_virgula  ");

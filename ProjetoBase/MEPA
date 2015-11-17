@@ -21,6 +21,10 @@
      CRVL 0,4
      CRVL 0,2
      SUBT
+     CRCT 4
+     SOMA
+     CRCT 3
+     SUBT
      CRCT 5
      MULT
      SOMA
