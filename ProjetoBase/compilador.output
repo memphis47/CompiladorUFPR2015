@@ -1,8 +1,3 @@
-Terminals unused in grammar
-
-   ATRIBUICAO
-
-
 Grammar
 
     0 $accept: programa $end
@@ -39,9 +34,26 @@ Grammar
    17 lista_idents: lista_idents VIRGULA IDENT
    18             | IDENT
 
-   19 comando_composto: T_BEGIN comandos T_END
+   19 comando_composto: T_BEGIN comandos_total T_END
 
-   20 comandos: %empty
+   20 comandos_total: comandos
+
+   21 comandos: comandos comando
+   22         | comando
+
+   23 $@6: %empty
+
+   24 comando: IDENT $@6 ATRIBUICAO expr PONTO_E_VIRGULA
+
+   25 expr: expr SOMA termo
+   26     | expr SUB termo
+   27     | termo
+
+   28 termo: termo MUL fator
+   29      | termo DIV fator
+   30      | fator
+
+   31 fator: IDENT
 
 
 Terminals, with rules where they appear
@@ -52,52 +64,68 @@ PROGRAM (258) 2
 ABRE_PARENTESES (259) 2
 FECHA_PARENTESES (260) 2
 VIRGULA (261) 15 17
-PONTO_E_VIRGULA (262) 2 13
+PONTO_E_VIRGULA (262) 2 13 24
 DOIS_PONTOS (263) 13
 PONTO (264) 2
 T_BEGIN (265) 19
 T_END (266) 19
 VAR (267) 7
-IDENT (268) 2 14 15 16 17 18
-ATRIBUICAO (269)
+IDENT (268) 2 14 15 16 17 18 24 31
+ATRIBUICAO (269) 24
+SOMA (270) 25
+SUB (271) 26
+MUL (272) 28
+DIV (273) 29
 
 
 Nonterminals, with rules where they appear
 
-$accept (15)
+$accept (19)
     on left: 0
-programa (16)
+programa (20)
     on left: 2, on right: 0
-$@1 (17)
+$@1 (21)
     on left: 1, on right: 2
-bloco (18)
+bloco (22)
     on left: 4, on right: 2
-$@2 (19)
+$@2 (23)
     on left: 3, on right: 4
-parte_declara_vars (20)
+parte_declara_vars (24)
     on left: 5, on right: 4
-var (21)
+var (25)
     on left: 7 8, on right: 5
-$@3 (22)
+$@3 (26)
     on left: 6, on right: 7
-declara_vars (23)
+declara_vars (27)
     on left: 9 10, on right: 7 9
-declara_var (24)
+declara_var (28)
     on left: 13, on right: 9 10
-$@4 (25)
+$@4 (29)
     on left: 11, on right: 13
-$@5 (26)
+$@5 (30)
     on left: 12, on right: 13
-tipo (27)
+tipo (31)
     on left: 14, on right: 13
-lista_id_var (28)
+lista_id_var (32)
     on left: 15 16, on right: 13 15
-lista_idents (29)
+lista_idents (33)
     on left: 17 18, on right: 2 17
-comando_composto (30)
+comando_composto (34)
     on left: 19, on right: 4
-comandos (31)
+comandos_total (35)
     on left: 20, on right: 19
+comandos (36)
+    on left: 21 22, on right: 20 21
+comando (37)
+    on left: 24, on right: 21 22
+$@6 (38)
+    on left: 23, on right: 24
+expr (39)
+    on left: 25 26 27, on right: 24 25 26
+termo (40)
+    on left: 28 29 30, on right: 25 26 27 28 29
+fator (41)
+    on left: 31, on right: 28 29 30
 
 
 State 0
@@ -263,11 +291,13 @@ State 19
 
 State 20
 
-   19 comando_composto: T_BEGIN . comandos T_END
+   19 comando_composto: T_BEGIN . comandos_total T_END
 
-    $default  reduce using rule 20 (comandos)
+    IDENT  shift, and go to state 25
 
-    comandos  go to state 25
+    comandos_total  go to state 26
+    comandos        go to state 27
+    comando         go to state 28
 
 
 State 21
@@ -285,7 +315,7 @@ State 22
     IDENT     reduce using rule 11 ($@4)
     $default  reduce using rule 7 (var)
 
-    declara_var  go to state 26
+    declara_var  go to state 29
     $@4          go to state 24
 
 
@@ -300,96 +330,269 @@ State 24
 
    13 declara_var: $@4 . lista_id_var DOIS_PONTOS tipo $@5 PONTO_E_VIRGULA
 
-    IDENT  shift, and go to state 27
+    IDENT  shift, and go to state 30
 
-    lista_id_var  go to state 28
+    lista_id_var  go to state 31
 
 
 State 25
 
-   19 comando_composto: T_BEGIN comandos . T_END
+   24 comando: IDENT . $@6 ATRIBUICAO expr PONTO_E_VIRGULA
 
-    T_END  shift, and go to state 29
+    $default  reduce using rule 23 ($@6)
+
+    $@6  go to state 32
 
 
 State 26
+
+   19 comando_composto: T_BEGIN comandos_total . T_END
+
+    T_END  shift, and go to state 33
+
+
+State 27
+
+   20 comandos_total: comandos .
+   21 comandos: comandos . comando
+
+    IDENT  shift, and go to state 25
+
+    $default  reduce using rule 20 (comandos_total)
+
+    comando  go to state 34
+
+
+State 28
+
+   22 comandos: comando .
+
+    $default  reduce using rule 22 (comandos)
+
+
+State 29
 
     9 declara_vars: declara_vars declara_var .
 
     $default  reduce using rule 9 (declara_vars)
 
 
-State 27
+State 30
 
    16 lista_id_var: IDENT .
 
     $default  reduce using rule 16 (lista_id_var)
 
 
-State 28
+State 31
 
    13 declara_var: $@4 lista_id_var . DOIS_PONTOS tipo $@5 PONTO_E_VIRGULA
    15 lista_id_var: lista_id_var . VIRGULA IDENT
 
-    VIRGULA      shift, and go to state 30
-    DOIS_PONTOS  shift, and go to state 31
+    VIRGULA      shift, and go to state 35
+    DOIS_PONTOS  shift, and go to state 36
 
 
-State 29
+State 32
 
-   19 comando_composto: T_BEGIN comandos T_END .
+   24 comando: IDENT $@6 . ATRIBUICAO expr PONTO_E_VIRGULA
+
+    ATRIBUICAO  shift, and go to state 37
+
+
+State 33
+
+   19 comando_composto: T_BEGIN comandos_total T_END .
 
     $default  reduce using rule 19 (comando_composto)
 
 
-State 30
+State 34
+
+   21 comandos: comandos comando .
+
+    $default  reduce using rule 21 (comandos)
+
+
+State 35
 
    15 lista_id_var: lista_id_var VIRGULA . IDENT
 
-    IDENT  shift, and go to state 32
+    IDENT  shift, and go to state 38
 
 
-State 31
+State 36
 
    13 declara_var: $@4 lista_id_var DOIS_PONTOS . tipo $@5 PONTO_E_VIRGULA
 
-    IDENT  shift, and go to state 33
+    IDENT  shift, and go to state 39
 
-    tipo  go to state 34
+    tipo  go to state 40
 
 
-State 32
+State 37
+
+   24 comando: IDENT $@6 ATRIBUICAO . expr PONTO_E_VIRGULA
+
+    IDENT  shift, and go to state 41
+
+    expr   go to state 42
+    termo  go to state 43
+    fator  go to state 44
+
+
+State 38
 
    15 lista_id_var: lista_id_var VIRGULA IDENT .
 
     $default  reduce using rule 15 (lista_id_var)
 
 
-State 33
+State 39
 
    14 tipo: IDENT .
 
     $default  reduce using rule 14 (tipo)
 
 
-State 34
+State 40
 
    13 declara_var: $@4 lista_id_var DOIS_PONTOS tipo . $@5 PONTO_E_VIRGULA
 
     $default  reduce using rule 12 ($@5)
 
-    $@5  go to state 35
+    $@5  go to state 45
 
 
-State 35
+State 41
+
+   31 fator: IDENT .
+
+    $default  reduce using rule 31 (fator)
+
+
+State 42
+
+   24 comando: IDENT $@6 ATRIBUICAO expr . PONTO_E_VIRGULA
+   25 expr: expr . SOMA termo
+   26     | expr . SUB termo
+
+    PONTO_E_VIRGULA  shift, and go to state 46
+    SOMA             shift, and go to state 47
+    SUB              shift, and go to state 48
+
+
+State 43
+
+   27 expr: termo .
+   28 termo: termo . MUL fator
+   29      | termo . DIV fator
+
+    MUL  shift, and go to state 49
+    DIV  shift, and go to state 50
+
+    $default  reduce using rule 27 (expr)
+
+
+State 44
+
+   30 termo: fator .
+
+    $default  reduce using rule 30 (termo)
+
+
+State 45
 
    13 declara_var: $@4 lista_id_var DOIS_PONTOS tipo $@5 . PONTO_E_VIRGULA
 
-    PONTO_E_VIRGULA  shift, and go to state 36
+    PONTO_E_VIRGULA  shift, and go to state 51
 
 
-State 36
+State 46
+
+   24 comando: IDENT $@6 ATRIBUICAO expr PONTO_E_VIRGULA .
+
+    $default  reduce using rule 24 (comando)
+
+
+State 47
+
+   25 expr: expr SOMA . termo
+
+    IDENT  shift, and go to state 41
+
+    termo  go to state 52
+    fator  go to state 44
+
+
+State 48
+
+   26 expr: expr SUB . termo
+
+    IDENT  shift, and go to state 41
+
+    termo  go to state 53
+    fator  go to state 44
+
+
+State 49
+
+   28 termo: termo MUL . fator
+
+    IDENT  shift, and go to state 41
+
+    fator  go to state 54
+
+
+State 50
+
+   29 termo: termo DIV . fator
+
+    IDENT  shift, and go to state 41
+
+    fator  go to state 55
+
+
+State 51
 
    13 declara_var: $@4 lista_id_var DOIS_PONTOS tipo $@5 PONTO_E_VIRGULA .
 
     $default  reduce using rule 13 (declara_var)
+
+
+State 52
+
+   25 expr: expr SOMA termo .
+   28 termo: termo . MUL fator
+   29      | termo . DIV fator
+
+    MUL  shift, and go to state 49
+    DIV  shift, and go to state 50
+
+    $default  reduce using rule 25 (expr)
+
+
+State 53
+
+   26 expr: expr SUB termo .
+   28 termo: termo . MUL fator
+   29      | termo . DIV fator
+
+    MUL  shift, and go to state 49
+    DIV  shift, and go to state 50
+
+    $default  reduce using rule 26 (expr)
+
+
+State 54
+
+   28 termo: termo MUL fator .
+
+    $default  reduce using rule 28 (termo)
+
+
+State 55
+
+   29 termo: termo DIV fator .
+
+    $default  reduce using rule 29 (termo)

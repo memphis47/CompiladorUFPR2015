@@ -1,4 +1,26 @@
      INPP
      AMEM 2
      AMEM 3
+     CRVL 0,0
+     CRVL 0,1
+     SOMA
+     ARMZ 0,0
+     CRVL 0,2
+     CRVL 0,3
+     SUBT
+     ARMZ 0,4
+     CRVL 0,2
+     CRVL 0,2
+     DIVI
+     ARMZ 0,2
+     CRVL 0,1
+     CRVL 0,4
+     MULT
+     ARMZ 0,0
+     CRVL 0,3
+     CRVL 0,4
+     SOMA
+     CRVL 0,2
+     SUBT
+     ARMZ 0,3
      PARA

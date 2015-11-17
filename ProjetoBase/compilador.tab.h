@@ -56,7 +56,11 @@ extern int yydebug;
     T_END = 266,
     VAR = 267,
     IDENT = 268,
-    ATRIBUICAO = 269
+    ATRIBUICAO = 269,
+    SOMA = 270,
+    SUB = 271,
+    MUL = 272,
+    DIV = 273
   };
 #endif
 
