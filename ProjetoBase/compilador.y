@@ -184,16 +184,18 @@ comando:
           }
 ;
 
-expr       : expr SOMA termo {
-             geraCodigo (NULL, "SOMA",NULL,NULL,NULL); 
-             printf ("+\n"); }|
-             expr SUB termo {
+expr       :ABRE_PARENTESES expr FECHA_PARENTESES|
+            expr SOMA termo {
+              geraCodigo (NULL, "SOMA",NULL,NULL,NULL); 
+              printf ("+\n"); }
+            |expr SUB termo {
               geraCodigo (NULL, "SUBT",NULL,NULL,NULL); 
-              printf ("-"); } | 
-             termo
+              printf ("-"); } 
+            |termo
 ;
 
-termo      : termo MUL fator  {
+termo      : ABRE_PARENTESES expr FECHA_PARENTESES|
+             termo MUL fator  {
               geraCodigo (NULL, "MULT",NULL,NULL,NULL); 
               printf ("*"); }| 
              termo DIV fator  {
@@ -202,7 +204,8 @@ termo      : termo MUL fator  {
              fator
 ;
 
-fator      : IDENT {
+fator      :  ABRE_PARENTESES expr FECHA_PARENTESES|
+              IDENT {
                 item *item = procura_tbsimb(token);
                 if(item!=NULL){
                   free(param1);

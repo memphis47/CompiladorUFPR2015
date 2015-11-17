@@ -19,8 +19,8 @@
      ARMZ 0,0
      CRVL 0,3
      CRVL 0,4
-     SOMA
      CRVL 0,2
      SUBT
+     SOMA
      ARMZ 0,3
      PARA

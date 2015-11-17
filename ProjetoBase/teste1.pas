@@ -6,6 +6,6 @@ begin
 	k := l-s;
 	l := l/l;
 	m := n*k;
-	s := s+k-l;
+	s := s+(k-l);
 end.
 
