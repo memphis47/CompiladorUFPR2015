@@ -21,6 +21,8 @@
      CRVL 0,4
      CRVL 0,2
      SUBT
+     CRCT 5
+     MULT
      SOMA
      ARMZ 0,3
      PARA

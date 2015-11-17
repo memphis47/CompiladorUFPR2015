@@ -105,6 +105,12 @@ end { simbolo = simb_end;
           return IDENT;
         }
 
+{numero} { simbolo = simb_numero; 
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" numero  ");
+          return NUMERO;
+        }
+
 \+    { simbolo = simb_soma;
         strncpy (token, yytext, TAM_TOKEN);
         IMPRIME(" soma ");

@@ -60,7 +60,7 @@ item * procura_tbsimb(char * token){
 %token PROGRAM ABRE_PARENTESES FECHA_PARENTESES 
 %token VIRGULA PONTO_E_VIRGULA DOIS_PONTOS PONTO
 %token T_BEGIN T_END VAR IDENT ATRIBUICAO
-%token SOMA SUB MUL DIV
+%token NUMERO SOMA SUB MUL DIV
 
 %%
 
@@ -217,7 +217,10 @@ fator      :  ABRE_PARENTESES expr FECHA_PARENTESES|
                   sprintf(param2, "%d", item->deslocamento);
                   geraCodigo (NULL, "CRVL",param1,param2,NULL); 
                 } 
-            }  
+              }
+              |NUMERO{
+                geraCodigo (NULL, "CRCT",token,NULL,NULL); 
+              }
 ;
 
 

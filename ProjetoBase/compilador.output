@@ -1,5 +1,5 @@
-State 54 conflicts: 6 reduce/reduce
-State 63 conflicts: 6 reduce/reduce
+State 55 conflicts: 6 reduce/reduce
+State 64 conflicts: 6 reduce/reduce
 
 
 Grammar
@@ -61,6 +61,7 @@ Grammar
 
    33 fator: ABRE_PARENTESES expr FECHA_PARENTESES
    34      | IDENT
+   35      | NUMERO
 
 
 Terminals, with rules where they appear
@@ -79,60 +80,61 @@ T_END (266) 19
 VAR (267) 7
 IDENT (268) 2 14 15 16 17 18 24 34
 ATRIBUICAO (269) 24
-SOMA (270) 26
-SUB (271) 27
-MUL (272) 30
-DIV (273) 31
+NUMERO (270) 35
+SOMA (271) 26
+SUB (272) 27
+MUL (273) 30
+DIV (274) 31
 
 
 Nonterminals, with rules where they appear
 
-$accept (19)
+$accept (20)
     on left: 0
-programa (20)
+programa (21)
     on left: 2, on right: 0
-$@1 (21)
+$@1 (22)
     on left: 1, on right: 2
-bloco (22)
+bloco (23)
     on left: 4, on right: 2
-$@2 (23)
+$@2 (24)
     on left: 3, on right: 4
-parte_declara_vars (24)
+parte_declara_vars (25)
     on left: 5, on right: 4
-var (25)
+var (26)
     on left: 7 8, on right: 5
-$@3 (26)
+$@3 (27)
     on left: 6, on right: 7
-declara_vars (27)
+declara_vars (28)
     on left: 9 10, on right: 7 9
-declara_var (28)
+declara_var (29)
     on left: 13, on right: 9 10
-$@4 (29)
+$@4 (30)
     on left: 11, on right: 13
-$@5 (30)
+$@5 (31)
     on left: 12, on right: 13
-tipo (31)
+tipo (32)
     on left: 14, on right: 13
-lista_id_var (32)
+lista_id_var (33)
     on left: 15 16, on right: 13 15
-lista_idents (33)
+lista_idents (34)
     on left: 17 18, on right: 2 17
-comando_composto (34)
+comando_composto (35)
     on left: 19, on right: 4
-comandos_total (35)
+comandos_total (36)
     on left: 20, on right: 19
-comandos (36)
+comandos (37)
     on left: 21 22, on right: 20 21
-comando (37)
+comando (38)
     on left: 24, on right: 21 22
-$@6 (38)
+$@6 (39)
     on left: 23, on right: 24
-expr (39)
+expr (40)
     on left: 25 26 27 28, on right: 24 25 26 27 29 33
-termo (40)
+termo (41)
     on left: 29 30 31 32, on right: 26 27 28 30 31
-fator (41)
-    on left: 33 34, on right: 30 31 32
+fator (42)
+    on left: 33 34 35, on right: 30 31 32
 
 
 State 0
@@ -443,10 +445,11 @@ State 37
 
     ABRE_PARENTESES  shift, and go to state 41
     IDENT            shift, and go to state 42
+    NUMERO           shift, and go to state 43
 
-    expr   go to state 43
-    termo  go to state 44
-    fator  go to state 45
+    expr   go to state 44
+    termo  go to state 45
+    fator  go to state 46
 
 
 State 38
@@ -469,7 +472,7 @@ State 40
 
     $default  reduce using rule 12 ($@5)
 
-    $@5  go to state 46
+    $@5  go to state 47
 
 
 State 41
@@ -480,10 +483,11 @@ State 41
 
     ABRE_PARENTESES  shift, and go to state 41
     IDENT            shift, and go to state 42
+    NUMERO           shift, and go to state 43
 
-    expr   go to state 47
-    termo  go to state 44
-    fator  go to state 45
+    expr   go to state 48
+    termo  go to state 45
+    fator  go to state 46
 
 
 State 42
@@ -495,42 +499,49 @@ State 42
 
 State 43
 
+   35 fator: NUMERO .
+
+    $default  reduce using rule 35 (fator)
+
+
+State 44
+
    24 comando: IDENT $@6 ATRIBUICAO expr . PONTO_E_VIRGULA
    26 expr: expr . SOMA termo
    27     | expr . SUB termo
 
-    PONTO_E_VIRGULA  shift, and go to state 48
-    SOMA             shift, and go to state 49
-    SUB              shift, and go to state 50
+    PONTO_E_VIRGULA  shift, and go to state 49
+    SOMA             shift, and go to state 50
+    SUB              shift, and go to state 51
 
 
-State 44
+State 45
 
    28 expr: termo .
    30 termo: termo . MUL fator
    31      | termo . DIV fator
 
-    MUL  shift, and go to state 51
-    DIV  shift, and go to state 52
+    MUL  shift, and go to state 52
+    DIV  shift, and go to state 53
 
     $default  reduce using rule 28 (expr)
 
 
-State 45
+State 46
 
    32 termo: fator .
 
     $default  reduce using rule 32 (termo)
 
 
-State 46
+State 47
 
    13 declara_var: $@4 lista_id_var DOIS_PONTOS tipo $@5 . PONTO_E_VIRGULA
 
-    PONTO_E_VIRGULA  shift, and go to state 53
+    PONTO_E_VIRGULA  shift, and go to state 54
 
 
-State 47
+State 48
 
    25 expr: ABRE_PARENTESES expr . FECHA_PARENTESES
    26     | expr . SOMA termo
@@ -538,68 +549,72 @@ State 47
    29 termo: ABRE_PARENTESES expr . FECHA_PARENTESES
    33 fator: ABRE_PARENTESES expr . FECHA_PARENTESES
 
-    FECHA_PARENTESES  shift, and go to state 54
-    SOMA              shift, and go to state 49
-    SUB               shift, and go to state 50
+    FECHA_PARENTESES  shift, and go to state 55
+    SOMA              shift, and go to state 50
+    SUB               shift, and go to state 51
 
 
-State 48
+State 49
 
    24 comando: IDENT $@6 ATRIBUICAO expr PONTO_E_VIRGULA .
 
     $default  reduce using rule 24 (comando)
 
 
-State 49
+State 50
 
    26 expr: expr SOMA . termo
 
-    ABRE_PARENTESES  shift, and go to state 55
+    ABRE_PARENTESES  shift, and go to state 56
     IDENT            shift, and go to state 42
-
-    termo  go to state 56
-    fator  go to state 45
-
-
-State 50
-
-   27 expr: expr SUB . termo
-
-    ABRE_PARENTESES  shift, and go to state 55
-    IDENT            shift, and go to state 42
+    NUMERO           shift, and go to state 43
 
     termo  go to state 57
-    fator  go to state 45
+    fator  go to state 46
 
 
 State 51
 
-   30 termo: termo MUL . fator
+   27 expr: expr SUB . termo
 
-    ABRE_PARENTESES  shift, and go to state 58
+    ABRE_PARENTESES  shift, and go to state 56
     IDENT            shift, and go to state 42
+    NUMERO           shift, and go to state 43
 
-    fator  go to state 59
+    termo  go to state 58
+    fator  go to state 46
 
 
 State 52
 
-   31 termo: termo DIV . fator
+   30 termo: termo MUL . fator
 
-    ABRE_PARENTESES  shift, and go to state 58
+    ABRE_PARENTESES  shift, and go to state 59
     IDENT            shift, and go to state 42
+    NUMERO           shift, and go to state 43
 
     fator  go to state 60
 
 
 State 53
 
+   31 termo: termo DIV . fator
+
+    ABRE_PARENTESES  shift, and go to state 59
+    IDENT            shift, and go to state 42
+    NUMERO           shift, and go to state 43
+
+    fator  go to state 61
+
+
+State 54
+
    13 declara_var: $@4 lista_id_var DOIS_PONTOS tipo $@5 PONTO_E_VIRGULA .
 
     $default  reduce using rule 13 (declara_var)
 
 
-State 54
+State 55
 
    25 expr: ABRE_PARENTESES expr FECHA_PARENTESES .
    29 termo: ABRE_PARENTESES expr FECHA_PARENTESES .
@@ -624,93 +639,95 @@ State 54
     $default          reduce using rule 25 (expr)
 
 
-State 55
+State 56
 
    29 termo: ABRE_PARENTESES . expr FECHA_PARENTESES
    33 fator: ABRE_PARENTESES . expr FECHA_PARENTESES
 
     ABRE_PARENTESES  shift, and go to state 41
     IDENT            shift, and go to state 42
+    NUMERO           shift, and go to state 43
 
-    expr   go to state 61
-    termo  go to state 44
-    fator  go to state 45
+    expr   go to state 62
+    termo  go to state 45
+    fator  go to state 46
 
 
-State 56
+State 57
 
    26 expr: expr SOMA termo .
    30 termo: termo . MUL fator
    31      | termo . DIV fator
 
-    MUL  shift, and go to state 51
-    DIV  shift, and go to state 52
+    MUL  shift, and go to state 52
+    DIV  shift, and go to state 53
 
     $default  reduce using rule 26 (expr)
 
 
-State 57
+State 58
 
    27 expr: expr SUB termo .
    30 termo: termo . MUL fator
    31      | termo . DIV fator
 
-    MUL  shift, and go to state 51
-    DIV  shift, and go to state 52
+    MUL  shift, and go to state 52
+    DIV  shift, and go to state 53
 
     $default  reduce using rule 27 (expr)
 
 
-State 58
+State 59
 
    33 fator: ABRE_PARENTESES . expr FECHA_PARENTESES
 
     ABRE_PARENTESES  shift, and go to state 41
     IDENT            shift, and go to state 42
+    NUMERO           shift, and go to state 43
 
-    expr   go to state 62
-    termo  go to state 44
-    fator  go to state 45
+    expr   go to state 63
+    termo  go to state 45
+    fator  go to state 46
 
 
-State 59
+State 60
 
    30 termo: termo MUL fator .
 
     $default  reduce using rule 30 (termo)
 
 
-State 60
+State 61
 
    31 termo: termo DIV fator .
 
     $default  reduce using rule 31 (termo)
 
 
-State 61
+State 62
 
    26 expr: expr . SOMA termo
    27     | expr . SUB termo
    29 termo: ABRE_PARENTESES expr . FECHA_PARENTESES
    33 fator: ABRE_PARENTESES expr . FECHA_PARENTESES
 
-    FECHA_PARENTESES  shift, and go to state 63
-    SOMA              shift, and go to state 49
-    SUB               shift, and go to state 50
+    FECHA_PARENTESES  shift, and go to state 64
+    SOMA              shift, and go to state 50
+    SUB               shift, and go to state 51
 
 
-State 62
+State 63
 
    26 expr: expr . SOMA termo
    27     | expr . SUB termo
    33 fator: ABRE_PARENTESES expr . FECHA_PARENTESES
 
-    FECHA_PARENTESES  shift, and go to state 64
-    SOMA              shift, and go to state 49
-    SUB               shift, and go to state 50
+    FECHA_PARENTESES  shift, and go to state 65
+    SOMA              shift, and go to state 50
+    SUB               shift, and go to state 51
 
 
-State 63
+State 64
 
    29 termo: ABRE_PARENTESES expr FECHA_PARENTESES .
    33 fator: ABRE_PARENTESES expr FECHA_PARENTESES .
@@ -730,7 +747,7 @@ State 63
     $default          reduce using rule 29 (termo)
 
 
-State 64
+State 65
 
    33 fator: ABRE_PARENTESES expr FECHA_PARENTESES .
 
