@@ -187,12 +187,10 @@ comando:
               sprintf(param1Aux, "%d", itema->nivel_lexico);
               sprintf(param2Aux, "%d", itema->deslocamento);
             }
+            //TODO: caso não encontrar mostrar msg de erro.
           } ATRIBUICAO expr PONTO_E_VIRGULA{
             geraCodigo (NULL, "ARMZ",param1Aux,param2Aux,NULL);
           }
-          | rep_while
-          | cond_if
-          | comando_goto
           | comando_write
 
 ;
@@ -237,27 +235,9 @@ fator      :  ABRE_PARENTESES expr FECHA_PARENTESES|
 ;
 
 
-cond_if     : if_then cond_else 
-            { 
-              em_if_finaliza (); 
-            }
-;
 
-if_then     : IF expressao 
-            {
-              em_if_apos_expr ();
-            }
-             THEN comando_sem_rotulo
-            {
-              em_if_apos_then ();
-            }
-;
-
-cond_else   : ELSE comando_sem_rotulo
-            | %prec LOWER_THAN_ELSE
-;
-
-comando_write : WRITE IDENT {
+comando_write : WRITE ABRE_PARENTESES IDENT {
+                  printf("OLA\n");
                   item *item = procura_tbsimb(token);
                   if(item!=NULL){
                     free(param1);
@@ -270,8 +250,8 @@ comando_write : WRITE IDENT {
                     geraCodigo (NULL, "CRVL",param1,param2,NULL);
                     geraCodigo (NULL, "IMPR",NULL,NULL,NULL);
                   } 
-                } PONTO_E_VIRGULA |
-                WRITE NUMERO PONTO_E_VIRGULA 
+                } FECHA_PARENTESES PONTO_E_VIRGULA |
+                WRITE ABRE_PARENTESES NUMERO FECHA_PARENTESES PONTO_E_VIRGULA 
 
 %%
 

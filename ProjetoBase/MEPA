@@ -1,6 +1,15 @@
      INPP
-     AMEM 2
-     AMEM 3
+     AMEM 5
+     CRCT 0
+     ARMZ 0,0
+     CRCT 0
+     ARMZ 0,1
+     CRCT 0
+     ARMZ 0,2
+     CRCT 0
+     ARMZ 0,3
+     CRCT 0
+     ARMZ 0,4
      CRVL 0,0
      CRVL 0,1
      SOMA
@@ -29,4 +38,6 @@
      MULT
      SOMA
      ARMZ 0,3
+     CRVL 0,3
+     IMPR
      PARA

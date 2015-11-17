@@ -60,30 +60,9 @@ end { simbolo = simb_end;
           strncpy (token, yytext, TAM_TOKEN);
           IMPRIME(" atribuicao  ");
           return ATRIBUICAO;  
- }
+}
 
-if { 
-     simbolo = simb_if;  
-     strncpy (token, yytext, TAM_TOKEN);
-     IMPRIME(" if  ");
-     return IF;  
-   }
-
-then { 
-     simbolo = simb_then;  
-     strncpy (token, yytext, TAM_TOKEN);
-     IMPRIME(" then  ");
-     return THEN;  
-   }
-
-else { 
-     simbolo = simb_else;  
-     strncpy (token, yytext, TAM_TOKEN);
-     IMPRIME(" else  ");
-     return ELSE;  
-   }
-
-write{
+write {
      simbolo = simb_write;
      strncpy (token, yytext, TAM_TOKEN);
      IMPRIME(" write  ");
