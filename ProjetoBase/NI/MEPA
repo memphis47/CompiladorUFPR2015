@@ -34,3 +34,8 @@
      CRVL 0,0
      SUBT
      ARMZ 0,3
+     CRVL 0,3
+     IMPR
+     DMEM 5
+     PARA
+

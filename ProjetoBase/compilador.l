@@ -16,6 +16,18 @@ int nl = 1;
 
 pulo_linha [\n]
 
+maior [>]
+
+maior_igual [>=]
+
+menor [<]
+
+menor_igual [<=]
+
+igual [==]
+
+diferente [!=]
+
 descarte [\t ]+
 
 ident [a-zAZ][a-zAZ1-9]*
@@ -137,6 +149,70 @@ write {
         strncpy (token, yytext, TAM_TOKEN);
         IMPRIME(" divisao ");
         return DIV;  }
+
+if   {   simbolo = simb_if;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME(" if ");
+        return IF;
+}
+
+then   { simbolo = simb_then;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME(" then ");
+        return THEN;
+
+}
+
+else   {  simbolo = simb_else;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME(" else ");
+        return ELSE;
+
+}
+
+{maior}   {  simbolo = simb_maior;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME(" > ");
+        return MAIOR;
+
+}
+
+{maior_igual}  {  
+          simbolo = simb_maior_igual;
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" >= ");
+          return MAEG;
+
+}
+
+{menor}   {  simbolo = simb_menor;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME(" < ");
+        return MENOR;
+
+}
+
+{menor_igual}  {  simbolo = simb_menor_igual;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME(" <= ");
+        return MEEG;
+
+}
+
+{igual}  {  simbolo = simb_igual;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME(" == ");
+        return IGUAL;
+
+}
+
+{diferente}  {  simbolo = simb_diferente;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME(" != ");
+        return DIFE;
+
+}
+
 
 %%
 

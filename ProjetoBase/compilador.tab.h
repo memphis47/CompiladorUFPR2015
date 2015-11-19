@@ -66,7 +66,13 @@ extern int yydebug;
     IF = 276,
     THEN = 277,
     ELSE = 278,
-    LOWER_THAN_ELSE = 279
+    DIFE = 279,
+    IGUAL = 280,
+    MAEG = 281,
+    MAIOR = 282,
+    MENOR = 283,
+    MEEG = 284,
+    LOWER_THAN_ELSE = 285
   };
 #endif
 

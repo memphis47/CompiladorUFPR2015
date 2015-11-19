@@ -22,6 +22,7 @@ struct item
   int  deslocamento;
   char *passagem;
   char *rotulo;
+  char *tipo; // mudar depois para enum
   item *itemAnt;
   item *itemProx;
 };
@@ -62,6 +63,7 @@ item * procura_tbsimb(char * token){
 %token T_BEGIN T_END VAR IDENT ATRIBUICAO
 %token NUMERO SOMA SUB MUL DIV
 %token IF THEN ELSE
+%token DIFE IGUAL MAEG MAIOR MENOR MEEG
 
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
@@ -192,6 +194,7 @@ comando:
             geraCodigo (NULL, "ARMZ",param1Aux,param2Aux,NULL);
           }
           | comando_write
+          | cond_if
 
 ;
 
@@ -237,7 +240,6 @@ fator      :  ABRE_PARENTESES expr FECHA_PARENTESES|
 
 
 comando_write : WRITE ABRE_PARENTESES IDENT {
-                  printf("OLA\n");
                   item *item = procura_tbsimb(token);
                   if(item!=NULL){
                     free(param1);
@@ -252,6 +254,50 @@ comando_write : WRITE ABRE_PARENTESES IDENT {
                   } 
                 } FECHA_PARENTESES PONTO_E_VIRGULA |
                 WRITE ABRE_PARENTESES NUMERO FECHA_PARENTESES PONTO_E_VIRGULA 
+
+
+cond_if     : if_then cond_else 
+            { 
+              printf("OLA1\n");
+            }
+;
+
+if_then     : IF expressao 
+            {
+             printf("OLA1\n");
+            }
+             THEN comandos
+            {
+             printf("OLA2\n");
+            }
+            |IF expressao 
+            {
+             printf("OLA3\n");
+            }
+             THEN T_BEGIN comandos T_END
+            {
+              printf("OLA4\n");
+            }
+;
+
+cond_else   : ELSE comandos | ELSE T_BEGIN comandos T_END
+            | %prec LOWER_THAN_ELSE
+;
+
+expressao   : ABRE_PARENTESES prior2 FECHA_PARENTESES
+
+prior2  :     prior2 IGUAL prior1  |
+              prior2 DIFE  prior1 |
+              prior1
+
+prior1  :     prior1 MAIOR final |
+              prior1 MENOR final |
+              prior1 MAEG  final | 
+              prior1 MEEG  final |
+              final
+
+final   :     IDENT |
+              NUMERO
 
 %%
 

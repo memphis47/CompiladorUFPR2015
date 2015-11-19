@@ -237,10 +237,10 @@ _dsvf_falso:
 # -----------------------------------------------------------------
 
 .macro SOMA
-   pop %rax
-   pop %rbx
-   add %rax, %rbx
-   push %rbx
+   popq %rax
+   popq %rbx
+   addq %rax, %rbx
+   pushq %rbx
 .endm
 
 # -----------------------------------------------------------------

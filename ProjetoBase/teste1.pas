@@ -7,12 +7,20 @@ begin
 	l := 0;
 	s := 0;
 	k := 0;
-	
-	m := m+n;
+	m := m+k+l+4;
 	k := l-s;
-	l := l/l;
-	m := n*k;
-	s := s+(((k-l)+4)-3)*5;
-	write(s);
+	s := s+(((k-l)+s)+l)-m;
+	if(m > k) then
+		write(s);
+	else
+		write(m);
+	if(s < 0) then
+	begin
+		write(s);
+		write(k);
+	end
+	else begin
+		write(l);
+	end
 end.
 

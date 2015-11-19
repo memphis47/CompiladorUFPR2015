@@ -15,10 +15,14 @@
 
 typedef enum simbolos { 
   simb_program, simb_var, simb_begin, simb_end, 
-  simb_identificador, simb_numero, simb_else, simb_write,
+  simb_identificador, simb_numero, simb_write,
   simb_ponto, simb_virgula, simb_ponto_e_virgula, simb_dois_pontos,
   simb_atribuicao, simb_abre_parenteses, simb_fecha_parenteses,
   simb_soma, simb_sub, simb_multiplicacao, simb_div,
+  simb_if, simb_then, simb_else,
+  simb_maior, simb_maior_igual, simb_menor,
+  simb_menor_igual, simb_igual, simb_diferente
+
 } simbolos;
 
 
