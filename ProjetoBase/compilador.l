@@ -118,37 +118,6 @@ write {
           return FECHA_PARENTESES;
  }
 
-{ident} { simbolo = simb_identificador; 
-          strncpy (token, yytext, TAM_TOKEN);
-          IMPRIME(" ident  ");
-          return IDENT;
-        }
-
-{numero} { simbolo = simb_numero; 
-          strncpy (token, yytext, TAM_TOKEN);
-          IMPRIME(" numero  ");
-          return NUMERO;
-        }
-
-\+    { simbolo = simb_soma;
-        strncpy (token, yytext, TAM_TOKEN);
-        IMPRIME(" soma ");
-        return SOMA; }
-
-\-    { simbolo = simb_sub;
-        strncpy (token, yytext, TAM_TOKEN);
-        IMPRIME(" subtracao ");
-        return SUB; }
-
-\*    { simbolo = simb_multiplicacao;
-        strncpy (token, yytext, TAM_TOKEN);
-        IMPRIME(" multiplicacao ");
-        return MUL;  }
-
-\/    { simbolo = simb_div;
-        strncpy (token, yytext, TAM_TOKEN);
-        IMPRIME(" divisao ");
-        return DIV;  }
 
 if   {   simbolo = simb_if;
         strncpy (token, yytext, TAM_TOKEN);
@@ -212,6 +181,39 @@ else   {  simbolo = simb_else;
         return DIFE;
 
 }
+
+{ident} { simbolo = simb_identificador; 
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" ident  ");
+          return IDENT;
+        }
+
+{numero} { simbolo = simb_numero; 
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" numero  ");
+          return NUMERO;
+        }
+
+\+    { simbolo = simb_soma;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME(" soma ");
+        return SOMA; }
+
+\-    { simbolo = simb_sub;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME(" subtracao ");
+        return SUB; }
+
+\*    { simbolo = simb_multiplicacao;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME(" multiplicacao ");
+        return MUL;  }
+
+\/    { simbolo = simb_div;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME(" divisao ");
+        return DIV;  }
+
 
 
 %%

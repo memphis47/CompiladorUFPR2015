@@ -10,7 +10,8 @@ begin
 	m := m+k+l+4;
 	k := l-s;
 	s := s+(((k-l)+s)+l)-m;
-	if(m > k) then
+	write(l);
+	if(m>k)then
 		write(s);
 	else
 		write(m);

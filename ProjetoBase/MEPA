@@ -34,3 +34,22 @@
      CRVL 0,0
      SUBT
      ARMZ 0,3
+     CRVL 0,2
+     IMPR
+     CRVL 0,0
+     CRVL 0,4
+     CMMA
+     CRVL 0,3
+     IMPR
+     CRVL 0,0
+     IMPR
+     CRVL 0,3
+     CRCT 0
+     CMME
+     CRVL 0,3
+     IMPR
+     CRVL 0,4
+     IMPR
+     CRVL 0,2
+     IMPR
+     PARA

@@ -45,6 +45,7 @@ char *param2Aux;
 char *param3Aux;
 char *ident;
 int desl;
+int rotNumber;
 
 item * procura_tbsimb(char * token){
   item *itemAtual = tbs->topo_pilha;
@@ -54,6 +55,20 @@ item * procura_tbsimb(char * token){
     itemAtual = itemAtual->itemAnt;
   }
   return NULL;
+}
+
+void gera_comando_crvl(char * token){
+  item *item = procura_tbsimb(token);
+  if(item!=NULL){
+    free(param1);
+    free(param2);
+    free(param3);
+    param1 = (char *) malloc (4 * sizeof(char));
+    param2 = (char *) malloc (4 * sizeof(char));
+    sprintf(param1, "%d", item->nivel_lexico);
+    sprintf(param2, "%d", item->deslocamento);
+    geraCodigo (NULL, "CRVL",param1,param2,NULL); 
+  } 
 }
 
 %}
@@ -220,17 +235,7 @@ termo      : ABRE_PARENTESES expr FECHA_PARENTESES|
 
 fator      :  ABRE_PARENTESES expr FECHA_PARENTESES|
               IDENT {
-                item *item = procura_tbsimb(token);
-                if(item!=NULL){
-                  free(param1);
-                  free(param2);
-                  free(param3);
-                  param1 = (char *) malloc (4 * sizeof(char));
-                  param2 = (char *) malloc (4 * sizeof(char));
-                  sprintf(param1, "%d", item->nivel_lexico);
-                  sprintf(param2, "%d", item->deslocamento);
-                  geraCodigo (NULL, "CRVL",param1,param2,NULL); 
-                } 
+                gera_comando_crvl(token);
               }
               |NUMERO{
                 geraCodigo (NULL, "CRCT",token,NULL,NULL); 
@@ -258,46 +263,38 @@ comando_write : WRITE ABRE_PARENTESES IDENT {
 
 cond_if     : if_then cond_else 
             { 
-              printf("OLA1\n");
+
             }
 ;
 
-if_then     : IF expressao 
-            {
-             printf("OLA1\n");
-            }
-             THEN comandos
-            {
-             printf("OLA2\n");
-            }
-            |IF expressao 
-            {
-             printf("OLA3\n");
-            }
-             THEN T_BEGIN comandos T_END
-            {
-              printf("OLA4\n");
-            }
+if_then     : IF expressao {
+
+              }
+             THEN internal_if{
+
+             }
 ;
 
-cond_else   : ELSE comandos | ELSE T_BEGIN comandos T_END
+cond_else   : ELSE internal_if
             | %prec LOWER_THAN_ELSE
 ;
 
+internal_if: comandos | T_BEGIN comandos T_END
+
 expressao   : ABRE_PARENTESES prior2 FECHA_PARENTESES
 
-prior2  :     prior2 IGUAL prior1  |
-              prior2 DIFE  prior1 |
+prior2  :     prior2 IGUAL prior1 {geraCodigo (NULL, "CMIG",NULL,NULL,NULL);}|
+              prior2 DIFE  prior1 {geraCodigo (NULL, "CMDG",NULL,NULL,NULL);}|
               prior1
 
-prior1  :     prior1 MAIOR final |
-              prior1 MENOR final |
-              prior1 MAEG  final | 
-              prior1 MEEG  final |
+prior1  :     prior1 MAIOR final {geraCodigo (NULL, "CMMA",NULL,NULL,NULL);}|
+              prior1 MENOR final {geraCodigo (NULL, "CMME",NULL,NULL,NULL);}|
+              prior1 MAEG  final {geraCodigo (NULL, "CMAG",NULL,NULL,NULL);}| 
+              prior1 MEEG  final {geraCodigo (NULL, "CMEG",NULL,NULL,NULL);}|
               final
 
-final   :     IDENT |
-              NUMERO
+final   :     IDENT{gera_comando_crvl(token);} |
+              NUMERO{geraCodigo (NULL, "CRCT",token,NULL,NULL);}
 
 %%
 
