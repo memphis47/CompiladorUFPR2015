@@ -34,9 +34,9 @@ typedef enum categorias {
   ROT, // Rotulo
 } categorias;
 
-typedef enum passagem_parametro {
+typedef enum tipo_parametro {
   REFERENCIA, SIMPLES, VALOR
-}
+} tipo_parametro;
 
 /* -------------------------------------------------------------------
  * variáveis globais
