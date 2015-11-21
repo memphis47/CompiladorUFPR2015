@@ -176,7 +176,7 @@ comando:
 
 ;
 
-expr       :ABRE_PARENTESES expr FECHA_PARENTESES|
+expr       ://ABRE_PARENTESES expr FECHA_PARENTESES|
             expr SOMA termo {
               geraCodigo (NULL, "SOMA",NULL,NULL,NULL); 
               printf ("+\n"); }
@@ -186,7 +186,7 @@ expr       :ABRE_PARENTESES expr FECHA_PARENTESES|
             |termo
 ;
 
-termo      : ABRE_PARENTESES expr FECHA_PARENTESES|
+termo      : //ABRE_PARENTESES expr FECHA_PARENTESES|
              termo MUL fator  {
               geraCodigo (NULL, "MULT",NULL,NULL,NULL); 
               printf ("*"); }| 
@@ -214,8 +214,6 @@ fator      :  ABRE_PARENTESES expr FECHA_PARENTESES|
                 geraCodigo (NULL, "CRCT",token,NULL,NULL); 
               }
 ;
-
-
 
 comando_write : WRITE ABRE_PARENTESES IDENT {
                   item *item = procura_tbsimb(token);
