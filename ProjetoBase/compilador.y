@@ -9,32 +9,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include "compilador.h"
+#include "tabela.h"
 
 int num_vars;
 int desl;
-typedef struct item item;
-
-struct item
-{
-  char *identificador;
-  char *categoria;
-  int  nivel_lexico;
-  int  deslocamento;
-  char *passagem;
-  char *rotulo;
-  char *tipo; // mudar depois para enum
-  item *itemAnt;
-  item *itemProx;
-};
-
-typedef struct tabela_simbolos
-{
-  int n_itens;
-  item *topo_pilha;
-  item *fim_pilha;
-  item *itens;
-
-} tabela_simbolos;
 
 tabela_simbolos *tbs;
 char *param1;
