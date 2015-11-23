@@ -39,17 +39,23 @@
      CRVL 0,0
      CRVL 0,4
      CMMA
+     DSVF R0
      CRVL 0,3
      IMPR
+     DSVS R1
      CRVL 0,0
      IMPR
      CRVL 0,3
      CRCT 0
      CMME
+     DSVF R2
      CRVL 0,3
      IMPR
      CRVL 0,4
      IMPR
+     DSVS R3
      CRVL 0,2
      IMPR
+     DSVS R4
+     DSVS R5
      PARA

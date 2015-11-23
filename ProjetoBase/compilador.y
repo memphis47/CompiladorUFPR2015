@@ -13,6 +13,7 @@
 int num_vars;
 int desl;
 typedef struct item item;
+typedef struct itemLista itemLista;
 
 struct item
 {
@@ -36,7 +37,25 @@ typedef struct tabela_simbolos
 
 } tabela_simbolos;
 
+
+struct itemLista
+{
+  char *identificador;
+  itemLista *itemAnt;
+  itemLista *itemProx;
+};
+
+typedef struct lista_rotulos
+{
+  int n_rotulos;
+  itemLista *fim;
+  itemLista *inicio;
+} lista_rotulos;
+
+
+
 tabela_simbolos *tbs;
+lista_rotulos *lr;
 char *param1;
 char *param2;
 char *param3;
@@ -57,6 +76,7 @@ item * procura_tbsimb(char * token){
   return NULL;
 }
 
+
 void gera_comando_crvl(char * token){
   item *item = procura_tbsimb(token);
   if(item!=NULL){
@@ -70,6 +90,29 @@ void gera_comando_crvl(char * token){
     geraCodigo (NULL, "CRVL",param1,param2,NULL); 
   } 
 }
+
+void adiciona_item_lista(){
+  itemLista *auxItem = (itemLista *) malloc (sizeof(itemLista));
+
+  auxItem->itemAnt = lr->fim;
+  auxItem->itemProx = NULL;
+  char rtn[4];
+  sprintf(rtn, "%d", rotNumber);
+  char rot[]="R";
+  strcat(rot, rtn);
+  auxItem->identificador = (char *) malloc (256 * sizeof(char));
+  strcpy(auxItem->identificador,rot);
+  lr->n_rotulos = lr->n_rotulos++;
+  if(lr->inicio == NULL){
+    lr->inicio = auxItem; 
+    lr->fim = auxItem;
+  }
+  else{
+    lr->fim= auxItem;
+  }
+  rotNumber++;
+}
+
 
 %}
 
@@ -268,14 +311,21 @@ cond_if     : if_then cond_else
 ;
 
 if_then     : IF expressao {
-
+                adiciona_item_lista();
+                geraCodigo (NULL, "DSVF",rot,NULL,NULL);
               }
              THEN internal_if{
-
+                adiciona_item_lista();
+                geraCodigo (NULL, "DSVS",rot,NULL,NULL);
              }
 ;
 
-cond_else   : ELSE internal_if
+cond_else   : ELSE{
+                geraCodigo (lr->topo_pilha->identificador, "NADA",NULL,NULL);
+                lr->topo_pilha=lr->topo_pilha->itemAnt
+              } internal_if {
+                
+                geraCodigo (NULL, "DSVS",rot,NULL,NULL);}
             | %prec LOWER_THAN_ELSE
 ;
 
@@ -318,10 +368,18 @@ main (int argc, char** argv) {
  *  Inicia a Tabela de Símbolos
  * ------------------------------------------------------------------- */
    tbs = (tabela_simbolos *) malloc (sizeof(tabela_simbolos));
+   lr = (lista_rotulos *) malloc (sizeof(lista_rotulos));
    tbs->topo_pilha = NULL;
+   lr->inicio = NULL;
+
    tbs->fim_pilha = NULL;
+   lr->fim = NULL;
+
    tbs->itens = NULL;
+
    tbs->n_itens = 0;
+   lr->n_rotulos = 0;
+
    yyin=fp;
    yyparse();
 
