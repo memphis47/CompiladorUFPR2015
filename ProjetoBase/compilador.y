@@ -297,8 +297,8 @@ if_then     : IF expressao {
 ;
 
 cond_else   : ELSE{
-                geraCodigo (lr->topo_pilha->identificador, "NADA",NULL,NULL);
-                lr->topo_pilha=lr->topo_pilha->itemAnt
+                geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
+                lr->fim=lr->fim->itemAnt
               } internal_if {
                 
                 geraCodigo (NULL, "DSVS",rot,NULL,NULL);}
