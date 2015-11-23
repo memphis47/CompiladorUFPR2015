@@ -25,7 +25,18 @@ typedef enum simbolos {
 
 } simbolos;
 
+typedef enum categorias {
+  VS, // Variavel Simples
+  PF, // Parametro formal
+  FUN, // Funcao
+  PROC, // Procedure
+  PROG, // Program
+  ROT, // Rotulo
+} categorias;
 
+typedef enum tipo_parametro {
+  REFERENCIA, SIMPLES, VALOR
+} tipo_parametro;
 
 /* -------------------------------------------------------------------
  * variáveis globais

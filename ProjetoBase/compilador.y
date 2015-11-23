@@ -9,33 +9,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include "compilador.h"
+#include "tabela.h"
 
 int num_vars;
 int desl;
-typedef struct item item;
 typedef struct itemLista itemLista;
-
-struct item
-{
-  char *identificador;
-  char *categoria;
-  int  nivel_lexico;
-  int  deslocamento;
-  char *passagem;
-  char *rotulo;
-  char *tipo; // mudar depois para enum
-  item *itemAnt;
-  item *itemProx;
-};
-
-typedef struct tabela_simbolos
-{
-  int n_itens;
-  item *topo_pilha;
-  item *fim_pilha;
-  item *itens;
-
-} tabela_simbolos;
 
 
 struct itemLista
@@ -256,7 +234,7 @@ comando:
 
 ;
 
-expr       :ABRE_PARENTESES expr FECHA_PARENTESES|
+expr       ://ABRE_PARENTESES expr FECHA_PARENTESES|
             expr SOMA termo {
               geraCodigo (NULL, "SOMA",NULL,NULL,NULL); 
               printf ("+\n"); }
@@ -266,7 +244,7 @@ expr       :ABRE_PARENTESES expr FECHA_PARENTESES|
             |termo
 ;
 
-termo      : ABRE_PARENTESES expr FECHA_PARENTESES|
+termo      : //ABRE_PARENTESES expr FECHA_PARENTESES|
              termo MUL fator  {
               geraCodigo (NULL, "MULT",NULL,NULL,NULL); 
               printf ("*"); }| 
@@ -284,8 +262,6 @@ fator      :  ABRE_PARENTESES expr FECHA_PARENTESES|
                 geraCodigo (NULL, "CRCT",token,NULL,NULL); 
               }
 ;
-
-
 
 comando_write : WRITE ABRE_PARENTESES IDENT {
                   item *item = procura_tbsimb(token);
