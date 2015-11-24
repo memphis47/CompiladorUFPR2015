@@ -3,11 +3,7 @@
      CRCT 0
      ARMZ 0,0
      CRCT 0
-     ARMZ 0,1
-     CRCT 0
      ARMZ 0,2
-     CRCT 0
-     ARMZ 0,3
      CRCT 0
      ARMZ 0,4
      CRVL 0,0
@@ -19,22 +15,6 @@
      SOMA
      ARMZ 0,0
      CRVL 0,2
-     CRVL 0,3
-     SUBT
-     ARMZ 0,4
-     CRVL 0,3
-     CRVL 0,4
-     CRVL 0,2
-     SUBT
-     CRVL 0,3
-     SOMA
-     CRVL 0,2
-     SOMA
-     SOMA
-     CRVL 0,0
-     SUBT
-     ARMZ 0,3
-     CRVL 0,2
      IMPR
      CRVL 0,0
      CRVL 0,4
@@ -43,19 +23,9 @@
      CRVL 0,3
      IMPR
      DSVS R1
-     CRVL 0,0
-     IMPR
-     CRVL 0,3
-     CRCT 0
-     CMME
-     DSVF R2
-     CRVL 0,3
-     IMPR
+R0: NADA 
      CRVL 0,4
      IMPR
-     DSVS R3
-     CRVL 0,2
-     IMPR
-     DSVS R4
-     DSVS R5
+     DSVS R1
+R1: NADA 
      PARA

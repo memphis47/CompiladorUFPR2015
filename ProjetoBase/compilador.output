@@ -79,22 +79,25 @@ Grammar
    44          | %empty
 
    45 internal_if: comandos
-   46            | T_BEGIN comandos T_END
 
-   47 expressao: ABRE_PARENTESES prior2 FECHA_PARENTESES
+   46 $@10: %empty
 
-   48 prior2: prior2 IGUAL prior1
-   49       | prior2 DIFE prior1
-   50       | prior1
+   47 internal_if: T_BEGIN $@10 comandos T_END
 
-   51 prior1: prior1 MAIOR final
-   52       | prior1 MENOR final
-   53       | prior1 MAEG final
-   54       | prior1 MEEG final
-   55       | final
+   48 expressao: ABRE_PARENTESES prior2 FECHA_PARENTESES
 
-   56 final: IDENT
-   57      | NUMERO
+   49 prior2: prior2 IGUAL prior1
+   50       | prior2 DIFE prior1
+   51       | prior1
+
+   52 prior1: prior1 MAIOR final
+   53       | prior1 MENOR final
+   54       | prior1 MAEG final
+   55       | prior1 MEEG final
+   56       | final
+
+   57 final: IDENT
+   58      | NUMERO
 
 
 Terminals, with rules where they appear
@@ -102,19 +105,19 @@ Terminals, with rules where they appear
 $end (0) 0
 error (256)
 PROGRAM (258) 2
-ABRE_PARENTESES (259) 2 33 37 38 47
-FECHA_PARENTESES (260) 2 33 37 38 47
+ABRE_PARENTESES (259) 2 33 37 38 48
+FECHA_PARENTESES (260) 2 33 37 38 48
 WRITE (261) 37 38
 VIRGULA (262) 15 17
 PONTO_E_VIRGULA (263) 2 13 24 37 38
 DOIS_PONTOS (264) 13
 PONTO (265) 2
-T_BEGIN (266) 19 46
-T_END (267) 19 46
+T_BEGIN (266) 19 47
+T_END (267) 19 47
 VAR (268) 7
-IDENT (269) 2 14 15 16 17 18 24 34 37 56
+IDENT (269) 2 14 15 16 17 18 24 34 37 57
 ATRIBUICAO (270) 24
-NUMERO (271) 35 38 57
+NUMERO (271) 35 38 58
 SOMA (272) 27
 SUB (273) 28
 MUL (274) 30
@@ -122,12 +125,12 @@ DIV (275) 31
 IF (276) 41
 THEN (277) 41
 ELSE (278) 43
-DIFE (279) 49
-IGUAL (280) 48
-MAEG (281) 53
-MAIOR (282) 51
-MENOR (283) 52
-MEEG (284) 54
+DIFE (279) 50
+IGUAL (280) 49
+MAEG (281) 54
+MAIOR (282) 52
+MENOR (283) 53
+MEEG (284) 55
 LOWER_THAN_ELSE (285)
 
 
@@ -168,7 +171,7 @@ comando_composto (46)
 comandos_total (47)
     on left: 20, on right: 19
 comandos (48)
-    on left: 21 22, on right: 20 21 45 46
+    on left: 21 22, on right: 20 21 45 47
 comando (49)
     on left: 24 25 26, on right: 21 22
 $@6 (50)
@@ -194,15 +197,17 @@ cond_else (59)
 $@9 (60)
     on left: 42, on right: 43
 internal_if (61)
-    on left: 45 46, on right: 41 43
-expressao (62)
-    on left: 47, on right: 41
-prior2 (63)
-    on left: 48 49 50, on right: 47 48 49
-prior1 (64)
-    on left: 51 52 53 54 55, on right: 48 49 50 51 52 53 54
-final (65)
-    on left: 56 57, on right: 51 52 53 54 55
+    on left: 45 47, on right: 41 43
+$@10 (62)
+    on left: 46, on right: 47
+expressao (63)
+    on left: 48, on right: 41
+prior2 (64)
+    on left: 49 50 51, on right: 48 49 50
+prior1 (65)
+    on left: 52 53 54 55 56, on right: 49 50 51 52 53 54 55
+final (66)
+    on left: 57 58, on right: 52 53 54 55 56
 
 
 State 0
@@ -540,7 +545,7 @@ State 38
 
 State 39
 
-   47 expressao: ABRE_PARENTESES . prior2 FECHA_PARENTESES
+   48 expressao: ABRE_PARENTESES . prior2 FECHA_PARENTESES
 
     IDENT   shift, and go to state 50
     NUMERO  shift, and go to state 51
@@ -636,23 +641,23 @@ State 49
 
 State 50
 
-   56 final: IDENT .
-
-    $default  reduce using rule 56 (final)
-
-
-State 51
-
-   57 final: NUMERO .
+   57 final: IDENT .
 
     $default  reduce using rule 57 (final)
 
 
+State 51
+
+   58 final: NUMERO .
+
+    $default  reduce using rule 58 (final)
+
+
 State 52
 
-   47 expressao: ABRE_PARENTESES prior2 . FECHA_PARENTESES
-   48 prior2: prior2 . IGUAL prior1
-   49       | prior2 . DIFE prior1
+   48 expressao: ABRE_PARENTESES prior2 . FECHA_PARENTESES
+   49 prior2: prior2 . IGUAL prior1
+   50       | prior2 . DIFE prior1
 
     FECHA_PARENTESES  shift, and go to state 68
     DIFE              shift, and go to state 69
@@ -661,25 +666,25 @@ State 52
 
 State 53
 
-   50 prior2: prior1 .
-   51 prior1: prior1 . MAIOR final
-   52       | prior1 . MENOR final
-   53       | prior1 . MAEG final
-   54       | prior1 . MEEG final
+   51 prior2: prior1 .
+   52 prior1: prior1 . MAIOR final
+   53       | prior1 . MENOR final
+   54       | prior1 . MAEG final
+   55       | prior1 . MEEG final
 
     MAEG   shift, and go to state 71
     MAIOR  shift, and go to state 72
     MENOR  shift, and go to state 73
     MEEG   shift, and go to state 74
 
-    $default  reduce using rule 50 (prior2)
+    $default  reduce using rule 51 (prior2)
 
 
 State 54
 
-   55 prior1: final .
+   56 prior1: final .
 
-    $default  reduce using rule 55 (prior1)
+    $default  reduce using rule 56 (prior1)
 
 
 State 55
@@ -802,14 +807,14 @@ State 67
 
 State 68
 
-   47 expressao: ABRE_PARENTESES prior2 FECHA_PARENTESES .
+   48 expressao: ABRE_PARENTESES prior2 FECHA_PARENTESES .
 
-    $default  reduce using rule 47 (expressao)
+    $default  reduce using rule 48 (expressao)
 
 
 State 69
 
-   49 prior2: prior2 DIFE . prior1
+   50 prior2: prior2 DIFE . prior1
 
     IDENT   shift, and go to state 50
     NUMERO  shift, and go to state 51
@@ -820,7 +825,7 @@ State 69
 
 State 70
 
-   48 prior2: prior2 IGUAL . prior1
+   49 prior2: prior2 IGUAL . prior1
 
     IDENT   shift, and go to state 50
     NUMERO  shift, and go to state 51
@@ -831,7 +836,7 @@ State 70
 
 State 71
 
-   53 prior1: prior1 MAEG . final
+   54 prior1: prior1 MAEG . final
 
     IDENT   shift, and go to state 50
     NUMERO  shift, and go to state 51
@@ -841,7 +846,7 @@ State 71
 
 State 72
 
-   51 prior1: prior1 MAIOR . final
+   52 prior1: prior1 MAIOR . final
 
     IDENT   shift, and go to state 50
     NUMERO  shift, and go to state 51
@@ -851,7 +856,7 @@ State 72
 
 State 73
 
-   52 prior1: prior1 MENOR . final
+   53 prior1: prior1 MENOR . final
 
     IDENT   shift, and go to state 50
     NUMERO  shift, and go to state 51
@@ -861,7 +866,7 @@ State 73
 
 State 74
 
-   54 prior1: prior1 MEEG . final
+   55 prior1: prior1 MEEG . final
 
     IDENT   shift, and go to state 50
     NUMERO  shift, and go to state 51
@@ -888,17 +893,11 @@ State 75
 
 State 76
 
-   46 internal_if: T_BEGIN . comandos T_END
+   47 internal_if: T_BEGIN . $@10 comandos T_END
 
-    WRITE  shift, and go to state 25
-    IDENT  shift, and go to state 26
-    IF     shift, and go to state 27
+    $default  reduce using rule 46 ($@10)
 
-    comandos       go to state 95
-    comando        go to state 30
-    comando_write  go to state 31
-    cond_if        go to state 32
-    if_then        go to state 33
+    $@10  go to state 95
 
 
 State 77
@@ -1015,11 +1014,27 @@ State 87
 
 State 88
 
-   49 prior2: prior2 DIFE prior1 .
-   51 prior1: prior1 . MAIOR final
-   52       | prior1 . MENOR final
-   53       | prior1 . MAEG final
-   54       | prior1 . MEEG final
+   50 prior2: prior2 DIFE prior1 .
+   52 prior1: prior1 . MAIOR final
+   53       | prior1 . MENOR final
+   54       | prior1 . MAEG final
+   55       | prior1 . MEEG final
+
+    MAEG   shift, and go to state 71
+    MAIOR  shift, and go to state 72
+    MENOR  shift, and go to state 73
+    MEEG   shift, and go to state 74
+
+    $default  reduce using rule 50 (prior2)
+
+
+State 89
+
+   49 prior2: prior2 IGUAL prior1 .
+   52 prior1: prior1 . MAIOR final
+   53       | prior1 . MENOR final
+   54       | prior1 . MAEG final
+   55       | prior1 . MEEG final
 
     MAEG   shift, and go to state 71
     MAIOR  shift, and go to state 72
@@ -1029,48 +1044,32 @@ State 88
     $default  reduce using rule 49 (prior2)
 
 
-State 89
-
-   48 prior2: prior2 IGUAL prior1 .
-   51 prior1: prior1 . MAIOR final
-   52       | prior1 . MENOR final
-   53       | prior1 . MAEG final
-   54       | prior1 . MEEG final
-
-    MAEG   shift, and go to state 71
-    MAIOR  shift, and go to state 72
-    MENOR  shift, and go to state 73
-    MEEG   shift, and go to state 74
-
-    $default  reduce using rule 48 (prior2)
-
-
 State 90
 
-   53 prior1: prior1 MAEG final .
+   54 prior1: prior1 MAEG final .
 
-    $default  reduce using rule 53 (prior1)
+    $default  reduce using rule 54 (prior1)
 
 
 State 91
 
-   51 prior1: prior1 MAIOR final .
-
-    $default  reduce using rule 51 (prior1)
-
-
-State 92
-
-   52 prior1: prior1 MENOR final .
+   52 prior1: prior1 MAIOR final .
 
     $default  reduce using rule 52 (prior1)
 
 
+State 92
+
+   53 prior1: prior1 MENOR final .
+
+    $default  reduce using rule 53 (prior1)
+
+
 State 93
 
-   54 prior1: prior1 MEEG final .
+   55 prior1: prior1 MEEG final .
 
-    $default  reduce using rule 54 (prior1)
+    $default  reduce using rule 55 (prior1)
 
 
 State 94
@@ -1082,15 +1081,14 @@ State 94
 
 State 95
 
-   21 comandos: comandos . comando
-   46 internal_if: T_BEGIN comandos . T_END
+   47 internal_if: T_BEGIN $@10 . comandos T_END
 
     WRITE  shift, and go to state 25
-    T_END  shift, and go to state 103
     IDENT  shift, and go to state 26
     IF     shift, and go to state 27
 
-    comando        go to state 42
+    comandos       go to state 103
+    comando        go to state 30
     comando_write  go to state 31
     cond_if        go to state 32
     if_then        go to state 33
@@ -1157,6 +1155,22 @@ State 102
 
 State 103
 
-   46 internal_if: T_BEGIN comandos T_END .
+   21 comandos: comandos . comando
+   47 internal_if: T_BEGIN $@10 comandos . T_END
 
-    $default  reduce using rule 46 (internal_if)
+    WRITE  shift, and go to state 25
+    T_END  shift, and go to state 104
+    IDENT  shift, and go to state 26
+    IF     shift, and go to state 27
+
+    comando        go to state 42
+    comando_write  go to state 31
+    cond_if        go to state 32
+    if_then        go to state 33
+
+
+State 104
+
+   47 internal_if: T_BEGIN $@10 comandos T_END .
+
+    $default  reduce using rule 47 (internal_if)

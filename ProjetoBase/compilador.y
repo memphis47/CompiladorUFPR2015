@@ -71,9 +71,8 @@ void gera_comando_crvl(char * token){
 
 void adiciona_item_lista(){
   itemLista *auxItem = (itemLista *) malloc (sizeof(itemLista));
-
-  auxItem->itemAnt = lr->fim;
-  auxItem->itemProx = NULL;
+  
+  
   char rtn[4];
   sprintf(rtn, "%d", rotNumber);
   char rot[]="R";
@@ -86,7 +85,9 @@ void adiciona_item_lista(){
     lr->fim = auxItem;
   }
   else{
-    lr->fim= auxItem;
+    lr->fim->itemProx = auxItem;
+    auxItem->itemAnt = lr->fim;
+    lr->fim = auxItem;
   }
   rotNumber++;
 }
@@ -282,30 +283,30 @@ comando_write : WRITE ABRE_PARENTESES IDENT {
 
 cond_if     : if_then cond_else 
             { 
-
+               geraCodigo (lr->inicio->identificador, "NADA",NULL,NULL);
+                lr->inicio=lr->inicio->itemProx;
             }
 ;
 
 if_then     : IF expressao {
                 adiciona_item_lista();
-                geraCodigo (NULL, "DSVF",rot,NULL,NULL);
+                geraCodigo (NULL, "DSVF",lr->fim->identificador,NULL,NULL);
               }
-             THEN internal_if{
-                adiciona_item_lista();
-                geraCodigo (NULL, "DSVS",rot,NULL,NULL);
-             }
+             THEN internal_if
 ;
 
 cond_else   : ELSE{
-                geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
-                lr->fim=lr->fim->itemAnt
+                adiciona_item_lista();
+                geraCodigo (NULL, "DSVS",lr->fim->identificador,NULL,NULL);
+                geraCodigo (lr->inicio->identificador, "NADA",NULL,NULL);
+                lr->inicio=lr->inicio->itemProx;
               } internal_if {
-                
-                geraCodigo (NULL, "DSVS",rot,NULL,NULL);}
+                geraCodigo (NULL, "DSVS",lr->inicio->identificador,NULL,NULL);
+              }
             | %prec LOWER_THAN_ELSE
 ;
 
-internal_if: comandos | T_BEGIN comandos T_END
+internal_if: comandos{printf("Oi\n");} | T_BEGIN{printf("Oisa\n");} comandos T_END
 
 expressao   : ABRE_PARENTESES prior2 FECHA_PARENTESES
 
