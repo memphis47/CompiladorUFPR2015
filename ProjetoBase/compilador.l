@@ -16,17 +16,17 @@ int nl = 1;
 
 pulo_linha [\n]
 
-maior [>]
+maior \>
 
-maior_igual [>=]
+maior_igual \>\=
 
-menor [<]
+menor \<
 
-menor_igual [<=]
+menor_igual \<\=
 
-igual [==]
+igual \=
 
-diferente [!=]
+diferente \<\>
 
 descarte [\t ]+
 

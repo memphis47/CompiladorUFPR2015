@@ -4,12 +4,22 @@ var m,n :  integer;
 begin
 	m := 0;
 	l := 0;
-	k := 0;
+	k := 1;
 	m := m+k+l+4;
 	write(l);
-	if(m>k)then
-		write(s);
+	if(m<k)then
+	begin
+		if(k <> 0) then
+			write(k);
+		else
+			write(m);
+	end;
 	else
-		write(k);
+	begin
+		if(k = 0) then
+			write(k);
+		else
+			write(m);
+	end;
 end.
 

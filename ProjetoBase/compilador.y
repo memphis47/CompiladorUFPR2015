@@ -283,8 +283,8 @@ comando_write : WRITE ABRE_PARENTESES IDENT {
 
 cond_if     : if_then cond_else 
             { 
-               geraCodigo (lr->inicio->identificador, "NADA",NULL,NULL);
-                lr->inicio=lr->inicio->itemProx;
+               geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
+                lr->fim=lr->fim->itemAnt;
             }
 ;
 
@@ -296,17 +296,22 @@ if_then     : IF expressao {
 ;
 
 cond_else   : ELSE{
+                char rtn[4];
+                sprintf(rtn, "%d", rotNumber);
+                char rot[]="R";
+                strcat(rot, rtn);
+                char *strRot = (char *) malloc (256 * sizeof(char));
+                strcpy(strRot,rot);
+                geraCodigo (NULL, "DSVS",strRot,NULL,NULL);
+                geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
+                if(lr->fim->itemAnt != NULL)
+                  lr->fim=lr->fim->itemAnt;
                 adiciona_item_lista();
-                geraCodigo (NULL, "DSVS",lr->fim->identificador,NULL,NULL);
-                geraCodigo (lr->inicio->identificador, "NADA",NULL,NULL);
-                lr->inicio=lr->inicio->itemProx;
-              } internal_if {
-                geraCodigo (NULL, "DSVS",lr->inicio->identificador,NULL,NULL);
-              }
+              } internal_if 
             | %prec LOWER_THAN_ELSE
 ;
 
-internal_if: comandos{printf("Oi\n");} | T_BEGIN{printf("Oisa\n");} comandos T_END
+internal_if: comandos| T_BEGIN comandos T_END PONTO_E_VIRGULA
 
 expressao   : ABRE_PARENTESES prior2 FECHA_PARENTESES
 

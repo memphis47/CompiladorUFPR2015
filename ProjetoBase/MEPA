@@ -4,7 +4,7 @@
      ARMZ 0,0
      CRCT 0
      ARMZ 0,2
-     CRCT 0
+     CRCT 1
      ARMZ 0,4
      CRVL 0,0
      CRVL 0,4
@@ -18,14 +18,31 @@
      IMPR
      CRVL 0,0
      CRVL 0,4
-     CMMA
+     CMME
      DSVF R0
-     CRVL 0,3
-     IMPR
-     DSVS R1
-R0: NADA 
+     CRVL 0,4
+     CRCT 0
+     CMDG
+     DSVF R1
      CRVL 0,4
      IMPR
-     DSVS R1
+     DSVS R2
 R1: NADA 
+     CRVL 0,0
+     IMPR
+R2: NADA 
+     DSVS R3
+R0: NADA 
+     CRVL 0,4
+     CRCT 0
+     CMIG
+     DSVF R4
+     CRVL 0,4
+     IMPR
+     DSVS R5
+R4: NADA 
+     CRVL 0,0
+     IMPR
+R5: NADA 
+R3: NADA 
      PARA
