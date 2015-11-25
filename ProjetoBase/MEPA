@@ -45,4 +45,13 @@ R4: NADA
      IMPR
 R5: NADA 
 R3: NADA 
+R6: NADA 
+     CRVL 0,0
+     CRVL 0,4
+     CMMA
+     DSVF R7
+     CRVL 0,0
+     IMPR
+     DSVS R6
+R7: NADA 
      PARA

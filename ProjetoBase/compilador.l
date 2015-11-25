@@ -81,6 +81,21 @@ write {
      return WRITE;  
 }
 
+while {
+     simbolo = simb_write;
+     strncpy (token, yytext, TAM_TOKEN);
+     IMPRIME(" while  ");
+     return WHILE;  
+}
+
+do {
+     simbolo = simb_write;
+     strncpy (token, yytext, TAM_TOKEN);
+     IMPRIME(" do  ");
+     return DO;  
+}
+
+
 \; { simbolo = simb_ponto_e_virgula;  
           strncpy (token, yytext, TAM_TOKEN);
           IMPRIME(" pt_virgula  ");

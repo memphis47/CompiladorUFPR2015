@@ -1,6 +1,6 @@
 
-// Testar se funciona corretamente o empilhamento de parâmetros
-// passados por valor ou por referência.
+// Testar se funciona corretamente o empilhamento de parÃ¢metros
+// passados por valor ou por referÃªncia.
 
 
 %{
@@ -72,14 +72,16 @@ void gera_comando_crvl(char * token){
 void adiciona_item_lista(){
   itemLista *auxItem = (itemLista *) malloc (sizeof(itemLista));
   
-  
   char rtn[4];
   sprintf(rtn, "%d", rotNumber);
   char rot[]="R";
   strcat(rot, rtn);
+
   auxItem->identificador = (char *) malloc (256 * sizeof(char));
   strcpy(auxItem->identificador,rot);
+  
   lr->n_rotulos = lr->n_rotulos++;
+  
   if(lr->inicio == NULL){
     lr->inicio = auxItem; 
     lr->fim = auxItem;
@@ -89,6 +91,7 @@ void adiciona_item_lista(){
     auxItem->itemAnt = lr->fim;
     lr->fim = auxItem;
   }
+
   rotNumber++;
 }
 
@@ -100,6 +103,7 @@ void adiciona_item_lista(){
 %token T_BEGIN T_END VAR IDENT ATRIBUICAO
 %token NUMERO SOMA SUB MUL DIV
 %token IF THEN ELSE
+%token WHILE DO
 %token DIFE IGUAL MAEG MAIOR MENOR MEEG
 
 %nonassoc LOWER_THAN_ELSE
@@ -164,7 +168,7 @@ tipo        : IDENT
 ;
 
 lista_id_var: lista_id_var VIRGULA IDENT 
-              { /* insere última vars na tabela de símbolos */ 
+              { /* insere Ãºltima vars na tabela de sÃ­mbolos */ 
                 item *auxItem = (item *) malloc (sizeof(item));
                 auxItem->itemAnt = tbs->topo_pilha;
                 auxItem->itemProx = NULL;
@@ -181,7 +185,7 @@ lista_id_var: lista_id_var VIRGULA IDENT
                 num_vars++;
                 desl ++;
               }
-            | IDENT { /* insere vars na tabela de símbolos */
+            | IDENT { /* insere vars na tabela de sÃ­mbolos */
                 item *auxItem = (item *) malloc (sizeof(item));
                 auxItem->itemAnt = tbs->topo_pilha;
                 auxItem->itemProx = NULL;
@@ -226,26 +230,27 @@ comando:
               sprintf(param1Aux, "%d", itema->nivel_lexico);
               sprintf(param2Aux, "%d", itema->deslocamento);
             }
-            //TODO: caso não encontrar mostrar msg de erro.
-          } ATRIBUICAO expr PONTO_E_VIRGULA{
+            //TODO: caso nÃ£o encontrar mostrar msg de erro.
+          } ATRIBUICAO expressao_simples PONTO_E_VIRGULA{
             geraCodigo (NULL, "ARMZ",param1Aux,param2Aux,NULL);
           }
           | comando_write
           | cond_if
+          | comando_repetitivo
 
 ;
 
-expr       ://ABRE_PARENTESES expr FECHA_PARENTESES|
-            expr SOMA termo {
+expressao_simples ://ABRE_PARENTESES expressao_simples FECHA_PARENTESES|
+            expressao_simples SOMA termo {
               geraCodigo (NULL, "SOMA",NULL,NULL,NULL); 
               printf ("+\n"); }
-            |expr SUB termo {
+            |expressao_simples SUB termo {
               geraCodigo (NULL, "SUBT",NULL,NULL,NULL); 
               printf ("-"); } 
             |termo
 ;
 
-termo      : //ABRE_PARENTESES expr FECHA_PARENTESES|
+termo      : //ABRE_PARENTESES expressao_simples FECHA_PARENTESES|
              termo MUL fator  {
               geraCodigo (NULL, "MULT",NULL,NULL,NULL); 
               printf ("*"); }| 
@@ -255,7 +260,7 @@ termo      : //ABRE_PARENTESES expr FECHA_PARENTESES|
              fator
 ;
 
-fator      :  ABRE_PARENTESES expr FECHA_PARENTESES|
+fator      :  ABRE_PARENTESES expressao_simples FECHA_PARENTESES|
               IDENT {
                 gera_comando_crvl(token);
               }
@@ -292,7 +297,7 @@ if_then     : IF expressao {
                 adiciona_item_lista();
                 geraCodigo (NULL, "DSVF",lr->fim->identificador,NULL,NULL);
               }
-             THEN internal_if
+             THEN internal
 ;
 
 cond_else   : ELSE{
@@ -302,16 +307,31 @@ cond_else   : ELSE{
                 strcat(rot, rtn);
                 char *strRot = (char *) malloc (256 * sizeof(char));
                 strcpy(strRot,rot);
+                
                 geraCodigo (NULL, "DSVS",strRot,NULL,NULL);
                 geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
                 if(lr->fim->itemAnt != NULL)
                   lr->fim=lr->fim->itemAnt;
                 adiciona_item_lista();
-              } internal_if 
+              } internal 
             | %prec LOWER_THAN_ELSE
 ;
 
-internal_if: comandos| T_BEGIN comandos T_END PONTO_E_VIRGULA
+internal: comando| T_BEGIN comandos T_END PONTO_E_VIRGULA
+
+comando_repetitivo:
+                     com_while
+
+com_while:    {
+                adiciona_item_lista();
+                geraCodigo (lr->fim->identificador, "NADA",NULL,NULL,NULL);
+              }
+              WHILE expressao {
+                adiciona_item_lista();
+                geraCodigo (NULL, "DSVF",lr->fim->identificador,NULL,NULL);
+              } DO internal { geraCodigo (NULL, "DSVS",lr->fim->itemAnt->identificador,NULL,NULL);
+                              geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
+                              lr->fim=lr->fim->itemAnt;}
 
 expressao   : ABRE_PARENTESES prior2 FECHA_PARENTESES
 
@@ -347,7 +367,7 @@ main (int argc, char** argv) {
 
 
 /* -------------------------------------------------------------------
- *  Inicia a Tabela de Símbolos
+ *  Inicia a Tabela de SÃ­mbolos
  * ------------------------------------------------------------------- */
    tbs = (tabela_simbolos *) malloc (sizeof(tabela_simbolos));
    lr = (lista_rotulos *) malloc (sizeof(lista_rotulos));

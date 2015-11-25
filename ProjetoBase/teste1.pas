@@ -21,5 +21,8 @@ begin
 		else
 			write(m);
 	end;
+	while (m>k) do
+		write(m);
+
 end.
 
