@@ -77,31 +77,55 @@ void adiciona_item_lista(){
   char rot[]="R";
   strcat(rot, rtn);
 
+
   auxItem->identificador = (char *) malloc (256 * sizeof(char));
   strcpy(auxItem->identificador,rot);
   
   lr->n_rotulos = lr->n_rotulos++;
-  
+
   if(lr->inicio == NULL){
     lr->inicio = auxItem; 
     lr->fim = auxItem;
   }
   else{
+    if(lr != NULL){
+      if(lr->fim == NULL)
+        printf("NULL\n");
+      else{
+        printf("Não esta null\n");
+      }
+      if(lr->inicio == NULL){
+        printf("Tbm NULL");
+      }
+      else
+        printf("%s\n",lr->inicio->identificador);
+    }
     lr->fim->itemProx = auxItem;
     auxItem->itemAnt = lr->fim;
     lr->fim = auxItem;
   }
-
   rotNumber++;
 }
 
 void remove_item_lista(char *token){
   itemLista *itemAtual = lr->fim;
+  printf("%s\n",lr->fim->identificador );
   while(itemAtual != NULL){
     if(strcmp (token, itemAtual->identificador) == 0){
-      itemAtual->itemAnt->itemProx = itemAtual->itemProx;
-      if(itemAtual->itemProx!=NULL)
+      if(itemAtual->itemAnt!=NULL)
+        itemAtual->itemAnt->itemProx = itemAtual->itemProx;
+      else{
+        lr->inicio = itemAtual->itemProx;
+      }
+      if(itemAtual->itemProx!=NULL){
+        printf("Entrei Aqui\n");
         itemAtual->itemProx->itemAnt = itemAtual->itemAnt;
+
+      }
+      else{
+        printf("Entrei Acola\n");
+        lr->fim = itemAtual->itemAnt;
+      }
     }
     itemAtual = itemAtual->itemAnt;
   }
@@ -343,6 +367,7 @@ com_while:    {
               } DO internal { geraCodigo (NULL, "DSVS",lr->fim->itemAnt->identificador,NULL,NULL);
                               remove_item_lista(lr->fim->itemAnt->identificador);
                               geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
+                                if(lr->fim->itemAnt != NULL)
                               lr->fim=lr->fim->itemAnt;}
 
 expressao   : ABRE_PARENTESES prior2 FECHA_PARENTESES
