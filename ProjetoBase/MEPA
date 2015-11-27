@@ -50,8 +50,15 @@ R6: NADA
      CRVL 0,4
      CMMA
      DSVF R7
+R8: NADA 
+     CRVL 0,4
+     CRVL 0,0
+     CMME
+     DSVF R9
      CRVL 0,0
      IMPR
+     DSVS R8
+R9: NADA 
      DSVS R6
 R7: NADA 
      PARA

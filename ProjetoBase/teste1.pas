@@ -22,7 +22,8 @@ begin
 			write(m);
 	end;
 	while (m>k) do
-		write(m);
+		while (k<m) do
+			write(m);
 
 end.
 

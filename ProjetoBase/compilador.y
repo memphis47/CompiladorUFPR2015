@@ -95,6 +95,17 @@ void adiciona_item_lista(){
   rotNumber++;
 }
 
+void remove_item_lista(char *token){
+  itemLista *itemAtual = lr->fim;
+  while(itemAtual != NULL){
+    if(strcmp (token, itemAtual->identificador) == 0){
+      itemAtual->itemAnt->itemProx = itemAtual->itemProx;
+      if(itemAtual->itemProx!=NULL)
+        itemAtual->itemProx->itemAnt = itemAtual->itemAnt;
+    }
+    itemAtual = itemAtual->itemAnt;
+  }
+}
 
 %}
 
@@ -330,6 +341,7 @@ com_while:    {
                 adiciona_item_lista();
                 geraCodigo (NULL, "DSVF",lr->fim->identificador,NULL,NULL);
               } DO internal { geraCodigo (NULL, "DSVS",lr->fim->itemAnt->identificador,NULL,NULL);
+                              remove_item_lista(lr->fim->itemAnt->identificador);
                               geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
                               lr->fim=lr->fim->itemAnt;}
 

@@ -62,113 +62,16 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 6 "compilador.y" /* yacc.c:339  */
+#line 14 "simulaMepa.y" /* yacc.c:339  */
 
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include "compilador.h"
-#include "tabela.h"
-
-int num_vars;
-int desl;
-typedef struct itemLista itemLista;
+#include "simulaMepa.h"
 
 
-struct itemLista
-{
-  char *identificador;
-  itemLista *itemAnt;
-  itemLista *itemProx;
-};
-
-typedef struct lista_rotulos
-{
-  int n_rotulos;
-  itemLista *fim;
-  itemLista *inicio;
-} lista_rotulos;
-
-
-
-tabela_simbolos *tbs;
-lista_rotulos *lr;
-char *param1;
-char *param2;
-char *param3;
-char *param1Aux;
-char *param2Aux;
-char *param3Aux;
-char *ident;
-int desl;
-int rotNumber;
-
-item * procura_tbsimb(char * token){
-  item *itemAtual = tbs->topo_pilha;
-  while(itemAtual != NULL){
-    if(strcmp (token, itemAtual->identificador) == 0)
-      return itemAtual;
-    itemAtual = itemAtual->itemAnt;
-  }
-  return NULL;
-}
-
-
-void gera_comando_crvl(char * token){
-  item *item = procura_tbsimb(token);
-  if(item!=NULL){
-    free(param1);
-    free(param2);
-    free(param3);
-    param1 = (char *) malloc (4 * sizeof(char));
-    param2 = (char *) malloc (4 * sizeof(char));
-    sprintf(param1, "%d", item->nivel_lexico);
-    sprintf(param2, "%d", item->deslocamento);
-    geraCodigo (NULL, "CRVL",param1,param2,NULL); 
-  } 
-}
-
-void adiciona_item_lista(){
-  itemLista *auxItem = (itemLista *) malloc (sizeof(itemLista));
-  
-  char rtn[4];
-  sprintf(rtn, "%d", rotNumber);
-  char rot[]="R";
-  strcat(rot, rtn);
-
-  auxItem->identificador = (char *) malloc (256 * sizeof(char));
-  strcpy(auxItem->identificador,rot);
-  
-  lr->n_rotulos = lr->n_rotulos++;
-  
-  if(lr->inicio == NULL){
-    lr->inicio = auxItem; 
-    lr->fim = auxItem;
-  }
-  else{
-    lr->fim->itemProx = auxItem;
-    auxItem->itemAnt = lr->fim;
-    lr->fim = auxItem;
-  }
-
-  rotNumber++;
-}
-
-void remove_item_lista(char *token){
-  itemLista *itemAtual = lr->fim;
-  while(itemAtual != NULL){
-    if(strcmp (token, itemAtual->identificador) == 0){
-      itemAtual->itemAnt->itemProx = itemAtual->itemProx;
-      if(itemAtual->itemProx!=NULL)
-        itemAtual->itemProx->itemAnt = itemAtual->itemAnt;
-    }
-    itemAtual = itemAtual->itemAnt;
-  }
-}
-
-
-#line 172 "compilador.tab.c" /* yacc.c:339  */
+#line 75 "simulaMepa.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -187,9 +90,9 @@ void remove_item_lista(char *token){
 #endif
 
 /* In a future release of Bison, this section will be replaced
-   by #include "compilador.tab.h".  */
-#ifndef YY_YY_COMPILADOR_TAB_H_INCLUDED
-# define YY_YY_COMPILADOR_TAB_H_INCLUDED
+   by #include "simulaMepa.tab.h".  */
+#ifndef YY_YY_SIMULAMEPA_TAB_H_INCLUDED
+# define YY_YY_SIMULAMEPA_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -203,36 +106,44 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    PROGRAM = 258,
-    ABRE_PARENTESES = 259,
-    FECHA_PARENTESES = 260,
-    WRITE = 261,
-    VIRGULA = 262,
-    PONTO_E_VIRGULA = 263,
-    DOIS_PONTOS = 264,
-    PONTO = 265,
-    T_BEGIN = 266,
-    T_END = 267,
-    VAR = 268,
-    IDENT = 269,
-    ATRIBUICAO = 270,
-    NUMERO = 271,
-    SOMA = 272,
-    SUB = 273,
-    MUL = 274,
-    DIV = 275,
-    IF = 276,
-    THEN = 277,
-    ELSE = 278,
-    WHILE = 279,
-    DO = 280,
-    DIFE = 281,
-    IGUAL = 282,
-    MAEG = 283,
-    MAIOR = 284,
-    MENOR = 285,
-    MEEG = 286,
-    LOWER_THAN_ELSE = 287
+    DOIS_PONTOS = 258,
+    ROTULO = 259,
+    INTEIRO = 260,
+    VIRGULA = 261,
+    INPP = 262,
+    PARA = 263,
+    SOMA = 264,
+    SUBT = 265,
+    MULT = 266,
+    DIVI = 267,
+    INVR = 268,
+    CONJ = 269,
+    DISJ = 270,
+    NEGA = 271,
+    CMME = 272,
+    CMMA = 273,
+    CMIG = 274,
+    CMDG = 275,
+    CMEG = 276,
+    CMAG = 277,
+    NADA = 278,
+    LEIT = 279,
+    IMPR = 280,
+    CRCT = 281,
+    AMEM = 282,
+    DMEM = 283,
+    ENPR = 284,
+    ENRT = 285,
+    DSVS = 286,
+    DSVF = 287,
+    CRVL = 288,
+    ARMZ = 289,
+    CRVI = 290,
+    ARMI = 291,
+    CREN = 292,
+    CHPR = 293,
+    RTPR = 294,
+    DSVR = 295
   };
 #endif
 
@@ -248,11 +159,11 @@ extern YYSTYPE yylval;
 
 int yyparse (void);
 
-#endif /* !YY_YY_COMPILADOR_TAB_H_INCLUDED  */
+#endif /* !YY_YY_SIMULAMEPA_TAB_H_INCLUDED  */
 
 /* Copy the second part of user declarations.  */
 
-#line 256 "compilador.tab.c" /* yacc.c:358  */
+#line 167 "simulaMepa.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -492,23 +403,23 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  3
+#define YYFINAL  6
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   94
+#define YYLAST   75
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  33
+#define YYNTOKENS  41
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  39
+#define YYNNTS  15
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  63
+#define YYNRULES  51
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  113
+#define YYNSTATES  88
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   287
+#define YYMAXUTOK   295
 
 #define YYTRANSLATE(YYX)                                                \
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -545,20 +456,20 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
-      25,    26,    27,    28,    29,    30,    31,    32
+      25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
+      35,    36,    37,    38,    39,    40
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_uint16 yyrline[] =
+static const yytype_uint8 yyrline[] =
 {
-       0,   125,   125,   125,   139,   138,   155,   159,   159,   161,
-     165,   166,   169,   172,   169,   178,   181,   199,   218,   219,
-     224,   227,   230,   230,   233,   233,   248,   249,   250,   255,
-     258,   261,   265,   268,   271,   274,   275,   278,   283,   283,
-     297,   300,   307,   307,   314,   314,   328,   331,   331,   334,
-     336,   340,   336,   348,   350,   351,   352,   354,   355,   356,
-     357,   358,   360,   361
+       0,    36,    36,    37,    41,    40,    53,    54,    58,    59,
+      64,    65,    66,    67,    68,    69,    70,    71,    72,    73,
+      74,    75,    76,    77,    78,    79,    80,    81,    82,    85,
+      86,    87,    88,    89,    90,    93,    93,    95,    95,    97,
+      97,    99,    99,   101,   101,   103,   103,   107,   109,   109,
+     112,   111
 };
 #endif
 
@@ -567,18 +478,13 @@ static const yytype_uint16 yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "PROGRAM", "ABRE_PARENTESES",
-  "FECHA_PARENTESES", "WRITE", "VIRGULA", "PONTO_E_VIRGULA", "DOIS_PONTOS",
-  "PONTO", "T_BEGIN", "T_END", "VAR", "IDENT", "ATRIBUICAO", "NUMERO",
-  "SOMA", "SUB", "MUL", "DIV", "IF", "THEN", "ELSE", "WHILE", "DO", "DIFE",
-  "IGUAL", "MAEG", "MAIOR", "MENOR", "MEEG", "LOWER_THAN_ELSE", "$accept",
-  "programa", "$@1", "bloco", "$@2", "parte_declara_vars", "var", "$@3",
-  "declara_vars", "declara_var", "$@4", "$@5", "tipo", "lista_id_var",
-  "lista_idents", "comando_composto", "comandos_total", "comandos",
-  "comando", "$@6", "expressao_simples", "termo", "fator", "comando_write",
-  "$@7", "cond_if", "if_then", "$@8", "cond_else", "$@9", "internal",
-  "comando_repetitivo", "com_while", "$@10", "$@11", "expressao", "prior2",
-  "prior1", "final", YY_NULLPTR
+  "$end", "error", "$undefined", "DOIS_PONTOS", "ROTULO", "INTEIRO",
+  "VIRGULA", "INPP", "PARA", "SOMA", "SUBT", "MULT", "DIVI", "INVR",
+  "CONJ", "DISJ", "NEGA", "CMME", "CMMA", "CMIG", "CMDG", "CMEG", "CMAG",
+  "NADA", "LEIT", "IMPR", "CRCT", "AMEM", "DMEM", "ENPR", "ENRT", "DSVS",
+  "DSVF", "CRVL", "ARMZ", "CRVI", "ARMI", "CREN", "CHPR", "RTPR", "DSVR",
+  "$accept", "linhas", "linha", "$@1", "rot", "virgula", "comando", "$@2",
+  "$@3", "$@4", "$@5", "$@6", "$@7", "$@8", "$@9", YY_NULLPTR
 };
 #endif
 
@@ -590,16 +496,17 @@ static const yytype_uint16 yytoknum[] =
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
      275,   276,   277,   278,   279,   280,   281,   282,   283,   284,
-     285,   286,   287
+     285,   286,   287,   288,   289,   290,   291,   292,   293,   294,
+     295
 };
 # endif
 
-#define YYPACT_NINF -79
+#define YYPACT_NINF -25
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-79)))
+  (!!((Yystate) == (-25)))
 
-#define YYTABLE_NINF -51
+#define YYTABLE_NINF -1
 
 #define yytable_value_is_error(Yytable_value) \
   0
@@ -608,18 +515,15 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-     -79,     7,     9,   -79,    25,    11,    28,   -79,     1,    24,
-      44,    15,   -79,    54,   -79,   -79,    52,   -79,    55,   -79,
-      22,   -79,    53,   -79,    56,    64,   -79,    65,    59,    -3,
-     -79,   -79,   -79,    49,   -79,   -79,    50,   -79,   -79,    26,
-      38,    58,    39,   -79,   -79,   -79,   -79,   -79,    65,    61,
-      62,   -79,    72,     0,   -79,   -79,    -4,    16,   -79,    57,
-      -1,   -79,   -79,   -79,   -79,    73,    74,     0,   -79,   -79,
-      23,    18,   -79,   -79,    39,    39,    39,    39,    39,    39,
-      -1,    22,   -79,   -79,    60,    75,    76,   -79,    12,   -79,
-       0,     0,     0,     0,    16,    16,   -79,   -79,   -79,   -79,
-     -79,    13,    -1,   -79,   -79,   -79,    18,    18,   -79,   -79,
-      78,   -79,   -79
+      38,    43,    41,   -25,   -25,   -25,   -25,   -25,    -7,   -25,
+     -25,   -25,   -25,   -25,   -25,   -25,   -25,   -25,   -25,   -25,
+     -25,   -25,   -25,   -25,   -25,   -25,   -25,   -25,    39,    42,
+      44,    45,    46,    48,    49,    50,    51,    52,    53,    54,
+      56,    57,    59,   -25,   -25,   -25,   -25,   -25,   -25,   -25,
+     -25,   -25,   -25,   -25,   -25,   -25,    58,   -25,    58,    58,
+      58,    58,    58,    58,    58,   -25,    60,    58,    61,    62,
+      63,    64,    65,    66,    67,   -25,    68,   -25,   -25,   -25,
+     -25,   -25,   -25,   -25,   -25,    58,    69,   -25
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -627,109 +531,93 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       2,     0,     0,     1,     0,     0,     0,    19,     0,     0,
-       0,     7,    18,     0,     4,     6,     0,     3,     0,    12,
-      50,     5,     8,    11,     0,     0,    24,     0,     0,    21,
-      23,    26,    27,    46,    28,    49,     0,    10,    17,     0,
-       0,     0,     0,    42,    20,    22,    44,    41,     0,     0,
-       0,    38,     0,     0,    62,    63,     0,    56,    61,     0,
-      50,    51,    16,    15,    13,     0,     0,     0,    36,    37,
-       0,    31,    34,    53,     0,     0,     0,     0,     0,     0,
-      50,    50,    47,    45,     0,     0,     0,    40,     0,    25,
-       0,     0,     0,     0,    55,    54,    59,    57,    58,    60,
-      43,    50,    50,    14,    39,    35,    29,    30,    32,    33,
-       0,    52,    48
+       7,     0,     7,     3,     4,     6,     1,     2,     0,    10,
+      11,    12,    13,    14,    15,    16,    17,    18,    19,    20,
+      21,    22,    23,    24,    25,    26,    27,    28,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     5,    29,    30,    31,    32,    45,    33,
+      34,    35,    37,    39,    41,    43,     9,    48,     9,     9,
+       9,     9,     9,     9,     9,     8,     0,     9,     0,     0,
+       0,     0,     0,     0,     0,    47,     0,    50,    46,    36,
+      38,    40,    42,    44,    49,     9,     0,    51
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -79,   -79,   -79,   -79,   -79,   -79,   -79,   -79,   -79,    66,
-     -79,   -79,   -79,   -79,   -79,   -79,   -79,     6,   -20,   -79,
-      27,   -34,   -33,   -79,   -79,   -79,   -79,   -79,   -79,   -79,
-     -78,   -79,   -79,   -79,   -79,    32,   -79,   -12,   -28
+     -25,   -25,    73,   -25,   -25,   -24,   -25,   -25,   -25,   -25,
+     -25,   -25,   -25,   -25,   -25
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     1,     2,    13,    18,    14,    15,    16,    22,    23,
-      24,    85,    64,    39,     8,    21,    28,    29,    82,    41,
-      70,    71,    72,    31,    65,    32,    33,    59,    47,    60,
-      83,    34,    35,    36,    84,    43,    56,    57,    58
+      -1,     2,     3,     8,     4,    66,    43,    60,    61,    62,
+      63,    64,    59,    67,    85
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
      positive, shift that token.  If negative, reduce the rule whose
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
-static const yytype_int8 yytable[] =
+static const yytype_uint8 yytable[] =
 {
-      30,    73,   100,    25,    67,    25,     9,     3,    10,    45,
-      81,    26,     4,    26,    68,     6,    69,   105,    27,    25,
-      27,   -50,    74,    75,   111,   110,    -9,    26,    25,    90,
-      91,    89,    11,    49,    27,    50,    26,    92,    93,     5,
-      90,    91,     7,    27,    76,    77,    78,    79,    96,    97,
-      98,    99,    51,    54,    52,    55,   106,   107,    12,   108,
-     109,    30,    94,    95,    17,    19,    20,   -12,    40,    42,
-      38,    44,    46,    53,    48,    62,    63,    66,    86,    80,
-      61,    45,    87,   103,   104,   102,   112,   101,    37,     0,
-       0,     0,     0,     0,    88
+       9,    10,    11,    12,    13,    14,    15,    16,    17,    18,
+      19,    20,    21,    22,    23,    24,    25,    26,    27,    28,
+      29,    30,    31,    32,    33,    34,    35,    36,    37,    38,
+      39,    40,    41,    42,    68,    69,    70,    71,    72,    73,
+      74,     6,     1,    76,    44,     1,     5,    45,     0,    46,
+      47,    48,    49,    50,     0,    51,    52,    53,    54,    55,
+      56,    86,    57,    58,    65,    75,    77,    78,    79,    80,
+      81,    82,    83,    84,    87,     7
 };
 
 static const yytype_int8 yycheck[] =
 {
-      20,     5,    80,     6,     4,     6,     5,     0,     7,    29,
-      11,    14,     3,    14,    14,     4,    16,     5,    21,     6,
-      21,    24,    26,    27,   102,    12,    11,    14,     6,    17,
-      18,     8,     8,     7,    21,     9,    14,    19,    20,    14,
-      17,    18,    14,    21,    28,    29,    30,    31,    76,    77,
-      78,    79,    14,    14,    16,    16,    90,    91,    14,    92,
-      93,    81,    74,    75,    10,    13,    11,    14,     4,     4,
-      14,    12,    23,    15,    24,    14,    14,     5,     5,    22,
-      48,   101,     8,     8,     8,    25,     8,    81,    22,    -1,
-      -1,    -1,    -1,    -1,    67
+       7,     8,     9,    10,    11,    12,    13,    14,    15,    16,
+      17,    18,    19,    20,    21,    22,    23,    24,    25,    26,
+      27,    28,    29,    30,    31,    32,    33,    34,    35,    36,
+      37,    38,    39,    40,    58,    59,    60,    61,    62,    63,
+      64,     0,     4,    67,     5,     4,     3,     5,    -1,     5,
+       5,     5,     4,     4,    -1,     5,     5,     5,     5,     5,
+       4,    85,     5,     4,     6,     5,     5,     5,     5,     5,
+       5,     5,     5,     5,     5,     2
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,    34,    35,     0,     3,    14,     4,    14,    47,     5,
-       7,     8,    14,    36,    38,    39,    40,    10,    37,    13,
-      11,    48,    41,    42,    43,     6,    14,    21,    49,    50,
-      51,    56,    58,    59,    64,    65,    66,    42,    14,    46,
-       4,    52,     4,    68,    12,    51,    23,    61,    24,     7,
-       9,    14,    16,    15,    14,    16,    69,    70,    71,    60,
-      62,    68,    14,    14,    45,    57,     5,     4,    14,    16,
-      53,    54,    55,     5,    26,    27,    28,    29,    30,    31,
-      22,    11,    51,    63,    67,    44,     5,     8,    53,     8,
-      17,    18,    19,    20,    70,    70,    71,    71,    71,    71,
-      63,    50,    25,     8,     8,     5,    54,    54,    55,    55,
-      12,    63,     8
+       0,     4,    42,    43,    45,     3,     0,    43,    44,     7,
+       8,     9,    10,    11,    12,    13,    14,    15,    16,    17,
+      18,    19,    20,    21,    22,    23,    24,    25,    26,    27,
+      28,    29,    30,    31,    32,    33,    34,    35,    36,    37,
+      38,    39,    40,    47,     5,     5,     5,     5,     5,     4,
+       4,     5,     5,     5,     5,     5,     4,     5,     4,    53,
+      48,    49,    50,    51,    52,     6,    46,    54,    46,    46,
+      46,    46,    46,    46,    46,     5,    46,     5,     5,     5,
+       5,     5,     5,     5,     5,    55,    46,     5
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    33,    35,    34,    37,    36,    38,    40,    39,    39,
-      41,    41,    43,    44,    42,    45,    46,    46,    47,    47,
-      48,    49,    50,    50,    52,    51,    51,    51,    51,    53,
-      53,    53,    54,    54,    54,    55,    55,    55,    57,    56,
-      56,    58,    60,    59,    62,    61,    61,    63,    63,    64,
-      66,    67,    65,    68,    69,    69,    69,    70,    70,    70,
-      70,    70,    71,    71
+       0,    41,    42,    42,    44,    43,    45,    45,    46,    46,
+      47,    47,    47,    47,    47,    47,    47,    47,    47,    47,
+      47,    47,    47,    47,    47,    47,    47,    47,    47,    47,
+      47,    47,    47,    47,    47,    48,    47,    49,    47,    50,
+      47,    51,    47,    52,    47,    53,    47,    47,    54,    47,
+      55,    47
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     0,     9,     0,     3,     1,     0,     3,     0,
-       2,     1,     0,     0,     6,     1,     3,     1,     3,     1,
-       3,     1,     2,     1,     0,     5,     1,     1,     1,     3,
-       3,     1,     3,     3,     1,     3,     1,     1,     0,     6,
-       5,     2,     0,     5,     0,     3,     0,     1,     4,     1,
-       0,     0,     6,     3,     3,     3,     1,     3,     3,     3,
-       3,     1,     1,     1
+       0,     2,     2,     1,     0,     3,     2,     0,     1,     0,
+       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     1,     1,     1,     2,
+       2,     2,     2,     2,     2,     0,     5,     0,     5,     0,
+       5,     0,     5,     0,     5,     0,     5,     4,     0,     5,
+       0,     7
 };
 
 
@@ -1405,316 +1293,277 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-        case 2:
-#line 125 "compilador.y" /* yacc.c:1646  */
+        case 4:
+#line 41 "simulaMepa.y" /* yacc.c:1646  */
     { 
-                num_vars=0;
-                desl=0;
-                geraCodigo (NULL, "INPP",NULL,NULL,NULL); 
-             }
-#line 1416 "compilador.tab.c" /* yacc.c:1646  */
+         strcpy(rotuloAlvo,rotulo);  
+         strcpy(rotulo,"");
+       }
+#line 1303 "simulaMepa.tab.c" /* yacc.c:1646  */
     break;
 
-  case 3:
-#line 132 "compilador.y" /* yacc.c:1646  */
+  case 5:
+#line 46 "simulaMepa.y" /* yacc.c:1646  */
     {
-              geraCodigo (NULL, "PARA",NULL,NULL,NULL); 
-             }
-#line 1424 "compilador.tab.c" /* yacc.c:1646  */
+         strcpy(rotulo,"");
+       }
+#line 1311 "simulaMepa.tab.c" /* yacc.c:1646  */
     break;
 
-  case 4:
-#line 139 "compilador.y" /* yacc.c:1646  */
-    { 
-                free(param1);
-                free(param2);
-                free(param3);
-                param1 = (char *) malloc (4 * sizeof(char));
-                sprintf(param1, "%d", num_vars);
-                num_vars=0;
-                geraCodigo (NULL, "AMEM",param1,NULL,NULL); 
-              }
-#line 1438 "compilador.tab.c" /* yacc.c:1646  */
+  case 10:
+#line 64 "simulaMepa.y" /* yacc.c:1646  */
+    { insereInstr (rotuloAlvo, inpp, 0, 0, 0, 0, NULL); }
+#line 1317 "simulaMepa.tab.c" /* yacc.c:1646  */
     break;
 
-  case 7:
-#line 159 "compilador.y" /* yacc.c:1646  */
-    { }
-#line 1444 "compilador.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 8:
-#line 159 "compilador.y" /* yacc.c:1646  */
-    {
-                }
-#line 1451 "compilador.tab.c" /* yacc.c:1646  */
+  case 11:
+#line 65 "simulaMepa.y" /* yacc.c:1646  */
+    { insereInstr (rotuloAlvo, para, 0, 0, 0, 0, NULL); }
+#line 1323 "simulaMepa.tab.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 169 "compilador.y" /* yacc.c:1646  */
-    { }
-#line 1457 "compilador.tab.c" /* yacc.c:1646  */
+#line 66 "simulaMepa.y" /* yacc.c:1646  */
+    { insereInstr (rotuloAlvo, soma, 0, 0, 0, 0, NULL); }
+#line 1329 "simulaMepa.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 172 "compilador.y" /* yacc.c:1646  */
-    { /* AMEM */
-               
-              }
-#line 1465 "compilador.tab.c" /* yacc.c:1646  */
+#line 67 "simulaMepa.y" /* yacc.c:1646  */
+    { insereInstr (rotuloAlvo, subt, 0, 0, 0, 0, NULL); }
+#line 1335 "simulaMepa.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 14:
+#line 68 "simulaMepa.y" /* yacc.c:1646  */
+    { insereInstr (rotuloAlvo, mult, 0, 0, 0, 0, NULL); }
+#line 1341 "simulaMepa.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 15:
+#line 69 "simulaMepa.y" /* yacc.c:1646  */
+    { insereInstr (rotuloAlvo, divi, 0, 0, 0, 0, NULL); }
+#line 1347 "simulaMepa.tab.c" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 182 "compilador.y" /* yacc.c:1646  */
-    { /* insere Ãºltima vars na tabela de sÃ­mbolos */ 
-                item *auxItem = (item *) malloc (sizeof(item));
-                auxItem->itemAnt = tbs->topo_pilha;
-                auxItem->itemProx = NULL;
-                
-
-                auxItem->identificador = (char *) malloc (256 * sizeof(char));
-                auxItem->categoria = (char *) malloc (256 * sizeof(char));
-                strcpy(auxItem->identificador,token);
-                strcpy(auxItem->categoria,"Variavel Simples");
-                auxItem->nivel_lexico = 0;
-                auxItem->deslocamento = desl;
-                tbs->n_itens = tbs->n_itens++;
-                tbs->topo_pilha = auxItem;
-                num_vars++;
-                desl ++;
-              }
-#line 1487 "compilador.tab.c" /* yacc.c:1646  */
+#line 70 "simulaMepa.y" /* yacc.c:1646  */
+    { insereInstr (rotuloAlvo, invr, 0, 0, 0, 0, NULL); }
+#line 1353 "simulaMepa.tab.c" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 199 "compilador.y" /* yacc.c:1646  */
-    { /* insere vars na tabela de sÃ­mbolos */
-                item *auxItem = (item *) malloc (sizeof(item));
-                auxItem->itemAnt = tbs->topo_pilha;
-                auxItem->itemProx = NULL;
-                
+#line 71 "simulaMepa.y" /* yacc.c:1646  */
+    { insereInstr (rotuloAlvo, conj, 0, 0, 0, 0, NULL); }
+#line 1359 "simulaMepa.tab.c" /* yacc.c:1646  */
+    break;
 
-                auxItem->identificador = (char *) malloc (256 * sizeof(char));
-                auxItem->categoria = (char *) malloc (256 * sizeof(char));
-                strcpy(auxItem->identificador,token);
-                strcpy(auxItem->categoria,"Variavel Simples");
-                auxItem->nivel_lexico = 0;
-                auxItem->deslocamento = desl;
-                tbs->n_itens = tbs->n_itens++;
-                tbs->topo_pilha = auxItem;
-                num_vars++;
-                desl ++;
-              }
-#line 1509 "compilador.tab.c" /* yacc.c:1646  */
+  case 18:
+#line 72 "simulaMepa.y" /* yacc.c:1646  */
+    { insereInstr (rotuloAlvo, disj, 0, 0, 0, 0, NULL); }
+#line 1365 "simulaMepa.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 19:
+#line 73 "simulaMepa.y" /* yacc.c:1646  */
+    { insereInstr (rotuloAlvo, nega, 0, 0, 0, 0, NULL); }
+#line 1371 "simulaMepa.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 20:
+#line 74 "simulaMepa.y" /* yacc.c:1646  */
+    { insereInstr (rotuloAlvo, cmme, 0, 0, 0, 0, NULL); }
+#line 1377 "simulaMepa.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 21:
+#line 75 "simulaMepa.y" /* yacc.c:1646  */
+    { insereInstr (rotuloAlvo, cmma, 0, 0, 0, 0, NULL); }
+#line 1383 "simulaMepa.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 22:
+#line 76 "simulaMepa.y" /* yacc.c:1646  */
+    { insereInstr (rotuloAlvo, cmig, 0, 0, 0, 0, NULL); }
+#line 1389 "simulaMepa.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 23:
+#line 77 "simulaMepa.y" /* yacc.c:1646  */
+    { insereInstr (rotuloAlvo, cmdg, 0, 0, 0, 0, NULL); }
+#line 1395 "simulaMepa.tab.c" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 233 "compilador.y" /* yacc.c:1646  */
-    {
-            item *itema = procura_tbsimb(token);
-            if(itema!=NULL){
-              free(param1Aux);
-              free(param2Aux);
-              free(param3Aux);
-              param1Aux = (char *) malloc (4 * sizeof(char));
-              param2Aux = (char *) malloc (4 * sizeof(char));
-              sprintf(param1Aux, "%d", itema->nivel_lexico);
-              sprintf(param2Aux, "%d", itema->deslocamento);
-            }
-            //TODO: caso nÃ£o encontrar mostrar msg de erro.
-          }
-#line 1527 "compilador.tab.c" /* yacc.c:1646  */
+#line 78 "simulaMepa.y" /* yacc.c:1646  */
+    { insereInstr (rotuloAlvo, cmeg, 0, 0, 0, 0, NULL); }
+#line 1401 "simulaMepa.tab.c" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 245 "compilador.y" /* yacc.c:1646  */
-    {
-            geraCodigo (NULL, "ARMZ",param1Aux,param2Aux,NULL);
-          }
-#line 1535 "compilador.tab.c" /* yacc.c:1646  */
+#line 79 "simulaMepa.y" /* yacc.c:1646  */
+    { insereInstr (rotuloAlvo, cmag, 0, 0, 0, 0, NULL); }
+#line 1407 "simulaMepa.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 26:
+#line 80 "simulaMepa.y" /* yacc.c:1646  */
+    { insereInstr (rotuloAlvo, nada, 0, 0, 0, 0, NULL); }
+#line 1413 "simulaMepa.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 27:
+#line 81 "simulaMepa.y" /* yacc.c:1646  */
+    { insereInstr (rotuloAlvo, leit, 0, 0, 0, 0, NULL); }
+#line 1419 "simulaMepa.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 28:
+#line 82 "simulaMepa.y" /* yacc.c:1646  */
+    { insereInstr (rotuloAlvo, impr, 0, 0, 0, 0, NULL); }
+#line 1425 "simulaMepa.tab.c" /* yacc.c:1646  */
     break;
 
   case 29:
-#line 255 "compilador.y" /* yacc.c:1646  */
-    {
-              geraCodigo (NULL, "SOMA",NULL,NULL,NULL); 
-              printf ("+\n"); }
-#line 1543 "compilador.tab.c" /* yacc.c:1646  */
+#line 85 "simulaMepa.y" /* yacc.c:1646  */
+    {insereInstr (rotuloAlvo, crct, inteiro, 0, 0, 0, NULL); }
+#line 1431 "simulaMepa.tab.c" /* yacc.c:1646  */
     break;
 
   case 30:
-#line 258 "compilador.y" /* yacc.c:1646  */
-    {
-              geraCodigo (NULL, "SUBT",NULL,NULL,NULL); 
-              printf ("-"); }
-#line 1551 "compilador.tab.c" /* yacc.c:1646  */
+#line 86 "simulaMepa.y" /* yacc.c:1646  */
+    {insereInstr (rotuloAlvo, amem, inteiro, 0, 0, 0, NULL); }
+#line 1437 "simulaMepa.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 31:
+#line 87 "simulaMepa.y" /* yacc.c:1646  */
+    {insereInstr (rotuloAlvo, dmem, inteiro, 0, 0, 0, NULL); }
+#line 1443 "simulaMepa.tab.c" /* yacc.c:1646  */
     break;
 
   case 32:
-#line 265 "compilador.y" /* yacc.c:1646  */
-    {
-              geraCodigo (NULL, "MULT",NULL,NULL,NULL); 
-              printf ("*"); }
-#line 1559 "compilador.tab.c" /* yacc.c:1646  */
+#line 88 "simulaMepa.y" /* yacc.c:1646  */
+    {insereInstr (rotuloAlvo, enpr, inteiro, 0, 0, 0, NULL); }
+#line 1449 "simulaMepa.tab.c" /* yacc.c:1646  */
     break;
 
   case 33:
-#line 268 "compilador.y" /* yacc.c:1646  */
-    {
-              geraCodigo (NULL, "DIVI",NULL,NULL,NULL); 
-              printf ("/"); }
-#line 1567 "compilador.tab.c" /* yacc.c:1646  */
+#line 89 "simulaMepa.y" /* yacc.c:1646  */
+    {insereInstr (rotuloAlvo, dsvs, 0, 0, 0, 0, rotulo); }
+#line 1455 "simulaMepa.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 34:
+#line 90 "simulaMepa.y" /* yacc.c:1646  */
+    {insereInstr (rotuloAlvo, dsvf, 0, 0, 0, 0, rotulo); }
+#line 1461 "simulaMepa.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 35:
+#line 93 "simulaMepa.y" /* yacc.c:1646  */
+    { param1_int = inteiro;}
+#line 1467 "simulaMepa.tab.c" /* yacc.c:1646  */
     break;
 
   case 36:
-#line 275 "compilador.y" /* yacc.c:1646  */
-    {
-                gera_comando_crvl(token);
-              }
-#line 1575 "compilador.tab.c" /* yacc.c:1646  */
+#line 94 "simulaMepa.y" /* yacc.c:1646  */
+    {insereInstr (rotuloAlvo, crvl, param1_int, inteiro, 0, 0, NULL); }
+#line 1473 "simulaMepa.tab.c" /* yacc.c:1646  */
     break;
 
   case 37:
-#line 278 "compilador.y" /* yacc.c:1646  */
-    {
-                geraCodigo (NULL, "CRCT",token,NULL,NULL); 
-              }
-#line 1583 "compilador.tab.c" /* yacc.c:1646  */
+#line 95 "simulaMepa.y" /* yacc.c:1646  */
+    { param1_int = inteiro;}
+#line 1479 "simulaMepa.tab.c" /* yacc.c:1646  */
     break;
 
   case 38:
-#line 283 "compilador.y" /* yacc.c:1646  */
-    {
-                  item *item = procura_tbsimb(token);
-                  if(item!=NULL){
-                    free(param1);
-                    free(param2);
-                    free(param3);
-                    param1 = (char *) malloc (4 * sizeof(char));
-                    param2 = (char *) malloc (4 * sizeof(char));
-                    sprintf(param1, "%d", item->nivel_lexico);
-                    sprintf(param2, "%d", item->deslocamento);
-                    geraCodigo (NULL, "CRVL",param1,param2,NULL);
-                    geraCodigo (NULL, "IMPR",NULL,NULL,NULL);
-                  } 
-                }
-#line 1602 "compilador.tab.c" /* yacc.c:1646  */
+#line 96 "simulaMepa.y" /* yacc.c:1646  */
+    {insereInstr (rotuloAlvo, armz, param1_int, inteiro, 0, 0, NULL); }
+#line 1485 "simulaMepa.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 39:
+#line 97 "simulaMepa.y" /* yacc.c:1646  */
+    { param1_int = inteiro;}
+#line 1491 "simulaMepa.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 40:
+#line 98 "simulaMepa.y" /* yacc.c:1646  */
+    {insereInstr (rotuloAlvo, crvi, param1_int, inteiro, 0, 0, NULL); }
+#line 1497 "simulaMepa.tab.c" /* yacc.c:1646  */
     break;
 
   case 41:
-#line 301 "compilador.y" /* yacc.c:1646  */
-    { 
-               geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
-                lr->fim=lr->fim->itemAnt;
-            }
-#line 1611 "compilador.tab.c" /* yacc.c:1646  */
+#line 99 "simulaMepa.y" /* yacc.c:1646  */
+    { param1_int = inteiro;}
+#line 1503 "simulaMepa.tab.c" /* yacc.c:1646  */
     break;
 
   case 42:
-#line 307 "compilador.y" /* yacc.c:1646  */
-    {
-                adiciona_item_lista();
-                geraCodigo (NULL, "DSVF",lr->fim->identificador,NULL,NULL);
-              }
-#line 1620 "compilador.tab.c" /* yacc.c:1646  */
+#line 100 "simulaMepa.y" /* yacc.c:1646  */
+    {insereInstr (rotuloAlvo, armi, param1_int, inteiro, 0, 0, NULL); }
+#line 1509 "simulaMepa.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 43:
+#line 101 "simulaMepa.y" /* yacc.c:1646  */
+    { param1_int = inteiro;}
+#line 1515 "simulaMepa.tab.c" /* yacc.c:1646  */
     break;
 
   case 44:
-#line 314 "compilador.y" /* yacc.c:1646  */
-    {
-                char rtn[4];
-                sprintf(rtn, "%d", rotNumber);
-                char rot[]="R";
-                strcat(rot, rtn);
-                char *strRot = (char *) malloc (256 * sizeof(char));
-                strcpy(strRot,rot);
-                
-                geraCodigo (NULL, "DSVS",strRot,NULL,NULL);
-                geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
-                if(lr->fim->itemAnt != NULL)
-                  lr->fim=lr->fim->itemAnt;
-                adiciona_item_lista();
-              }
-#line 1639 "compilador.tab.c" /* yacc.c:1646  */
+#line 102 "simulaMepa.y" /* yacc.c:1646  */
+    {insereInstr (rotuloAlvo, cren, param1_int, inteiro, 0, 0, NULL); }
+#line 1521 "simulaMepa.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 45:
+#line 103 "simulaMepa.y" /* yacc.c:1646  */
+    { param1_int = inteiro;}
+#line 1527 "simulaMepa.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 46:
+#line 104 "simulaMepa.y" /* yacc.c:1646  */
+    {insereInstr (rotuloAlvo, enrt, param1_int, inteiro, 0, 0, NULL); }
+#line 1533 "simulaMepa.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 47:
+#line 108 "simulaMepa.y" /* yacc.c:1646  */
+    {insereInstr (rotuloAlvo, chpr, inteiro, 0, 0, 0, rotulo); }
+#line 1539 "simulaMepa.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 48:
+#line 109 "simulaMepa.y" /* yacc.c:1646  */
+    { param1_int = inteiro;}
+#line 1545 "simulaMepa.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 49:
+#line 110 "simulaMepa.y" /* yacc.c:1646  */
+    {insereInstr (rotuloAlvo, rtpr, param1_int, inteiro, 0, 0, NULL); }
+#line 1551 "simulaMepa.tab.c" /* yacc.c:1646  */
     break;
 
   case 50:
-#line 336 "compilador.y" /* yacc.c:1646  */
-    {
-                adiciona_item_lista();
-                geraCodigo (lr->fim->identificador, "NADA",NULL,NULL,NULL);
-              }
-#line 1648 "compilador.tab.c" /* yacc.c:1646  */
+#line 112 "simulaMepa.y" /* yacc.c:1646  */
+    { param1_int = inteiro;}
+#line 1557 "simulaMepa.tab.c" /* yacc.c:1646  */
     break;
 
   case 51:
-#line 340 "compilador.y" /* yacc.c:1646  */
-    {
-                adiciona_item_lista();
-                geraCodigo (NULL, "DSVF",lr->fim->identificador,NULL,NULL);
-              }
-#line 1657 "compilador.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 52:
-#line 343 "compilador.y" /* yacc.c:1646  */
-    { geraCodigo (NULL, "DSVS",lr->fim->itemAnt->identificador,NULL,NULL);
-                              remove_item_lista(lr->fim->itemAnt->identificador);
-                              geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
-                              lr->fim=lr->fim->itemAnt;}
-#line 1666 "compilador.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 54:
-#line 350 "compilador.y" /* yacc.c:1646  */
-    {geraCodigo (NULL, "CMIG",NULL,NULL,NULL);}
-#line 1672 "compilador.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 55:
-#line 351 "compilador.y" /* yacc.c:1646  */
-    {geraCodigo (NULL, "CMDG",NULL,NULL,NULL);}
-#line 1678 "compilador.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 57:
-#line 354 "compilador.y" /* yacc.c:1646  */
-    {geraCodigo (NULL, "CMMA",NULL,NULL,NULL);}
-#line 1684 "compilador.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 58:
-#line 355 "compilador.y" /* yacc.c:1646  */
-    {geraCodigo (NULL, "CMME",NULL,NULL,NULL);}
-#line 1690 "compilador.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 59:
-#line 356 "compilador.y" /* yacc.c:1646  */
-    {geraCodigo (NULL, "CMAG",NULL,NULL,NULL);}
-#line 1696 "compilador.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 60:
-#line 357 "compilador.y" /* yacc.c:1646  */
-    {geraCodigo (NULL, "CMEG",NULL,NULL,NULL);}
-#line 1702 "compilador.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 62:
-#line 360 "compilador.y" /* yacc.c:1646  */
-    {gera_comando_crvl(token);}
-#line 1708 "compilador.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 63:
-#line 361 "compilador.y" /* yacc.c:1646  */
-    {geraCodigo (NULL, "CRCT",token,NULL,NULL);}
-#line 1714 "compilador.tab.c" /* yacc.c:1646  */
+#line 113 "simulaMepa.y" /* yacc.c:1646  */
+    {insereInstr (rotuloAlvo, dsvr, param1_int, inteiro, 0, 0, rotulo); }
+#line 1563 "simulaMepa.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1718 "compilador.tab.c" /* yacc.c:1646  */
+#line 1567 "simulaMepa.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1942,44 +1791,106 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 363 "compilador.y" /* yacc.c:1906  */
+#line 115 "simulaMepa.y" /* yacc.c:1906  */
+
+
+int yyerror (char *s) {
+    fprintf (stderr, "%s\n", s);
+}
+
+char* msg_help = "uso: simulaMepa [-d -p -h -iArqIn -oArqOut]\n"
+                 "Onde:\n"
+                 "    -d => debug\n"
+                 "    -p => pretty printer\n"
+                 "    -h => help\n"
+//               "    -oARQ => arquivo de saída\n"
+                 "    -iARQ => arquivo de entrada (default=MEPA)\n";
+parser_opcoes(int argc, char **argv) 
+{
+  int c;
+
+/* -------------------------------------------------------------------
+ *   -d => debug
+ *   -p => pretty printer
+ *   -iARQ => arquivo de entrada
+ *   -oARQ => arquivo de saída
+ *   -h => help
+ * ------------------------------------------------------------------- */
+
+  while ((c = getopt (argc, argv, "dphi:")) != -1)
+    switch (c)
+      {
+      case 'd':
+        arg_debug = 1;
+        break;
+      case 'p':
+        arg_impr = 1;
+        break;
+        /* case 'o': */
+        /* strcpy(arq_out, optarg); */
+        /* break; */
+      case 'i':
+        strcpy(arq_in, optarg);
+        break;
+      case 'h':
+        printf("%s", msg_help);
+        exit(0);
+        break;
+      case '?':
+        if (optopt == 'i')
+          fprintf (stderr, "Option -%i requer nome do arquivo de saida\n", 
+                   optopt);
+        else if (isprint (optopt))
+          fprintf (stderr, "Opcao `-%c' desconecida\n", optopt);
+        else
+          fprintf (stderr,
+                   "o que voce quer dizer com `%c' ?????\n",
+                   optopt);
+        exit (0);
+      default:
+        abort ();
+      }
+
+  // Se não disse o nome do arquivo de entrada, 
+  // então a entrada é o arquivo "MEPA"
+  if (strlen(arq_in)==0)
+    strcpy (arq_in, "MEPA");
+}
+
 
 
 main (int argc, char** argv) {
    FILE* fp;
    extern FILE* yyin;
 
-   if (argc<2 || argc>2) {
-         printf("usage compilador <arq>a %d\n", argc);
-         return(-1);
-      }
+   parser_opcoes(argc, argv);
 
-   fp=fopen (argv[1], "r");
+   printf("Arquivo de entrada: %s", arq_in);
+   fp=fopen (arq_in, "r");
    if (fp == NULL) {
-      printf("usage compilador <arq>b\n");
+     printf("Arquivo %s não encontrado\n", arq_in);
       return(-1);
    }
+  yyin=fp;
 
+  // Iniciações de variáveis globais
+  iniciaTabInstr();
+  strcpy(rotulo,"");
 
-/* -------------------------------------------------------------------
- *  Inicia a Tabela de SÃ­mbolos
- * ------------------------------------------------------------------- */
-   tbs = (tabela_simbolos *) malloc (sizeof(tabela_simbolos));
-   lr = (lista_rotulos *) malloc (sizeof(lista_rotulos));
-   tbs->topo_pilha = NULL;
-   lr->inicio = NULL;
+  // faz a análise sintática e gera os comandos no formato indicado
+  // pela "instStruct".
+  yyparse();
 
-   tbs->fim_pilha = NULL;
-   lr->fim = NULL;
+  // Coloca o número da linha no comandos com rótulos, verifica por
+  // duplicidades, etc.
+  ajustaRotulos();
 
-   tbs->itens = NULL;
+  // Imprime (pretty printer) do código MEPA.
+  if (arg_impr)
+    imprimeProg();
 
-   tbs->n_itens = 0;
-   lr->n_rotulos = 0;
+  // Finalmente interpreta os comandos em "instStruct"
+  interpretaMEPA();
 
-   yyin=fp;
-   yyparse();
-
-   return 0;
-}
-
+  return 0;
+ }
