@@ -14,7 +14,15 @@
 int num_vars;
 int desl;
 typedef struct itemLista itemLista;
+typedef struct nivelLexicoItem itemLexico;
 
+struct nivelLexicoItem
+{
+  int nivel;
+  char *num_vars_alocados;
+  itemLexico *itemAnt;
+  itemLexico *itemProx;
+};
 
 struct itemLista
 {
@@ -30,10 +38,16 @@ typedef struct lista_rotulos
   itemLista *inicio;
 } lista_rotulos;
 
-
+typedef struct tabela_nivel_lexico
+{
+  int nivel_lexico;
+  itemLexico *fim;
+  itemLexico *inicio;
+} lista_lexica;
 
 tabela_simbolos *tbs;
 lista_rotulos *lr;
+lista_lexica *ll;
 char *param1;
 char *param2;
 char *param3;
@@ -43,6 +57,7 @@ char *param3Aux;
 char *ident;
 int desl;
 int rotNumber;
+int nivel;
 
 item * procura_tbsimb(char * token){
   item *itemAtual = tbs->topo_pilha;
@@ -118,16 +133,32 @@ void remove_item_lista(char *token){
         lr->inicio = itemAtual->itemProx;
       }
       if(itemAtual->itemProx!=NULL){
-        printf("Entrei Aqui\n");
         itemAtual->itemProx->itemAnt = itemAtual->itemAnt;
-
       }
       else{
-        printf("Entrei Acola\n");
         lr->fim = itemAtual->itemAnt;
       }
     }
     itemAtual = itemAtual->itemAnt;
+  }
+}
+
+void adiciona_item_lista_lexica(char *num_vars){
+  itemLexico *auxItem = (itemLexico *) malloc (sizeof(itemLexico));
+
+  auxItem->nivel = ll->nivel_lexico;
+
+  auxItem->num_vars_alocados = (char *) malloc (256 * sizeof(char));
+  strcpy(auxItem->num_vars_alocados,num_vars);
+  
+  if(ll->inicio == NULL){
+    ll->inicio = auxItem; 
+    ll->fim = auxItem;
+  }
+  else{
+    ll->fim->itemProx = auxItem;
+    auxItem->itemAnt = ll->fim;
+    ll->fim = auxItem;
   }
 }
 
@@ -149,11 +180,13 @@ void remove_item_lista(char *token){
 programa    :{ 
                 num_vars=0;
                 desl=0;
+                nivel=0;
                 geraCodigo (NULL, "INPP",NULL,NULL,NULL); 
              }
              PROGRAM IDENT 
              ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
              bloco PONTO {
+              geraCodigo (NULL, "DMEM", ll->inicio->num_vars_alocados,NULL,NULL);
               geraCodigo (NULL, "PARA",NULL,NULL,NULL); 
              }
 ;
@@ -166,13 +199,16 @@ bloco       :
                 free(param3);
                 param1 = (char *) malloc (4 * sizeof(char));
                 sprintf(param1, "%d", num_vars);
+                adiciona_item_lista_lexica(param1);
                 num_vars=0;
                 geraCodigo (NULL, "AMEM",param1,NULL,NULL); 
               }
-
+//              proc_com
               comando_composto 
               ;
 
+//proc_com:  PROCEDURE 
+//           IDENT bloco PONTO_E_VIRGULA comando_composto| comando_composto
 
 
 
@@ -190,7 +226,7 @@ declara_vars:
               declara_var 
 ;
 
-declara_var : { } 
+declara_var :  
               lista_id_var DOIS_PONTOS 
               tipo 
               { /* AMEM */
@@ -213,7 +249,7 @@ lista_id_var: lista_id_var VIRGULA IDENT
                 auxItem->categoria = (char *) malloc (256 * sizeof(char));
                 strcpy(auxItem->identificador,token);
                 strcpy(auxItem->categoria,"Variavel Simples");
-                auxItem->nivel_lexico = 0;
+                auxItem->nivel_lexico = nivel;
                 auxItem->deslocamento = desl;
                 tbs->n_itens = tbs->n_itens++;
                 tbs->topo_pilha = auxItem;
@@ -230,7 +266,7 @@ lista_id_var: lista_id_var VIRGULA IDENT
                 auxItem->categoria = (char *) malloc (256 * sizeof(char));
                 strcpy(auxItem->identificador,token);
                 strcpy(auxItem->categoria,"Variavel Simples");
-                auxItem->nivel_lexico = 0;
+                auxItem->nivel_lexico = nivel;
                 auxItem->deslocamento = desl;
                 tbs->n_itens = tbs->n_itens++;
                 tbs->topo_pilha = auxItem;
@@ -408,6 +444,7 @@ main (int argc, char** argv) {
  * ------------------------------------------------------------------- */
    tbs = (tabela_simbolos *) malloc (sizeof(tabela_simbolos));
    lr = (lista_rotulos *) malloc (sizeof(lista_rotulos));
+   ll = (lista_lexica *) malloc (sizeof(lista_lexica));
    tbs->topo_pilha = NULL;
    lr->inicio = NULL;
 
@@ -418,6 +455,10 @@ main (int argc, char** argv) {
 
    tbs->n_itens = 0;
    lr->n_rotulos = 0;
+
+   ll->inicio = NULL;
+   ll->fim = NULL;
+   ll->nivel_lexico = 0;
 
    yyin=fp;
    yyparse();

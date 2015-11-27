@@ -1,8 +1,7 @@
 program exemplo75 (input, output);
 var m,n :  integer;
     l,s,k :  integer;
-    procedure p;
-    	write(l);
+    
 begin
 	m := 0;
 	l := 0;
