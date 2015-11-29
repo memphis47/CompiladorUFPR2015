@@ -5,13 +5,13 @@ var c: integer;
 begin
     c := a + b
 end;
-procedure v(x,y: integer; z: integer);
-var d: integer;
+procedure v(x,y: integer; var z: integer);
+var do: integer;
 begin
     (* codigo do procedure v *)
 end;
 begin
     a := 5;
-    b := a div 2;
-    p
+    b := a * 2;
+    p;
 end.
