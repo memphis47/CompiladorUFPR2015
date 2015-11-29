@@ -147,6 +147,7 @@ void adiciona_item_lista_lexica(char *num_vars){
   itemLexico *auxItem = (itemLexico *) malloc (sizeof(itemLexico));
 
   auxItem->nivel = ll->nivel_lexico;
+  // Em algum momento incrementa o nivel_lexico? o.0
 
   auxItem->num_vars_alocados = (char *) malloc (256 * sizeof(char));
   strcpy(auxItem->num_vars_alocados,num_vars);
@@ -186,7 +187,7 @@ programa    :{
              PROGRAM IDENT 
              ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
              bloco PONTO {
-              geraCodigo (NULL, "DMEM", ll->inicio->num_vars_alocados,NULL,NULL);
+              // O DMEM tem que ser feito no fim do bloco neh? coloquei comentário la
               geraCodigo (NULL, "PARA",NULL,NULL,NULL); 
              }
 ;
@@ -205,6 +206,12 @@ bloco       :
               }
 //              proc_com
               comando_composto 
+
+              {
+                // printf(">>>>>>%s\n<<<<<<", );
+                // geraCodigo (NULL, "DMEM", ll->~nivel lexico atual~->num_vars_alocados,NULL,NULL);
+                // geraCodigo (NULL, "DMEM", ll->inicio->num_vars_alocados,NULL,NULL);
+              }
               ;
 
 //proc_com:  PROCEDURE 
