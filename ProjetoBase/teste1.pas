@@ -1,6 +1,9 @@
 program exemplo75 (input, output);
 var m,n :  integer;
-    l,s,k :  integer;
+    l,s,k :  boolean;
+    f,a,v :  integer;
+    c,aba,mama :  integer;
+    mia,oh,mama :  boolean;
     
 begin
 	m := 0;

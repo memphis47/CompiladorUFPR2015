@@ -42,6 +42,13 @@ char *ident;
 int desl;
 int rotNumber;
 int nivel;
+char *compItem = NULL;
+
+
+int yyerror (char *msg) {
+  printf("%s", msg);
+  exit(1);
+}
 
 item * procura_tbsimb(char * token){
   item *itemAtual = tbs->topo_pilha;
@@ -87,18 +94,6 @@ void adiciona_item_lista(){
     lr->fim = auxItem;
   }
   else{
-    if(lr != NULL){
-      if(lr->fim == NULL)
-        printf("NULL\n");
-      else{
-        printf("Não esta null\n");
-      }
-      if(lr->inicio == NULL){
-        printf("Tbm NULL");
-      }
-      else
-        printf("%s\n",lr->inicio->identificador);
-    }
     lr->fim->itemProx = auxItem;
     auxItem->itemAnt = lr->fim;
     lr->fim = auxItem;
@@ -140,6 +135,54 @@ int remove_ts(){
   return count;
 }
 
+adiciona_ts(){
+  item *auxItem = (item *) malloc (sizeof(item));
+  auxItem->itemAnt = tbs->topo_pilha;
+  auxItem->itemProx = NULL;
+  
+
+  auxItem->identificador = (char *) malloc (256 * sizeof(char));
+  
+  strcpy(auxItem->identificador,token);
+  auxItem->categoria = VS;
+  auxItem->nivel_lexico = nivel;
+  auxItem->deslocamento = desl;
+  tbs->n_itens = tbs->n_itens++;
+  tbs->topo_pilha = auxItem;
+  num_vars++;
+  desl ++;
+}
+
+adiciona_tipo_ts(int nvars){
+  item *itemAtual = tbs->topo_pilha;
+  int i=0;
+  while(itemAtual!= NULL && itemAtual->categoria == VS
+        && itemAtual->tipo==NULL){
+
+    itemAtual->tipo = (char *) malloc (256 * sizeof(char));
+    strcpy(itemAtual->tipo, token);
+    itemAtual = itemAtual->itemAnt;
+    i++;
+  }
+}
+
+/* yyerror()
+  YYERROR
+  */
+
+procura_compara(){
+  item *itemAtual=procura_tbsimb(token);
+  if(compItem!=NULL){
+    if(strcmp(compItem,itemAtual->tipo)!=0){
+      yyerror("\n\nOperação não permitida, valores com tipos diferentes\n\n");
+    }
+  }
+  else{
+    compItem = (char *) malloc (256 * sizeof(char));
+    strcpy(compItem,itemAtual->tipo);
+  }
+}
+
 %}
 
 %token PROGRAM ABRE_PARENTESES FECHA_PARENTESES WRITE
@@ -163,13 +206,7 @@ programa    :{
              }
              PROGRAM IDENT 
              ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
-             bloco {
-              num_vars=remove_ts();
-              printf("%d\n",num_vars );
-              param1 = (char *) malloc (4 * sizeof(char));
-              sprintf(param1, "%d", num_vars);
-              geraCodigo (NULL, "DMEM",param1,NULL,NULL);
-             } PONTO {
+             bloco PONTO {
               // O DMEM tem que ser feito no fim do bloco neh? coloquei comentário la
               geraCodigo (NULL, "PARA",NULL,NULL,NULL); 
              }
@@ -190,9 +227,11 @@ bloco       :
               comando_composto 
 
               {
-                // printf(">>>>>>%s\n<<<<<<", );
-                // geraCodigo (NULL, "DMEM", ll->~nivel lexico atual~->num_vars_alocados,NULL,NULL);
-                // geraCodigo (NULL, "DMEM", ll->inicio->num_vars_alocados,NULL,NULL);
+                num_vars=remove_ts();
+                printf("%d\n",num_vars );
+                param1 = (char *) malloc (4 * sizeof(char));
+                sprintf(param1, "%d", num_vars);
+                geraCodigo (NULL, "DMEM",param1,NULL,NULL);
               }
               ;
 
@@ -218,7 +257,8 @@ declara_vars:
 declara_var :  
               lista_id_var DOIS_PONTOS 
               tipo 
-              { /* AMEM */
+              { 
+                adiciona_tipo_ts(num_vars);
                
               }
               PONTO_E_VIRGULA
@@ -229,38 +269,10 @@ tipo        : IDENT
 
 lista_id_var: lista_id_var VIRGULA IDENT 
               { /* insere última vars na tabela de símbolos */ 
-                item *auxItem = (item *) malloc (sizeof(item));
-                auxItem->itemAnt = tbs->topo_pilha;
-                auxItem->itemProx = NULL;
-                
-
-                auxItem->identificador = (char *) malloc (256 * sizeof(char));
-                
-                strcpy(auxItem->identificador,token);
-                auxItem->categoria = VS;
-                auxItem->nivel_lexico = nivel;
-                auxItem->deslocamento = desl;
-                tbs->n_itens = tbs->n_itens++;
-                tbs->topo_pilha = auxItem;
-                num_vars++;
-                desl ++;
+               adiciona_ts();
               }
             | IDENT { /* insere vars na tabela de símbolos */
-                item *auxItem = (item *) malloc (sizeof(item));
-                auxItem->itemAnt = tbs->topo_pilha;
-                auxItem->itemProx = NULL;
-                
-
-                auxItem->identificador = (char *) malloc (256 * sizeof(char));
-                
-                strcpy(auxItem->identificador,token);
-                auxItem->categoria = VS;
-                auxItem->nivel_lexico = nivel;
-                auxItem->deslocamento = desl;
-                tbs->n_itens = tbs->n_itens++;
-                tbs->topo_pilha = auxItem;
-                num_vars++;
-                desl ++;
+                adiciona_ts();
               }
 ;
 
@@ -291,7 +303,11 @@ comando:
               sprintf(param2Aux, "%d", itema->deslocamento);
             }
             //TODO: caso não encontrar mostrar msg de erro.
-          } ATRIBUICAO expressao_simples PONTO_E_VIRGULA{
+          } ATRIBUICAO expressao_simples { 
+            compItem = NULL;
+            free(compItem);
+              // reseta comparador ao terminar expressao.
+          } PONTO_E_VIRGULA{
             geraCodigo (NULL, "ARMZ",param1Aux,param2Aux,NULL);
           }
           | comando_write
@@ -322,6 +338,7 @@ termo      : //ABRE_PARENTESES expressao_simples FECHA_PARENTESES|
 
 fator      :  ABRE_PARENTESES expressao_simples FECHA_PARENTESES|
               IDENT {
+                procura_compara();
                 gera_comando_crvl(token);
               }
               |NUMERO{

@@ -1,5 +1,5 @@
      INPP
-     AMEM 5
+     AMEM 14
      CRCT 0
      ARMZ 0,0
      CRCT 0
@@ -7,65 +7,3 @@
      CRCT 1
      ARMZ 0,4
      CRVL 0,0
-     CRVL 0,4
-     SOMA
-     CRVL 0,2
-     SOMA
-     CRCT 4
-     SOMA
-     ARMZ 0,0
-     CRVL 0,2
-     IMPR
-     CRVL 0,0
-     CRVL 0,4
-     CMME
-     DSVF R0
-     CRVL 0,4
-     CRCT 0
-     CMDG
-     DSVF R1
-     CRVL 0,4
-     IMPR
-     DSVS R2
-R1: NADA 
-     CRVL 0,0
-     IMPR
-R2: NADA 
-     DSVS R3
-R0: NADA 
-     CRVL 0,4
-     CRCT 0
-     CMIG
-     DSVF R4
-     CRVL 0,4
-     IMPR
-     DSVS R5
-R4: NADA 
-     CRVL 0,0
-     IMPR
-R5: NADA 
-R3: NADA 
-R6: NADA 
-     CRVL 0,0
-     CRVL 0,4
-     CMMA
-     DSVF R7
-     CRVL 0,4
-     CRCT 0
-     CMIG
-     DSVF R8
-     CRVL 0,4
-     IMPR
-     DSVS R9
-R8: NADA 
-     CRVL 0,0
-     IMPR
-R9: NADA 
-     CRVL 0,4
-     CRCT 1
-     SOMA
-     ARMZ 0,4
-     DSVS R6
-R7: NADA 
-     DMEM 5
-     PARA
