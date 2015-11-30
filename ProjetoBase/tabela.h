@@ -3,7 +3,7 @@ typedef struct item item;
 struct item
 {
   char *identificador;
-  char *categoria;
+  categorias categoria;
   int  nivel_lexico;
   int  deslocamento;
   char *passagem;

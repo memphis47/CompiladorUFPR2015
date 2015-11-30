@@ -14,15 +14,6 @@
 int num_vars;
 int desl;
 typedef struct itemLista itemLista;
-typedef struct nivelLexicoItem itemLexico;
-
-struct nivelLexicoItem
-{
-  int nivel;
-  char *num_vars_alocados;
-  itemLexico *itemAnt;
-  itemLexico *itemProx;
-};
 
 struct itemLista
 {
@@ -38,16 +29,9 @@ typedef struct lista_rotulos
   itemLista *inicio;
 } lista_rotulos;
 
-typedef struct tabela_nivel_lexico
-{
-  int nivel_lexico;
-  itemLexico *fim;
-  itemLexico *inicio;
-} lista_lexica;
 
 tabela_simbolos *tbs;
 lista_rotulos *lr;
-lista_lexica *ll;
 char *param1;
 char *param2;
 char *param3;
@@ -143,24 +127,17 @@ void remove_item_lista(char *token){
   }
 }
 
-void adiciona_item_lista_lexica(char *num_vars){
-  itemLexico *auxItem = (itemLexico *) malloc (sizeof(itemLexico));
-
-  auxItem->nivel = ll->nivel_lexico;
-  // Em algum momento incrementa o nivel_lexico? o.0
-
-  auxItem->num_vars_alocados = (char *) malloc (256 * sizeof(char));
-  strcpy(auxItem->num_vars_alocados,num_vars);
-  
-  if(ll->inicio == NULL){
-    ll->inicio = auxItem; 
-    ll->fim = auxItem;
+int remove_ts(){
+ item *itemAtual = tbs->topo_pilha;
+ int count = 0;
+  while(itemAtual!= NULL && itemAtual->categoria == VS){
+    item *aux = itemAtual;
+    itemAtual = itemAtual->itemAnt;
+    free(aux);
+    count++;
   }
-  else{
-    ll->fim->itemProx = auxItem;
-    auxItem->itemAnt = ll->fim;
-    ll->fim = auxItem;
-  }
+  tbs->topo_pilha = itemAtual;
+  return count;
 }
 
 %}
@@ -186,7 +163,13 @@ programa    :{
              }
              PROGRAM IDENT 
              ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
-             bloco PONTO {
+             bloco {
+              num_vars=remove_ts();
+              printf("%d\n",num_vars );
+              param1 = (char *) malloc (4 * sizeof(char));
+              sprintf(param1, "%d", num_vars);
+              geraCodigo (NULL, "DMEM",param1,NULL,NULL);
+             } PONTO {
               // O DMEM tem que ser feito no fim do bloco neh? coloquei comentário la
               geraCodigo (NULL, "PARA",NULL,NULL,NULL); 
              }
@@ -200,7 +183,6 @@ bloco       :
                 free(param3);
                 param1 = (char *) malloc (4 * sizeof(char));
                 sprintf(param1, "%d", num_vars);
-                adiciona_item_lista_lexica(param1);
                 num_vars=0;
                 geraCodigo (NULL, "AMEM",param1,NULL,NULL); 
               }
@@ -253,9 +235,9 @@ lista_id_var: lista_id_var VIRGULA IDENT
                 
 
                 auxItem->identificador = (char *) malloc (256 * sizeof(char));
-                auxItem->categoria = (char *) malloc (256 * sizeof(char));
+                
                 strcpy(auxItem->identificador,token);
-                strcpy(auxItem->categoria,"Variavel Simples");
+                auxItem->categoria = VS;
                 auxItem->nivel_lexico = nivel;
                 auxItem->deslocamento = desl;
                 tbs->n_itens = tbs->n_itens++;
@@ -270,9 +252,9 @@ lista_id_var: lista_id_var VIRGULA IDENT
                 
 
                 auxItem->identificador = (char *) malloc (256 * sizeof(char));
-                auxItem->categoria = (char *) malloc (256 * sizeof(char));
+                
                 strcpy(auxItem->identificador,token);
-                strcpy(auxItem->categoria,"Variavel Simples");
+                auxItem->categoria = VS;
                 auxItem->nivel_lexico = nivel;
                 auxItem->deslocamento = desl;
                 tbs->n_itens = tbs->n_itens++;
@@ -451,7 +433,6 @@ main (int argc, char** argv) {
  * ------------------------------------------------------------------- */
    tbs = (tabela_simbolos *) malloc (sizeof(tabela_simbolos));
    lr = (lista_rotulos *) malloc (sizeof(lista_rotulos));
-   ll = (lista_lexica *) malloc (sizeof(lista_lexica));
    tbs->topo_pilha = NULL;
    lr->inicio = NULL;
 
@@ -462,10 +443,6 @@ main (int argc, char** argv) {
 
    tbs->n_itens = 0;
    lr->n_rotulos = 0;
-
-   ll->inicio = NULL;
-   ll->fim = NULL;
-   ll->nivel_lexico = 0;
 
    yyin=fp;
    yyparse();
