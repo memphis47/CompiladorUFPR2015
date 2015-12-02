@@ -22,17 +22,18 @@ typedef enum simbolos {
   simb_if, simb_then, simb_else,
   simb_maior, simb_maior_igual, simb_menor,
   simb_menor_igual, simb_igual, simb_diferente,
-  simb_while, simb_do
+  simb_while, simb_do,
+  simb_procedure
 
 } simbolos;
 
 typedef enum categorias {
-  VS, // Variavel Simples
-  PF, // Parametro formal
-  FUN, // Funcao
-  PROC, // Procedure
-  PROG, // Program
-  ROT, // Rotulo
+  VS, // Variavel Simples 0
+  PF, // Parametro formal 1
+  FUN, // Funcao 2
+  PROC, // Procedure 3
+  PROG, // Program 4
+  ROT, // Rotulo 5
 } categorias;
 
 typedef enum tipo_parametro {

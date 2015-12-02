@@ -95,6 +95,12 @@ do {
      return DO;  
 }
 
+procedure { simbolo  = simb_procedure;  
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME("procedure ");
+          return PROCEDURE;
+}
+
 
 \; { simbolo = simb_ponto_e_virgula;  
           strncpy (token, yytext, TAM_TOKEN);

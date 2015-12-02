@@ -42,7 +42,9 @@ char *ident;
 int desl;
 int rotNumber;
 int nivel;
+int nivel_lexico_atual;
 char *compItem = NULL;
+char* rots;
 
 
 int yyerror (char *msg) {
@@ -50,11 +52,15 @@ int yyerror (char *msg) {
   exit(1);
 }
 
-item * procura_tbsimb(char * token){
+item * procura_tbsimb(char * token, categorias cat){
   item *itemAtual = tbs->topo_pilha;
+  printf("%s\n", token);
   while(itemAtual != NULL){
-    if(strcmp (token, itemAtual->identificador) == 0)
+    printf("%d\n", itemAtual->categoria);
+    if(strcmp (token, itemAtual->identificador) == 0 && itemAtual->categoria == cat){
+      printf("SAPOIAIA\n");
       return itemAtual;
+    }
     itemAtual = itemAtual->itemAnt;
   }
   return NULL;
@@ -62,7 +68,7 @@ item * procura_tbsimb(char * token){
 
 
 void gera_comando_crvl(char * token){
-  item *item = procura_tbsimb(token);
+  item *item = procura_tbsimb(token,VS);
   if(item!=NULL){
     free(param1);
     free(param2);
@@ -123,9 +129,9 @@ void remove_item_lista(char *token){
 }
 
 int remove_ts(){
- item *itemAtual = tbs->topo_pilha;
- int count = 0;
-  while(itemAtual!= NULL && itemAtual->categoria == VS){
+  item *itemAtual = tbs->topo_pilha;
+  int count = 0;
+  while(itemAtual!= NULL && itemAtual->categoria == VS && itemAtual->nivel_lexico == nivel_lexico_atual){
     item *aux = itemAtual;
     itemAtual = itemAtual->itemAnt;
     free(aux);
@@ -135,7 +141,7 @@ int remove_ts(){
   return count;
 }
 
-adiciona_ts(){
+adiciona_ts(categorias cat,char *rot){
   item *auxItem = (item *) malloc (sizeof(item));
   auxItem->itemAnt = tbs->topo_pilha;
   auxItem->itemProx = NULL;
@@ -144,12 +150,15 @@ adiciona_ts(){
   auxItem->identificador = (char *) malloc (256 * sizeof(char));
   
   strcpy(auxItem->identificador,token);
-  auxItem->categoria = VS;
-  auxItem->nivel_lexico = nivel;
+  auxItem->categoria = cat;
+  auxItem->nivel_lexico = nivel_lexico_atual;
   auxItem->deslocamento = desl;
+  if(rot!=NULL){
+    auxItem->rotulo = (char *) malloc (256 * sizeof(char));
+    strcpy(auxItem->rotulo,rot);
+  }
   tbs->n_itens = tbs->n_itens++;
   tbs->topo_pilha = auxItem;
-  num_vars++;
   desl ++;
 }
 
@@ -171,7 +180,7 @@ adiciona_tipo_ts(int nvars){
   */
 
 procura_compara(){
-  item *itemAtual=procura_tbsimb(token);
+  item *itemAtual=procura_tbsimb(token,VS);
   if(compItem!=NULL){
     if(strcmp(compItem,itemAtual->tipo)!=0){
       yyerror("\n\nOperação não permitida, valores com tipos diferentes\n\n");
@@ -183,6 +192,39 @@ procura_compara(){
   }
 }
 
+reza(){
+  if(num_vars>0){
+    free(param1);
+    free(param2);
+    free(param3);
+    param1 = (char *) malloc (4 * sizeof(char));
+    sprintf(param1, "%d", num_vars);
+    num_vars=0;
+    geraCodigo (NULL, "AMEM",param1,NULL,NULL); 
+  }  
+}
+
+doDmem(){
+  num_vars=remove_ts();
+  if(num_vars>0){
+    printf("%d\n",num_vars );
+    param1 = (char *) malloc (4 * sizeof(char));
+    sprintf(param1, "%d", num_vars);
+    geraCodigo (NULL, "DMEM",param1,NULL,NULL);
+  }
+}
+
+char * retornaRotulo(){
+  char rtn[4];
+  sprintf(rtn, "%d", rotNumber);
+  char rot[]="R";
+  strcat(rot, rtn);
+  char *strRot = (char *) malloc (256 * sizeof(char));
+  strcpy(strRot,rot);
+  return strRot;
+  
+}
+
 %}
 
 %token PROGRAM ABRE_PARENTESES FECHA_PARENTESES WRITE
@@ -192,13 +234,14 @@ procura_compara(){
 %token IF THEN ELSE
 %token WHILE DO
 %token DIFE IGUAL MAEG MAIOR MENOR MEEG
-
+%token PROCEDURE
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
 
 %%
 
 programa    :{ 
+                nivel_lexico_atual=0;
                 num_vars=0;
                 desl=0;
                 nivel=0;
@@ -213,32 +256,52 @@ programa    :{
 ;
 
 bloco       : 
-              parte_declara_vars
-              { 
-                free(param1);
-                free(param2);
-                free(param3);
-                param1 = (char *) malloc (4 * sizeof(char));
-                sprintf(param1, "%d", num_vars);
-                num_vars=0;
-                geraCodigo (NULL, "AMEM",param1,NULL,NULL); 
-              }
-//              proc_com
-              comando_composto 
-
+              parte_declara_vars { 
+                reza();
+                adiciona_item_lista();
+                geraCodigo (NULL, "DSVS",lr->fim->identificador,NULL,NULL);
+              } 
+              proc_com 
               {
-                num_vars=remove_ts();
-                printf("%d\n",num_vars );
-                param1 = (char *) malloc (4 * sizeof(char));
-                sprintf(param1, "%d", num_vars);
-                geraCodigo (NULL, "DMEM",param1,NULL,NULL);
+                remove_item_lista(lr->fim->identificador);
+                geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
               }
-              ;
+              comando_composto{ doDmem(); }
+              |
+              parte_declara_vars{ reza(); }
+              comando_composto{ doDmem(); }
+;
 
-//proc_com:  PROCEDURE 
-//           IDENT bloco PONTO_E_VIRGULA comando_composto| comando_composto
 
+proc_com:  PROCEDURE IDENT{
+              nivel_lexico_atual++;
+              free(rots);
+              rots=(char *) malloc (5* sizeof(char));
+              rots=retornaRotulo(); 
+              adiciona_ts(PROC,rots);
+            } 
+           PONTO_E_VIRGULA {
+              char lexico[4];
+              sprintf(lexico, "%d", nivel_lexico_atual);
+              geraCodigo (rots, "ENPR",lexico,NULL,NULL); 
+              adiciona_item_lista();
+            }
+           blocoProc PONTO_E_VIRGULA
+           {
+             char lexico[4];
+             sprintf(lexico, "%d", nivel_lexico_atual);
+             geraCodigo (NULL, "RTPR",lexico,"0",NULL); 
+             nivel_lexico_atual--;
+           }
 
+blocoProc       : 
+              parte_declara_vars { reza(); } 
+              proc_com 
+              comando_composto{ doDmem(); }
+              |
+              parte_declara_vars{ reza(); }
+              comando_composto{ doDmem(); }
+;
 
 parte_declara_vars:  var 
 ;
@@ -259,7 +322,6 @@ declara_var :
               tipo 
               { 
                 adiciona_tipo_ts(num_vars);
-               
               }
               PONTO_E_VIRGULA
 ;
@@ -269,10 +331,12 @@ tipo        : IDENT
 
 lista_id_var: lista_id_var VIRGULA IDENT 
               { /* insere última vars na tabela de símbolos */ 
-               adiciona_ts();
+               adiciona_ts(VS,NULL);
+               num_vars++;
               }
             | IDENT { /* insere vars na tabela de símbolos */
-                adiciona_ts();
+                adiciona_ts(VS,NULL);
+                num_vars++;
               }
 ;
 
@@ -292,15 +356,15 @@ comandos :
 
 comando:
           IDENT{
-            item *itema = procura_tbsimb(token);
-            if(itema!=NULL){
+            item *item = procura_tbsimb(token,VS);
+            if(item!=NULL){
               free(param1Aux);
               free(param2Aux);
               free(param3Aux);
               param1Aux = (char *) malloc (4 * sizeof(char));
               param2Aux = (char *) malloc (4 * sizeof(char));
-              sprintf(param1Aux, "%d", itema->nivel_lexico);
-              sprintf(param2Aux, "%d", itema->deslocamento);
+              sprintf(param1Aux, "%d", item->nivel_lexico);
+              sprintf(param2Aux, "%d", item->deslocamento);
             }
             //TODO: caso não encontrar mostrar msg de erro.
           } ATRIBUICAO expressao_simples { 
@@ -313,8 +377,18 @@ comando:
           | comando_write
           | cond_if
           | comando_repetitivo
+          | comando_procedure
 
 ;
+
+comando_procedure:
+          IDENT{ 
+            item *item = procura_tbsimb(token,PROC);
+            if(item!=NULL)
+              geraCodigo (NULL, "CHPR",item->rotulo,nivel_lexico_atual,NULL); 
+          } PONTO_E_VIRGULA 
+          | 
+          IDENT ABRE_PARENTESES FECHA_PARENTESES PONTO_E_VIRGULA
 
 expressao_simples ://ABRE_PARENTESES expressao_simples FECHA_PARENTESES|
             expressao_simples SOMA termo {
@@ -347,7 +421,7 @@ fator      :  ABRE_PARENTESES expressao_simples FECHA_PARENTESES|
 ;
 
 comando_write : WRITE ABRE_PARENTESES IDENT {
-                  item *item = procura_tbsimb(token);
+                  item *item = procura_tbsimb(token,VS);
                   if(item!=NULL){
                     free(param1);
                     free(param2);
