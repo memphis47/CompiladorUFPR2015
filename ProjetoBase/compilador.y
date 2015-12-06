@@ -56,9 +56,8 @@ item * procura_tbsimb(char * token, categorias cat){
   item *itemAtual = tbs->topo_pilha;
   printf("%s\n", token);
   while(itemAtual != NULL){
-    printf("%d\n", itemAtual->categoria);
-    if(strcmp (token, itemAtual->identificador) == 0 && itemAtual->categoria == cat){
-      printf("SAPOIAIA\n");
+    if(strcmp (token, itemAtual->identificador) == 0 
+    && itemAtual->categoria == cat){
       return itemAtual;
     }
     itemAtual = itemAtual->itemAnt;
@@ -131,7 +130,8 @@ void remove_item_lista(char *token){
 int remove_ts(){
   item *itemAtual = tbs->topo_pilha;
   int count = 0;
-  while(itemAtual!= NULL && itemAtual->categoria == VS && itemAtual->nivel_lexico == nivel_lexico_atual){
+  while(itemAtual!= NULL && itemAtual->categoria == VS 
+  && itemAtual->nivel_lexico == nivel_lexico_atual){
     item *aux = itemAtual;
     itemAtual = itemAtual->itemAnt;
     free(aux);
@@ -141,14 +141,13 @@ int remove_ts(){
   return count;
 }
 
-adiciona_ts(categorias cat,char *rot){
+void adiciona_ts(categorias cat,char *rot){
   item *auxItem = (item *) malloc (sizeof(item));
   auxItem->itemAnt = tbs->topo_pilha;
   auxItem->itemProx = NULL;
   
 
   auxItem->identificador = (char *) malloc (256 * sizeof(char));
-  
   strcpy(auxItem->identificador,token);
   auxItem->categoria = cat;
   auxItem->nivel_lexico = nivel_lexico_atual;
@@ -162,7 +161,7 @@ adiciona_ts(categorias cat,char *rot){
   desl ++;
 }
 
-adiciona_tipo_ts(int nvars){
+void adiciona_tipo_ts(int nvars){
   item *itemAtual = tbs->topo_pilha;
   int i=0;
   while(itemAtual!= NULL && itemAtual->categoria == VS
@@ -179,7 +178,7 @@ adiciona_tipo_ts(int nvars){
   YYERROR
   */
 
-procura_compara(){
+void procura_compara(){
   item *itemAtual=procura_tbsimb(token,VS);
   if(compItem!=NULL){
     if(strcmp(compItem,itemAtual->tipo)!=0){
@@ -192,7 +191,7 @@ procura_compara(){
   }
 }
 
-reza(){
+void reza(){
   if(num_vars>0){
     free(param1);
     free(param2);
@@ -204,10 +203,9 @@ reza(){
   }  
 }
 
-doDmem(){
+void doDmem(){
   num_vars=remove_ts();
   if(num_vars>0){
-    printf("%d\n",num_vars );
     param1 = (char *) malloc (4 * sizeof(char));
     sprintf(param1, "%d", num_vars);
     geraCodigo (NULL, "DMEM",param1,NULL,NULL);
@@ -223,6 +221,20 @@ char * retornaRotulo(){
   strcpy(strRot,rot);
   return strRot;
   
+}
+
+void cria_valores_armz(){
+  item *item = procura_tbsimb(token,VS);
+  if(item!=NULL){
+    free(param1Aux);
+    free(param2Aux);
+    free(param3Aux);
+    
+    param1Aux = (char *) malloc (4 * sizeof(char));
+    param2Aux = (char *) malloc (4 * sizeof(char));
+    sprintf(param1Aux, "%d", item->nivel_lexico);
+    sprintf(param2Aux, "%d", item->deslocamento);
+  }
 }
 
 %}
@@ -258,18 +270,25 @@ programa    :{
 bloco       : 
               parte_declara_vars { 
                 reza();
-                adiciona_item_lista();
-                geraCodigo (NULL, "DSVS",lr->fim->identificador,NULL,NULL);
-              } 
-              proc_com 
-              {
-                remove_item_lista(lr->fim->identificador);
-                geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
               }
-              comando_composto{ doDmem(); }
-              |
-              parte_declara_vars{ reza(); }
-              comando_composto{ doDmem(); }
+              parse_bloco
+;
+
+parse_bloco:
+            {
+              adiciona_item_lista();
+              geraCodigo (NULL, "DSVS",lr->fim->identificador,NULL,NULL);
+            } 
+            proc_com 
+            {
+              remove_item_lista(lr->fim->identificador);
+              geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
+            }
+            comando_composto{ doDmem(); }
+            |
+            comando_composto{ doDmem(); }
+
+
 ;
 
 
@@ -293,13 +312,18 @@ proc_com:  PROCEDURE IDENT{
              geraCodigo (NULL, "RTPR",lexico,"0",NULL); 
              nivel_lexico_atual--;
            }
+;
 
-blocoProc       : 
+blocoProc: 
               parte_declara_vars { reza(); } 
+              parse_bloco_proc |
+              parse_bloco_proc
+;
+
+parse_bloco_proc:
               proc_com 
               comando_composto{ doDmem(); }
               |
-              parte_declara_vars{ reza(); }
               comando_composto{ doDmem(); }
 ;
 
@@ -307,9 +331,7 @@ parte_declara_vars:  var
 ;
 
 
-var         : { } VAR declara_vars {
-                }
-            |
+var         : VAR declara_vars
 ;
 
 declara_vars:
@@ -319,14 +341,11 @@ declara_vars:
 
 declara_var :  
               lista_id_var DOIS_PONTOS 
-              tipo 
+              IDENT 
               { 
                 adiciona_tipo_ts(num_vars);
               }
               PONTO_E_VIRGULA
-;
-
-tipo        : IDENT
 ;
 
 lista_id_var: lista_id_var VIRGULA IDENT 
@@ -346,49 +365,42 @@ lista_idents: lista_idents VIRGULA IDENT
 
 // Comandos a serem executados.
 
-comando_composto: T_BEGIN comandos_total T_END 
+comando_composto: T_BEGIN comando comando_composto_loop T_END ;
 
+comando_composto_loop: PONTO_E_VIRGULA comando comando_composto_loop | PONTO_E_VIRGULA
+; 
 
-comandos_total: comandos //ver empty
-
-comandos : 
-           comandos comando | comando
-
-comando:
-          IDENT{
-            item *item = procura_tbsimb(token,VS);
+comando:  IDENT
+          {
+            item *item = procura_tbsimb(token,PROC);
             if(item!=NULL){
-              free(param1Aux);
-              free(param2Aux);
-              free(param3Aux);
-              param1Aux = (char *) malloc (4 * sizeof(char));
-              param2Aux = (char *) malloc (4 * sizeof(char));
-              sprintf(param1Aux, "%d", item->nivel_lexico);
-              sprintf(param2Aux, "%d", item->deslocamento);
+              free(param2);
+              param2 = (char *) malloc (4 * sizeof(char));
+              sprintf(param2, "%d", nivel_lexico_atual);
+              geraCodigo (NULL, "CHPR",item->rotulo,param2,NULL);
             }
-            //TODO: caso não encontrar mostrar msg de erro.
-          } ATRIBUICAO expressao_simples { 
-            compItem = NULL;
-            free(compItem);
-              // reseta comparador ao terminar expressao.
-          } PONTO_E_VIRGULA{
-            geraCodigo (NULL, "ARMZ",param1Aux,param2Aux,NULL);
+            else{
+              cria_valores_armz();
+            }
           }
+          parse_comando
           | comando_write
           | cond_if
           | comando_repetitivo
-          | comando_procedure
 
 ;
 
-comando_procedure:
-          IDENT{ 
-            item *item = procura_tbsimb(token,PROC);
-            if(item!=NULL)
-              geraCodigo (NULL, "CHPR",item->rotulo,nivel_lexico_atual,NULL); 
-          } PONTO_E_VIRGULA 
-          | 
-          IDENT ABRE_PARENTESES FECHA_PARENTESES PONTO_E_VIRGULA
+parse_comando:
+          ATRIBUICAO 
+          expressao_simples { 
+            compItem = NULL;
+            free(compItem);
+            geraCodigo (NULL, "ARMZ",param1Aux,param2Aux,NULL);
+          }
+          |
+          IDENT ABRE_PARENTESES FECHA_PARENTESES
+          |
+;
 
 expressao_simples ://ABRE_PARENTESES expressao_simples FECHA_PARENTESES|
             expressao_simples SOMA termo {
@@ -433,8 +445,9 @@ comando_write : WRITE ABRE_PARENTESES IDENT {
                     geraCodigo (NULL, "CRVL",param1,param2,NULL);
                     geraCodigo (NULL, "IMPR",NULL,NULL,NULL);
                   } 
-                } FECHA_PARENTESES PONTO_E_VIRGULA |
-                WRITE ABRE_PARENTESES NUMERO FECHA_PARENTESES PONTO_E_VIRGULA 
+                } FECHA_PARENTESES |
+                WRITE ABRE_PARENTESES NUMERO FECHA_PARENTESES
+;
 
 
 cond_if     : if_then cond_else 
@@ -468,10 +481,10 @@ cond_else   : ELSE{
             | %prec LOWER_THAN_ELSE
 ;
 
-internal: comando| T_BEGIN comandos T_END PONTO_E_VIRGULA
+internal: comando| comando_composto PONTO_E_VIRGULA ;
 
 comando_repetitivo:
-                     com_while
+                     com_while ;
 
 com_while:    {
                 adiciona_item_lista();
@@ -483,23 +496,28 @@ com_while:    {
               } DO internal { geraCodigo (NULL, "DSVS",lr->fim->itemAnt->identificador,NULL,NULL);
                               remove_item_lista(lr->fim->itemAnt->identificador);
                               geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
-                                if(lr->fim->itemAnt != NULL)
-                              lr->fim=lr->fim->itemAnt;}
+                              if(lr->fim->itemAnt != NULL)
+                                lr->fim=lr->fim->itemAnt;
+                        }
+;
 
-expressao   : ABRE_PARENTESES prior2 FECHA_PARENTESES
+expressao   : ABRE_PARENTESES prior2 FECHA_PARENTESES ;
 
 prior2  :     prior2 IGUAL prior1 {geraCodigo (NULL, "CMIG",NULL,NULL,NULL);}|
               prior2 DIFE  prior1 {geraCodigo (NULL, "CMDG",NULL,NULL,NULL);}|
               prior1
+;
 
 prior1  :     prior1 MAIOR final {geraCodigo (NULL, "CMMA",NULL,NULL,NULL);}|
               prior1 MENOR final {geraCodigo (NULL, "CMME",NULL,NULL,NULL);}|
               prior1 MAEG  final {geraCodigo (NULL, "CMAG",NULL,NULL,NULL);}| 
               prior1 MEEG  final {geraCodigo (NULL, "CMEG",NULL,NULL,NULL);}|
               final
+;
 
 final   :     IDENT{gera_comando_crvl(token);} |
               NUMERO{geraCodigo (NULL, "CRCT",token,NULL,NULL);}
+;
 
 %%
 
