@@ -2,8 +2,14 @@
     AMEM 2
     DSVS R0
 R1: ENPR 1
+    AMEM 2
+    CRCT 5
+    ARMZ 1,0
+    CRVL 1,0
+    IMPR
     CRVL 0,0
     IMPR
+    DMEM 2
     RTPR 1,0
 R0: NADA 
     CRCT 0

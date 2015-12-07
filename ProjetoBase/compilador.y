@@ -315,7 +315,7 @@ proc_com:  PROCEDURE IDENT{
 ;
 
 blocoProc: 
-              parte_declara_vars { reza(); } 
+              {desl=0;}parte_declara_vars { reza(); } 
               parse_bloco_proc |
               parse_bloco_proc
 ;
