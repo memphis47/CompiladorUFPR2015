@@ -32,6 +32,7 @@ typedef struct lista_rotulos
 
 tabela_simbolos *tbs;
 lista_rotulos *lr;
+lista_params *lp;
 char *param1;
 char *param2;
 char *param3;
@@ -46,6 +47,7 @@ int nivel_lexico_atual;
 char *compItem = NULL;
 char* rots;
 char* paramName;
+item procedure;
 
 
 int yyerror (char *msg) {
@@ -156,6 +158,9 @@ void adiciona_ts(categorias cat,char *rot){
     strcpy(auxItem->rotulo,rot);
   }
   tbs->n_itens = tbs->n_itens++;
+  if(cat == PROC){
+    procedure = auxItem;
+  }
   tbs->topo_pilha = auxItem;
   desl ++;
 }
@@ -179,6 +184,11 @@ void adiciona_param_ts(categorias cat,char *rot){
   strcpy(auxItem->tipo, token);
   tbs->n_itens = tbs->n_itens++;
   tbs->topo_pilha = auxItem;
+  if(procedure->inicio==NULL){
+    procedure->fim_pilha=auxItem;
+    procedure->ini_pilha=auxItem;
+  }
+  
   desl ++;
 }
 
@@ -199,12 +209,17 @@ void adiciona_tipo_ts(int nvars){
 void adiciona_deslocamento_param(){
   item *itemAtual = tbs->topo_pilha;
   int i=-4;
+  int param=0;
   while(itemAtual!= NULL && itemAtual->categoria != PROC){
     if(itemAtual->categoria==PF){
       itemAtual->deslocamento = i;
     }
     itemAtual = itemAtual->itemAnt;
     i--;
+    param++;
+  }
+  if(itemAtual->categoria == PROC){
+    itemAtual->n_param=param;
   }
 }
 
@@ -481,7 +496,7 @@ parse_comando:
             geraCodigo (NULL, "ARMZ",param1Aux,param2Aux,NULL);
           }
           |
-          IDENT ABRE_PARENTESES FECHA_PARENTESES
+          ABRE_PARENTESES FECHA_PARENTESES
           |
 ;
 
@@ -614,16 +629,20 @@ main (int argc, char** argv) {
  * ------------------------------------------------------------------- */
    tbs = (tabela_simbolos *) malloc (sizeof(tabela_simbolos));
    lr = (lista_rotulos *) malloc (sizeof(lista_rotulos));
+   lp = (lista_params *) malloc (sizeof(lista_params));
    tbs->topo_pilha = NULL;
    lr->inicio = NULL;
+   lp->inicio = NULL;
 
    tbs->fim_pilha = NULL;
    lr->fim = NULL;
+   lp->fim = NULL;
 
    tbs->itens = NULL;
 
    tbs->n_itens = 0;
    lr->n_rotulos = 0;
+   lp->n_param = 0;
 
    yyin=fp;
    yyparse();
