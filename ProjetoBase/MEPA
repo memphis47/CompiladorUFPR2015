@@ -3,8 +3,12 @@
     DSVS R0
 R1: ENPR 1
     AMEM 2
+    CRCT 6
+    ARMZ 1,-5
     CRCT 5
     ARMZ 1,0
+    CRVL 1,-5
+    IMPR
     CRVL 1,0
     IMPR
     CRVL 0,0

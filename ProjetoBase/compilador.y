@@ -45,6 +45,7 @@ int nivel;
 int nivel_lexico_atual;
 char *compItem = NULL;
 char* rots;
+char* paramName;
 
 
 int yyerror (char *msg) {
@@ -54,7 +55,6 @@ int yyerror (char *msg) {
 
 item * procura_tbsimb(char * token, categorias cat){
   item *itemAtual = tbs->topo_pilha;
-  printf("%s\n", token);
   while(itemAtual != NULL){
     if(strcmp (token, itemAtual->identificador) == 0 
     && itemAtual->categoria == cat){
@@ -108,7 +108,6 @@ void adiciona_item_lista(){
 
 void remove_item_lista(char *token){
   itemLista *itemAtual = lr->fim;
-  printf("%s\n",lr->fim->identificador );
   while(itemAtual != NULL){
     if(strcmp (token, itemAtual->identificador) == 0){
       if(itemAtual->itemAnt!=NULL)
@@ -161,6 +160,29 @@ void adiciona_ts(categorias cat,char *rot){
   desl ++;
 }
 
+
+void adiciona_param_ts(categorias cat,char *rot){
+  item *auxItem = (item *) malloc (sizeof(item));
+  auxItem->itemAnt = tbs->topo_pilha;
+  auxItem->itemProx = NULL;
+  
+
+  auxItem->identificador = (char *) malloc (256 * sizeof(char));
+  strcpy(auxItem->identificador,paramName);
+  auxItem->categoria = cat;
+  auxItem->nivel_lexico = nivel_lexico_atual;
+  if(rot!=NULL){
+    auxItem->rotulo = (char *) malloc (256 * sizeof(char));
+    strcpy(auxItem->rotulo,rot);
+  }
+  auxItem->tipo = (char *) malloc (256 * sizeof(char));
+  strcpy(auxItem->tipo, token);
+  tbs->n_itens = tbs->n_itens++;
+  tbs->topo_pilha = auxItem;
+  desl ++;
+}
+
+
 void adiciona_tipo_ts(int nvars){
   item *itemAtual = tbs->topo_pilha;
   int i=0;
@@ -171,6 +193,18 @@ void adiciona_tipo_ts(int nvars){
     strcpy(itemAtual->tipo, token);
     itemAtual = itemAtual->itemAnt;
     i++;
+  }
+}
+
+void adiciona_deslocamento_param(){
+  item *itemAtual = tbs->topo_pilha;
+  int i=-4;
+  while(itemAtual!= NULL && itemAtual->categoria != PROC){
+    if(itemAtual->categoria==PF){
+      itemAtual->deslocamento = i;
+    }
+    itemAtual = itemAtual->itemAnt;
+    i--;
   }
 }
 
@@ -223,9 +257,10 @@ char * retornaRotulo(){
   
 }
 
-void cria_valores_armz(){
-  item *item = procura_tbsimb(token,VS);
+void cria_valores_armz(categorias cat){
+  item *item = procura_tbsimb(token,cat);
   if(item!=NULL){
+    
     free(param1Aux);
     free(param2Aux);
     free(param3Aux);
@@ -234,6 +269,27 @@ void cria_valores_armz(){
     param2Aux = (char *) malloc (4 * sizeof(char));
     sprintf(param1Aux, "%d", item->nivel_lexico);
     sprintf(param2Aux, "%d", item->deslocamento);
+  }
+  else if(cat != PF){
+    cria_valores_armz(PF);
+  }
+}
+
+void carrega_valor_imprime(categorias cat){
+  item *item = procura_tbsimb(token,cat);
+  if(item!=NULL){
+    free(param1);
+    free(param2);
+    free(param3);
+    param1 = (char *) malloc (4 * sizeof(char));
+    param2 = (char *) malloc (4 * sizeof(char));
+    sprintf(param1, "%d", item->nivel_lexico);
+    sprintf(param2, "%d", item->deslocamento);
+    geraCodigo (NULL, "CRVL",param1,param2,NULL);
+    geraCodigo (NULL, "IMPR",NULL,NULL,NULL);
+  }
+  else if(cat != PF){
+    carrega_valor_imprime(PF);
   }
 }
 
@@ -299,12 +355,8 @@ proc_com:  PROCEDURE IDENT{
               rots=retornaRotulo(); 
               adiciona_ts(PROC,rots);
             } 
-           PONTO_E_VIRGULA {
-              char lexico[4];
-              sprintf(lexico, "%d", nivel_lexico_atual);
-              geraCodigo (rots, "ENPR",lexico,NULL,NULL); 
-              adiciona_item_lista();
-            }
+           parse_proc_decl
+           
            blocoProc PONTO_E_VIRGULA
            {
              char lexico[4];
@@ -312,6 +364,37 @@ proc_com:  PROCEDURE IDENT{
              geraCodigo (NULL, "RTPR",lexico,"0",NULL); 
              nivel_lexico_atual--;
            }
+;
+
+
+parse_proc_decl: ABRE_PARENTESES 
+                 declara_param param_loop 
+                 FECHA_PARENTESES {adiciona_deslocamento_param();} 
+                 PONTO_E_VIRGULA {
+                    char lexico[4];
+                    sprintf(lexico, "%d", nivel_lexico_atual);
+                    geraCodigo (rots, "ENPR",lexico,NULL,NULL); 
+                    adiciona_item_lista();
+                  } 
+                  |
+                 PONTO_E_VIRGULA {
+                    char lexico[4];
+                    sprintf(lexico, "%d", nivel_lexico_atual);
+                    geraCodigo (rots, "ENPR",lexico,NULL,NULL); 
+                    adiciona_item_lista();
+                  }
+;
+
+param_loop: PONTO_E_VIRGULA declara_param param_loop | 
+;
+
+declara_param:
+             VAR  parse_declaracao| parse_declaracao
+;
+
+parse_declaracao:
+  IDENT{paramName = (char *) malloc (256 * sizeof(char));
+  strcpy(paramName,token);} DOIS_PONTOS IDENT{adiciona_param_ts(PF,NULL);}
 ;
 
 blocoProc: 
@@ -380,7 +463,7 @@ comando:  IDENT
               geraCodigo (NULL, "CHPR",item->rotulo,param2,NULL);
             }
             else{
-              cria_valores_armz();
+              cria_valores_armz(VS);
             }
           }
           parse_comando
@@ -433,18 +516,7 @@ fator      :  ABRE_PARENTESES expressao_simples FECHA_PARENTESES|
 ;
 
 comando_write : WRITE ABRE_PARENTESES IDENT {
-                  item *item = procura_tbsimb(token,VS);
-                  if(item!=NULL){
-                    free(param1);
-                    free(param2);
-                    free(param3);
-                    param1 = (char *) malloc (4 * sizeof(char));
-                    param2 = (char *) malloc (4 * sizeof(char));
-                    sprintf(param1, "%d", item->nivel_lexico);
-                    sprintf(param2, "%d", item->deslocamento);
-                    geraCodigo (NULL, "CRVL",param1,param2,NULL);
-                    geraCodigo (NULL, "IMPR",NULL,NULL,NULL);
-                  } 
+                  carrega_valor_imprime(VS);
                 } FECHA_PARENTESES |
                 WRITE ABRE_PARENTESES NUMERO FECHA_PARENTESES
 ;
