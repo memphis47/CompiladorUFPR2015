@@ -18,5 +18,9 @@ R1: ENPR 1
 R0: NADA 
     CRCT 0
     ARMZ 0,0
+    CRCT 0
+    ARMZ 0,1
+    CRVL 0,0
+    CRVL 0,1
     CHPR R1,0
     PARA

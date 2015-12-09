@@ -1,6 +1,5 @@
 typedef struct item item;
-
-
+typedef struct lista_params lista_params;
 
 struct item
 {
@@ -16,12 +15,12 @@ struct item
   item *itemProx;
 };
 
-typedef struct params{
+struct lista_params{
   int n_param;
   item *fim;
   item *inicio;
   item *paramItem;  
-}lista_params;
+};
 
 typedef struct tabela_simbolos
 {

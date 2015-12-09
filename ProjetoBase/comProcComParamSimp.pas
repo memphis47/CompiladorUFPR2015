@@ -11,6 +11,7 @@ var m,n :  integer;
     	end;
 begin
 	m := 0;
-	p;
+	n := 0;
+	p(m,n);
 end.
 

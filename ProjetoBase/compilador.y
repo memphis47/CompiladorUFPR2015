@@ -44,10 +44,11 @@ int desl;
 int rotNumber;
 int nivel;
 int nivel_lexico_atual;
+int n_param_atual;
 char *compItem = NULL;
 char* rots;
 char* paramName;
-item procedure;
+item *procedure;
 
 
 int yyerror (char *msg) {
@@ -159,7 +160,7 @@ void adiciona_ts(categorias cat,char *rot){
   }
   tbs->n_itens = tbs->n_itens++;
   if(cat == PROC){
-    procedure = auxItem;
+    procedure=auxItem;
   }
   tbs->topo_pilha = auxItem;
   desl ++;
@@ -184,11 +185,23 @@ void adiciona_param_ts(categorias cat,char *rot){
   strcpy(auxItem->tipo, token);
   tbs->n_itens = tbs->n_itens++;
   tbs->topo_pilha = auxItem;
-  if(procedure->inicio==NULL){
-    procedure->fim_pilha=auxItem;
-    procedure->ini_pilha=auxItem;
+  if(lp->inicio==NULL){
+    item *fim=(item *) malloc(sizeof(item));
+    memcpy(fim,auxItem,sizeof(item));
+    item *inicio=(item *) malloc(sizeof(item));
+    memcpy(inicio,auxItem,sizeof(item));
+    lp->fim=fim;
+    lp->inicio=inicio;
+    lp->fim->itemAnt=lp->inicio;
+    lp->inicio->itemProx=lp->fim;
   }
-  
+  else{
+    item *fim=(item *) malloc(sizeof(item));
+    memcpy(fim,auxItem,sizeof(item));
+    fim->itemAnt=lp->fim;
+    fim->itemProx=NULL;
+    lp->fim = fim;
+  }
   desl ++;
 }
 
@@ -218,9 +231,7 @@ void adiciona_deslocamento_param(){
     i--;
     param++;
   }
-  if(itemAtual->categoria == PROC){
-    itemAtual->n_param=param;
-  }
+  procedure->param->n_param=param;
 }
 
 /* yyerror()
@@ -384,7 +395,11 @@ proc_com:  PROCEDURE IDENT{
 
 parse_proc_decl: ABRE_PARENTESES 
                  declara_param param_loop 
-                 FECHA_PARENTESES {adiciona_deslocamento_param();} 
+                 FECHA_PARENTESES {
+                    procedure->param=(lista_params *) malloc(sizeof(lista_params));
+                    memcpy(procedure->param,lp,sizeof(lista_params)); //Procedure definido com os parametros;
+                    adiciona_deslocamento_param();
+                 } 
                  PONTO_E_VIRGULA {
                     char lexico[4];
                     sprintf(lexico, "%d", nivel_lexico_atual);
@@ -470,15 +485,10 @@ comando_composto_loop: PONTO_E_VIRGULA comando comando_composto_loop | PONTO_E_V
 
 comando:  IDENT
           {
-            item *item = procura_tbsimb(token,PROC);
-            if(item!=NULL){
-              free(param2);
-              param2 = (char *) malloc (4 * sizeof(char));
-              sprintf(param2, "%d", nivel_lexico_atual);
-              geraCodigo (NULL, "CHPR",item->rotulo,param2,NULL);
-            }
-            else{
+            procedure = procura_tbsimb(token,PROC);
+            if(procedure==NULL){
               cria_valores_armz(VS);
+              
             }
           }
           parse_comando
@@ -489,15 +499,46 @@ comando:  IDENT
 ;
 
 parse_comando:
-          ATRIBUICAO 
+          
+          ATRIBUICAO {
+            if(procedure!=NULL){
+              yyerror("Tipo de operação nao permitida");
+              exit(1);
+            }
+          }
           expressao_simples { 
             compItem = NULL;
             free(compItem);
             geraCodigo (NULL, "ARMZ",param1Aux,param2Aux,NULL);
           }
           |
-          ABRE_PARENTESES FECHA_PARENTESES
+          {if(procedure==NULL){printf("Tipo de operação nao permitida"); return 0;}}
+          ABRE_PARENTESES{n_param_atual=0;} le_params FECHA_PARENTESES
+          {
+            if(n_param_atual!=procedure->param->n_param){
+              printf("ERRO: Número de parametros passados: %d\n",n_param_atual);
+              printf("Número de parametros esperados: %d\n",procedure->param->n_param);
+              yyerror("");
+              return 0;
+            }
+            free(param2);
+            param2 = (char *) malloc (4 * sizeof(char));
+            sprintf(param2, "%d", nivel_lexico_atual);
+            geraCodigo (NULL, "CHPR",procedure->rotulo,param2,NULL);
+          }
           |
+;
+
+le_params:
+          get_param get_param_loop
+;
+
+get_param_loop: 
+          VIRGULA get_param get_param_loop |
+;
+
+get_param:
+          expressao_simples{n_param_atual++;}
 ;
 
 expressao_simples ://ABRE_PARENTESES expressao_simples FECHA_PARENTESES|
