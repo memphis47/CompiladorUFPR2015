@@ -53,6 +53,7 @@ tipo_parametro passado;
 tipo_variavel  compItem = -1;
 
 item *procedure;
+item *tempItemArmz;
 
 
 int yyerror (char *msg) {
@@ -97,10 +98,12 @@ void gera_comando_crvl(categorias cat){
     param2 = (char *) malloc (4 * sizeof(char));
     sprintf(param1, "%d", item->nivel_lexico);
     sprintf(param2, "%d", item->deslocamento);
+    printf("\n\n\nCategoria: %d\n\n\n",cat);
+    printf("Item: %s\n\n\n",item->identificador);
+    printf("Passagem: %d\n\n\n",item->passagem);
+    printf("ParamChamada: %d\n\n\n",param_chamada);
     if(param_chamada && temp->inicio->passagem == REFERENCIA){ //chamada de parametro passado por referencia
       if(item->tipo == temp->inicio->tipo){
-        printf("Identificador:%s\n\n\n",temp->inicio->identificador);
-        printf("passagem:%d\n\n\n",temp->inicio->passagem);
         geraCodigo (NULL, "CREN",param1,param2,NULL);
       }
       else{
@@ -109,7 +112,7 @@ void gera_comando_crvl(categorias cat){
         yyerror("");
       }
     }
-    else if(!param_chamada && cat==PF && item->passagem == REFERENCIA){
+    else if(param_chamada==0 && cat==PF && item->passagem == REFERENCIA){
       geraCodigo (NULL, "CRVI",param1,param2,NULL); 
     }
     else{
@@ -317,7 +320,7 @@ char * retornaRotulo(){
   
 }
 
-void cria_valores_armz(categorias cat){
+item* cria_valores_armz(categorias cat){
   item *item = procura_tbsimb(token,cat);
   if(item!=NULL){
     
@@ -331,26 +334,14 @@ void cria_valores_armz(categorias cat){
     sprintf(param2Aux, "%d", item->deslocamento);
   }
   else if(cat != PF){
-    cria_valores_armz(PF);
+    return cria_valores_armz(PF);
   }
+  return item;
 }
 
 void carrega_valor_imprime(categorias cat){
-  item *item = procura_tbsimb(token,cat);
-  if(item!=NULL){
-    free(param1);
-    free(param2);
-    free(param3);
-    param1 = (char *) malloc (4 * sizeof(char));
-    param2 = (char *) malloc (4 * sizeof(char));
-    sprintf(param1, "%d", item->nivel_lexico);
-    sprintf(param2, "%d", item->deslocamento);
-    geraCodigo (NULL, "CRVL",param1,param2,NULL);
-    geraCodigo (NULL, "IMPR",NULL,NULL,NULL);
-  }
-  else if(cat != PF){
-    carrega_valor_imprime(PF);
-  }
+  gera_comando_crvl(cat);
+  geraCodigo (NULL, "IMPR",NULL,NULL,NULL);
 }
 
 void verifica_chama_proc(){
@@ -540,7 +531,7 @@ comando:  IDENT
           {
             procedure = procura_tbsimb(token,PROC);
             if(procedure==NULL){
-              cria_valores_armz(VS);
+              tempItemArmz = cria_valores_armz(VS);
             }
           }
           parse_comando
@@ -559,7 +550,11 @@ parse_comando:
           }
           expressao_simples { 
             compItem = -1;
-            geraCodigo (NULL, "ARMZ",param1Aux,param2Aux,NULL);
+            if(tempItemArmz->passagem == REFERENCIA)
+              geraCodigo (NULL, "ARMI",param1Aux,param2Aux,NULL);
+            else{
+              geraCodigo (NULL, "ARMZ",param1Aux,param2Aux,NULL);
+            }
           }
           |
           {
@@ -570,7 +565,6 @@ parse_comando:
           ABRE_PARENTESES{
             n_param_atual=0;
             param_chamada=1;
-            printf("procedure:%s\n\n\n",procedure->identificador);
             temp=(lista_params *) malloc(sizeof(lista_params));
             memcpy(temp,procedure->param,sizeof(lista_params));
           } le_params FECHA_PARENTESES
@@ -591,11 +585,9 @@ le_params:
 
 get_param_loop: 
           VIRGULA{
-            printf("IdentParam:%s\n\n\n",temp->inicio->itemProx->identificador);
             temp->inicio=temp->inicio->itemProx;
-            printf("IdentParam2:%s\n\n\n",temp->inicio->identificador);
-            }
-            le_params |
+          }
+          le_params |
 ;
 
 get_param:
@@ -633,6 +625,8 @@ fator      :  ABRE_PARENTESES expressao_simples FECHA_PARENTESES|
 ;
 
 comando_write : WRITE ABRE_PARENTESES IDENT {
+                  printf("\n\n\nIdent:%s\n\n",token);
+                  param_chamada=0;
                   carrega_valor_imprime(VS);
                 } FECHA_PARENTESES |
                 WRITE ABRE_PARENTESES NUMERO FECHA_PARENTESES

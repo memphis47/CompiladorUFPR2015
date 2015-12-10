@@ -4,10 +4,10 @@
 R1: ENPR 1
     AMEM 2
     CRCT 6
-    ARMZ 1,-5
+    ARMI 1,-5
     CRCT 5
-    ARMZ 1,0
-    CRVL 1,-5
+    ARMI 1,0
+    CRVI 1,-5
     IMPR
     CRVL 1,0
     IMPR
@@ -17,9 +17,9 @@ R1: ENPR 1
     RTPR 1,0
 R0: NADA 
     CRCT 0
-    ARMZ 0,1
+    ARMI 0,1
     CRCT 0
-    ARMZ 0,2
+    ARMI 0,2
     CREN 0,1
     CRVL 0,2
     CHPR R1,0
