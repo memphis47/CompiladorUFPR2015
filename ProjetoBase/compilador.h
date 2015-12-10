@@ -7,7 +7,7 @@
  *
  * -------------------------------------------------------------------
  *
- * Tipos, protótipos e vaiáveis globais do compilador
+ * Tipos, protï¿½tipos e vaiï¿½veis globais do compilador
  *
  * ------------------------------------------------------------------- */
 
@@ -40,8 +40,12 @@ typedef enum tipo_parametro {
   REFERENCIA, SIMPLES, VALOR
 } tipo_parametro;
 
+typedef enum tipo_variavel {
+  INTEGER, BOOLEAN, CHAR
+} tipo_variavel;
+
 /* -------------------------------------------------------------------
- * variáveis globais
+ * variï¿½veis globais
  * ------------------------------------------------------------------- */
 
 extern simbolos simbolo, relacao;

@@ -4,12 +4,12 @@ typedef struct lista_params lista_params;
 struct item
 {
   char *identificador;
-  categorias categoria;
+  char *rotulo;
   int  nivel_lexico;
   int  deslocamento;
-  char *passagem;
-  char *rotulo;
-  char *tipo; // mudar depois para enum
+  categorias categoria;
+  tipo_parametro passagem;
+  tipo_variavel tipo; // mudar depois para enum
   lista_params *param;
   item *itemAnt;
   item *itemProx;

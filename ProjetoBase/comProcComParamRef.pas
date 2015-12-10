@@ -1,6 +1,6 @@
 program exemplo75 (input, output);
 var m,n :  integer;
-    procedure p(k:integer; s:integer);
+    procedure p(var k:integer; s:integer);
     var x,z : integer;
     	begin
     	    k := 6;
@@ -11,7 +11,7 @@ var m,n :  integer;
     	end;
 begin
 	m := 0;
-	n:=0;
+	n := 0;
 	p(m,n);
 end.
 

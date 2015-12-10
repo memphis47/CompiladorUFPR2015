@@ -33,6 +33,7 @@ typedef struct lista_rotulos
 tabela_simbolos *tbs;
 lista_rotulos *lr;
 lista_params *lp;
+lista_params *temp;
 char *param1;
 char *param2;
 char *param3;
@@ -40,20 +41,37 @@ char *param1Aux;
 char *param2Aux;
 char *param3Aux;
 char *ident;
+char* rots;
+char* paramName;
 int desl;
 int rotNumber;
 int nivel;
 int nivel_lexico_atual;
 int n_param_atual;
-char *compItem = NULL;
-char* rots;
-char* paramName;
+int param_chamada = 0;
+tipo_parametro passado;
+tipo_variavel  compItem = -1;
+
 item *procedure;
 
 
 int yyerror (char *msg) {
   printf("%s", msg);
   exit(1);
+}
+
+tipo_variavel retornaTipo(){
+  if (strcmp(token, "integer") == 0) 
+    return INTEGER;
+    
+  else if (strcmp(token, "boolean") == 0)
+    return BOOLEAN;
+    
+  else if (strcmp(token, "char") == 0)
+    return CHAR;
+    
+  else /* default: */
+    yyerror("Tipo não definido");
 }
 
 item * procura_tbsimb(char * token, categorias cat){
@@ -69,8 +87,8 @@ item * procura_tbsimb(char * token, categorias cat){
 }
 
 
-void gera_comando_crvl(char * token){
-  item *item = procura_tbsimb(token,VS);
+void gera_comando_crvl(categorias cat){
+  item *item = procura_tbsimb(token,cat);
   if(item!=NULL){
     free(param1);
     free(param2);
@@ -79,8 +97,28 @@ void gera_comando_crvl(char * token){
     param2 = (char *) malloc (4 * sizeof(char));
     sprintf(param1, "%d", item->nivel_lexico);
     sprintf(param2, "%d", item->deslocamento);
-    geraCodigo (NULL, "CRVL",param1,param2,NULL); 
+    if(param_chamada && temp->inicio->passagem == REFERENCIA){ //chamada de parametro passado por referencia
+      if(item->tipo == temp->inicio->tipo){
+        printf("Identificador:%s\n\n\n",temp->inicio->identificador);
+        printf("passagem:%d\n\n\n",temp->inicio->passagem);
+        geraCodigo (NULL, "CREN",param1,param2,NULL);
+      }
+      else{
+        printf("ERRO: Tipo passado: %d\n",item->tipo);
+        printf("Tipo esperado %d\n",temp->inicio->tipo);
+        yyerror("");
+      }
+    }
+    else if(!param_chamada && cat==PF && item->passagem == REFERENCIA){
+      geraCodigo (NULL, "CRVI",param1,param2,NULL); 
+    }
+    else{
+      geraCodigo (NULL, "CRVL",param1,param2,NULL); 
+    }
   } 
+  else if(cat != PF){
+    gera_comando_crvl(PF);
+  }
 }
 
 void adiciona_item_lista(){
@@ -148,7 +186,7 @@ void adiciona_ts(categorias cat,char *rot){
   auxItem->itemAnt = tbs->topo_pilha;
   auxItem->itemProx = NULL;
   
-
+  auxItem->tipo = -1;
   auxItem->identificador = (char *) malloc (256 * sizeof(char));
   strcpy(auxItem->identificador,token);
   auxItem->categoria = cat;
@@ -167,12 +205,11 @@ void adiciona_ts(categorias cat,char *rot){
 }
 
 
-void adiciona_param_ts(categorias cat,char *rot){
+void adiciona_param_ts(categorias cat,char *rot, tipo_parametro passagem){
   item *auxItem = (item *) malloc (sizeof(item));
   auxItem->itemAnt = tbs->topo_pilha;
   auxItem->itemProx = NULL;
   
-
   auxItem->identificador = (char *) malloc (256 * sizeof(char));
   strcpy(auxItem->identificador,paramName);
   auxItem->categoria = cat;
@@ -181,25 +218,24 @@ void adiciona_param_ts(categorias cat,char *rot){
     auxItem->rotulo = (char *) malloc (256 * sizeof(char));
     strcpy(auxItem->rotulo,rot);
   }
-  auxItem->tipo = (char *) malloc (256 * sizeof(char));
-  strcpy(auxItem->tipo, token);
+  auxItem->tipo = retornaTipo();
+  auxItem->passagem = passagem; 
   tbs->n_itens = tbs->n_itens++;
   tbs->topo_pilha = auxItem;
   if(lp->inicio==NULL){
-    item *fim=(item *) malloc(sizeof(item));
-    memcpy(fim,auxItem,sizeof(item));
     item *inicio=(item *) malloc(sizeof(item));
     memcpy(inicio,auxItem,sizeof(item));
-    lp->fim=fim;
+    inicio->itemAnt=inicio;
+    inicio->itemProx=inicio;
+    lp->fim=inicio;
     lp->inicio=inicio;
-    lp->fim->itemAnt=lp->inicio;
-    lp->inicio->itemProx=lp->fim;
   }
   else{
     item *fim=(item *) malloc(sizeof(item));
     memcpy(fim,auxItem,sizeof(item));
     fim->itemAnt=lp->fim;
     fim->itemProx=NULL;
+    lp->fim->itemProx=fim;
     lp->fim = fim;
   }
   desl ++;
@@ -208,16 +244,15 @@ void adiciona_param_ts(categorias cat,char *rot){
 
 void adiciona_tipo_ts(int nvars){
   item *itemAtual = tbs->topo_pilha;
-  int i=0;
+  tipo_variavel tipo= retornaTipo();
   while(itemAtual!= NULL && itemAtual->categoria == VS
-        && itemAtual->tipo==NULL){
-
-    itemAtual->tipo = (char *) malloc (256 * sizeof(char));
-    strcpy(itemAtual->tipo, token);
+        && itemAtual->tipo == -1){
+    itemAtual->tipo = tipo;
     itemAtual = itemAtual->itemAnt;
-    i++;
   }
 }
+
+
 
 void adiciona_deslocamento_param(){
   item *itemAtual = tbs->topo_pilha;
@@ -240,14 +275,13 @@ void adiciona_deslocamento_param(){
 
 void procura_compara(){
   item *itemAtual=procura_tbsimb(token,VS);
-  if(compItem!=NULL){
-    if(strcmp(compItem,itemAtual->tipo)!=0){
+  if(compItem!=-1){
+    if(compItem != itemAtual->tipo){
       yyerror("\n\nOperação não permitida, valores com tipos diferentes\n\n");
     }
   }
   else{
-    compItem = (char *) malloc (256 * sizeof(char));
-    strcpy(compItem,itemAtual->tipo);
+    compItem = itemAtual->tipo;
   }
 }
 
@@ -319,6 +353,18 @@ void carrega_valor_imprime(categorias cat){
   }
 }
 
+void verifica_chama_proc(){
+  if(procedure->param!=NULL &&  n_param_atual!=procedure->param->n_param){
+    printf("ERRO: Número de parametros passados: %d\n",n_param_atual);
+    printf("Número de parametros esperados: %d\n",procedure->param->n_param);
+    yyerror("");
+  }
+  free(param2);
+  param2 = (char *) malloc (4 * sizeof(char));
+  sprintf(param2, "%d", nivel_lexico_atual);
+  geraCodigo (NULL, "CHPR",procedure->rotulo,param2,NULL);
+}
+
 %}
 
 %token PROGRAM ABRE_PARENTESES FECHA_PARENTESES WRITE
@@ -341,10 +387,9 @@ programa    :{
                 nivel=0;
                 geraCodigo (NULL, "INPP",NULL,NULL,NULL); 
              }
-             PROGRAM IDENT 
+             PROGRAM IDENT{adiciona_ts(PROG,NULL);}
              ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
              bloco PONTO {
-              // O DMEM tem que ser feito no fim do bloco neh? coloquei comentário la
               geraCodigo (NULL, "PARA",NULL,NULL,NULL); 
              }
 ;
@@ -397,7 +442,7 @@ parse_proc_decl: ABRE_PARENTESES
                  declara_param param_loop 
                  FECHA_PARENTESES {
                     procedure->param=(lista_params *) malloc(sizeof(lista_params));
-                    memcpy(procedure->param,lp,sizeof(lista_params)); //Procedure definido com os parametros;
+                    memcpy(procedure->param,lp,sizeof(lista_params)); //Procedure definido com os par
                     adiciona_deslocamento_param();
                  } 
                  PONTO_E_VIRGULA {
@@ -419,12 +464,20 @@ param_loop: PONTO_E_VIRGULA declara_param param_loop |
 ;
 
 declara_param:
-             VAR  parse_declaracao| parse_declaracao
+            VAR{passado=REFERENCIA;}
+            parse_declaracao|
+            {passado=VALOR;}
+            parse_declaracao
 ;
 
 parse_declaracao:
-  IDENT{paramName = (char *) malloc (256 * sizeof(char));
-  strcpy(paramName,token);} DOIS_PONTOS IDENT{adiciona_param_ts(PF,NULL);}
+            IDENT{
+              free(paramName);
+              paramName = (char *) malloc (256 * sizeof(char));
+              strcpy(paramName,token);
+            }
+            DOIS_PONTOS 
+            IDENT{adiciona_param_ts(PF,NULL,passado);}
 ;
 
 blocoProc: 
@@ -488,7 +541,6 @@ comando:  IDENT
             procedure = procura_tbsimb(token,PROC);
             if(procedure==NULL){
               cria_valores_armz(VS);
-              
             }
           }
           parse_comando
@@ -503,30 +555,34 @@ parse_comando:
           ATRIBUICAO {
             if(procedure!=NULL){
               yyerror("Tipo de operação nao permitida");
-              exit(1);
             }
           }
           expressao_simples { 
-            compItem = NULL;
-            free(compItem);
+            compItem = -1;
             geraCodigo (NULL, "ARMZ",param1Aux,param2Aux,NULL);
           }
           |
-          {if(procedure==NULL){printf("Tipo de operação nao permitida"); return 0;}}
-          ABRE_PARENTESES{n_param_atual=0;} le_params FECHA_PARENTESES
           {
-            if(n_param_atual!=procedure->param->n_param){
-              printf("ERRO: Número de parametros passados: %d\n",n_param_atual);
-              printf("Número de parametros esperados: %d\n",procedure->param->n_param);
-              yyerror("");
-              return 0;
+            if(procedure==NULL){ 
+              yyerror("Tipo de operação nao permitida");
             }
-            free(param2);
-            param2 = (char *) malloc (4 * sizeof(char));
-            sprintf(param2, "%d", nivel_lexico_atual);
-            geraCodigo (NULL, "CHPR",procedure->rotulo,param2,NULL);
+          }
+          ABRE_PARENTESES{
+            n_param_atual=0;
+            param_chamada=1;
+            printf("procedure:%s\n\n\n",procedure->identificador);
+            temp=(lista_params *) malloc(sizeof(lista_params));
+            memcpy(temp,procedure->param,sizeof(lista_params));
+          } le_params FECHA_PARENTESES
+          {
+            free(temp);
+            param_chamada=0;
+            verifica_chama_proc();
           }
           |
+          { n_param_atual=0;
+            verifica_chama_proc();
+          }
 ;
 
 le_params:
@@ -534,7 +590,12 @@ le_params:
 ;
 
 get_param_loop: 
-          VIRGULA get_param get_param_loop |
+          VIRGULA{
+            printf("IdentParam:%s\n\n\n",temp->inicio->itemProx->identificador);
+            temp->inicio=temp->inicio->itemProx;
+            printf("IdentParam2:%s\n\n\n",temp->inicio->identificador);
+            }
+            le_params |
 ;
 
 get_param:
@@ -564,7 +625,7 @@ termo      : //ABRE_PARENTESES expressao_simples FECHA_PARENTESES|
 fator      :  ABRE_PARENTESES expressao_simples FECHA_PARENTESES|
               IDENT {
                 procura_compara();
-                gera_comando_crvl(token);
+                gera_comando_crvl(VS);
               }
               |NUMERO{
                 geraCodigo (NULL, "CRCT",token,NULL,NULL); 
@@ -643,7 +704,7 @@ prior1  :     prior1 MAIOR final {geraCodigo (NULL, "CMMA",NULL,NULL,NULL);}|
               final
 ;
 
-final   :     IDENT{gera_comando_crvl(token);} |
+final   :     IDENT{gera_comando_crvl(VS);} |
               NUMERO{geraCodigo (NULL, "CRCT",token,NULL,NULL);}
 ;
 
