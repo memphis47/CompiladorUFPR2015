@@ -23,7 +23,8 @@ typedef enum simbolos {
   simb_maior, simb_maior_igual, simb_menor,
   simb_menor_igual, simb_igual, simb_diferente,
   simb_while, simb_do,
-  simb_procedure
+  simb_procedure,
+  simb_function
 
 } simbolos;
 

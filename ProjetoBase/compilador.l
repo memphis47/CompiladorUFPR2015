@@ -101,6 +101,12 @@ procedure { simbolo  = simb_procedure;
           return PROCEDURE;
 }
 
+function { simbolo  = simb_function;  
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME("function ");
+          return FUNCTION;
+}
+
 
 \; { simbolo = simb_ponto_e_virgula;  
           strncpy (token, yytext, TAM_TOKEN);

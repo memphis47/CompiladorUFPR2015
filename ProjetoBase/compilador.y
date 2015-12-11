@@ -49,11 +49,15 @@ int nivel;
 int nivel_lexico_atual;
 int n_param_atual;
 int param_chamada = 0;
+int do_verify = 0;
+int no_proc=0;
 tipo_parametro passado;
 tipo_variavel  compItem = -1;
 
 item *procedure;
 item *tempItemArmz;
+item *tempFunc;
+categorias tempCategoria;
 
 
 int yyerror (char *msg) {
@@ -88,7 +92,7 @@ item * procura_tbsimb(char * token, categorias cat){
 }
 
 
-void gera_comando_crvl(categorias cat){
+int gera_comando_crvl(categorias cat){
   item *item = procura_tbsimb(token,cat);
   if(item!=NULL){
     free(param1);
@@ -98,10 +102,6 @@ void gera_comando_crvl(categorias cat){
     param2 = (char *) malloc (4 * sizeof(char));
     sprintf(param1, "%d", item->nivel_lexico);
     sprintf(param2, "%d", item->deslocamento);
-    printf("\n\n\nCategoria: %d\n\n\n",cat);
-    printf("Item: %s\n\n\n",item->identificador);
-    printf("Passagem: %d\n\n\n",item->passagem);
-    printf("ParamChamada: %d\n\n\n",param_chamada);
     if(param_chamada && temp->inicio->passagem == REFERENCIA){ //chamada de parametro passado por referencia
       if(item->tipo == temp->inicio->tipo){
         geraCodigo (NULL, "CREN",param1,param2,NULL);
@@ -118,10 +118,10 @@ void gera_comando_crvl(categorias cat){
     else{
       geraCodigo (NULL, "CRVL",param1,param2,NULL); 
     }
+    return 1;
   } 
-  else if(cat != PF){
-    gera_comando_crvl(PF);
-  }
+  return 0;
+  
 }
 
 void adiciona_item_lista(){
@@ -195,12 +195,13 @@ void adiciona_ts(categorias cat,char *rot){
   auxItem->categoria = cat;
   auxItem->nivel_lexico = nivel_lexico_atual;
   auxItem->deslocamento = desl;
+  auxItem->passagem = -1;
   if(rot!=NULL){
     auxItem->rotulo = (char *) malloc (256 * sizeof(char));
     strcpy(auxItem->rotulo,rot);
   }
   tbs->n_itens = tbs->n_itens++;
-  if(cat == PROC){
+  if(cat == PROC || cat == FUN){
     procedure=auxItem;
   }
   tbs->topo_pilha = auxItem;
@@ -261,13 +262,16 @@ void adiciona_deslocamento_param(){
   item *itemAtual = tbs->topo_pilha;
   int i=-4;
   int param=0;
-  while(itemAtual!= NULL && itemAtual->categoria != PROC){
+  while(itemAtual!= NULL && itemAtual->categoria != PROC && itemAtual->categoria != FUN){
     if(itemAtual->categoria==PF){
       itemAtual->deslocamento = i;
     }
     itemAtual = itemAtual->itemAnt;
     i--;
     param++;
+  }
+  if(itemAtual->categoria == FUN){
+    procedure->deslocamento=i;
   }
   procedure->param->n_param=param;
 }
@@ -276,15 +280,20 @@ void adiciona_deslocamento_param(){
   YYERROR
   */
 
-void procura_compara(){
-  item *itemAtual=procura_tbsimb(token,VS);
-  if(compItem!=-1){
+int procura_compara(categorias cat){
+  item *itemAtual=procura_tbsimb(token,cat);
+  if(compItem!=-1 && itemAtual!=NULL){
     if(compItem != itemAtual->tipo){
       yyerror("\n\nOperação não permitida, valores com tipos diferentes\n\n");
     }
+    return 1;
+  }
+  else if(itemAtual!=NULL){
+    compItem = itemAtual->tipo;
+    return 1;
   }
   else{
-    compItem = itemAtual->tipo;
+    return 0;
   }
 }
 
@@ -339,8 +348,8 @@ item* cria_valores_armz(categorias cat){
   return item;
 }
 
-void carrega_valor_imprime(categorias cat){
-  gera_comando_crvl(cat);
+void carrega_valor_imprime(){
+  
   geraCodigo (NULL, "IMPR",NULL,NULL,NULL);
 }
 
@@ -353,7 +362,24 @@ void verifica_chama_proc(){
   free(param2);
   param2 = (char *) malloc (4 * sizeof(char));
   sprintf(param2, "%d", nivel_lexico_atual);
+  
   geraCodigo (NULL, "CHPR",procedure->rotulo,param2,NULL);
+}
+
+void define_else(){
+  char rtn[4];
+  sprintf(rtn, "%d", rotNumber);
+  char rot[]="R";
+  strcat(rot, rtn);
+  char *strRot = (char *) malloc (256 * sizeof(char));
+  strcpy(strRot,rot);
+  
+  geraCodigo (NULL, "DSVS",strRot,NULL,NULL);
+  geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
+  remove_item_lista(lr->fim->identificador);
+  if(lr->fim->itemAnt != NULL)
+    lr->fim=lr->fim->itemAnt;
+  adiciona_item_lista();
 }
 
 %}
@@ -366,6 +392,7 @@ void verifica_chama_proc(){
 %token WHILE DO
 %token DIFE IGUAL MAEG MAIOR MENOR MEEG
 %token PROCEDURE
+%token FUNCTION
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
 
@@ -397,11 +424,11 @@ parse_bloco:
               adiciona_item_lista();
               geraCodigo (NULL, "DSVS",lr->fim->identificador,NULL,NULL);
             } 
-            proc_com 
+            proc_func_def_loop
             {
-              remove_item_lista(lr->fim->identificador);
               geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
             }
+            
             comando_composto{ doDmem(); }
             |
             comando_composto{ doDmem(); }
@@ -409,25 +436,43 @@ parse_bloco:
 
 ;
 
-
-proc_com:  PROCEDURE IDENT{
-              nivel_lexico_atual++;
-              free(rots);
-              rots=(char *) malloc (5* sizeof(char));
-              rots=retornaRotulo(); 
-              adiciona_ts(PROC,rots);
-            } 
-           parse_proc_decl
-           
-           blocoProc PONTO_E_VIRGULA
-           {
-             char lexico[4];
-             sprintf(lexico, "%d", nivel_lexico_atual);
-             geraCodigo (NULL, "RTPR",lexico,"0",NULL); 
-             nivel_lexico_atual--;
-           }
+proc_func_def_loop:
+                  proc_func_def proc_func_def_loop |
 ;
 
+proc_func_def:
+              proc_func_def_choose proc_com
+;
+
+proc_func_def_choose:
+              PROCEDURE{tempCategoria=PROC;}  | 
+              FUNCTION{tempCategoria=FUN;}
+;
+
+proc_com: IDENT{
+            nivel_lexico_atual++;
+            free(rots);
+            rots=(char *) malloc (5* sizeof(char));
+            rots=retornaRotulo(); 
+            adiciona_ts(tempCategoria,rots);
+          } 
+          parse_proc_decl PONTO_E_VIRGULA
+          {
+            char lexico[4];
+            sprintf(lexico, "%d", nivel_lexico_atual);
+            geraCodigo (rots, "ENPR",lexico,NULL,NULL); 
+            adiciona_item_lista();
+          } 
+          
+          blocoProc PONTO_E_VIRGULA
+          {
+            remove_item_lista(lr->fim->identificador);
+            char lexico[4];
+            sprintf(lexico, "%d", nivel_lexico_atual);
+            geraCodigo (NULL, "RTPR",lexico,"0",NULL); 
+            nivel_lexico_atual--;
+          }
+;
 
 parse_proc_decl: ABRE_PARENTESES 
                  declara_param param_loop 
@@ -435,20 +480,21 @@ parse_proc_decl: ABRE_PARENTESES
                     procedure->param=(lista_params *) malloc(sizeof(lista_params));
                     memcpy(procedure->param,lp,sizeof(lista_params)); //Procedure definido com os par
                     adiciona_deslocamento_param();
-                 } 
-                 PONTO_E_VIRGULA {
-                    char lexico[4];
-                    sprintf(lexico, "%d", nivel_lexico_atual);
-                    geraCodigo (rots, "ENPR",lexico,NULL,NULL); 
-                    adiciona_item_lista();
-                  } 
-                  |
-                 PONTO_E_VIRGULA {
-                    char lexico[4];
-                    sprintf(lexico, "%d", nivel_lexico_atual);
-                    geraCodigo (rots, "ENPR",lexico,NULL,NULL); 
-                    adiciona_item_lista();
-                  }
+                 }
+                 func_type
+;
+
+func_type:
+          DOIS_PONTOS IDENT{
+            tipo_variavel tipo= retornaTipo();
+            procedure->tipo = tipo;
+            lp->inicio=NULL;
+            lp->fim=NULL;
+          } |
+          {
+            lp->inicio=NULL;
+            lp->fim=NULL;
+          }
 ;
 
 param_loop: PONTO_E_VIRGULA declara_param param_loop | 
@@ -473,15 +519,8 @@ parse_declaracao:
 
 blocoProc: 
               {desl=0;}parte_declara_vars { reza(); } 
-              parse_bloco_proc |
-              parse_bloco_proc
-;
-
-parse_bloco_proc:
-              proc_com 
-              comando_composto{ doDmem(); }
-              |
-              comando_composto{ doDmem(); }
+              parse_bloco|
+              parse_bloco
 ;
 
 parte_declara_vars:  var 
@@ -524,14 +563,19 @@ lista_idents: lista_idents VIRGULA IDENT
 
 comando_composto: T_BEGIN comando comando_composto_loop T_END ;
 
-comando_composto_loop: PONTO_E_VIRGULA comando comando_composto_loop | PONTO_E_VIRGULA
+comando_composto_loop: PONTO_E_VIRGULA comando comando_composto_loop | PONTO_E_VIRGULA | 
 ; 
 
 comando:  IDENT
           {
             procedure = procura_tbsimb(token,PROC);
+            no_proc=0;
             if(procedure==NULL){
-              tempItemArmz = cria_valores_armz(VS);
+              procedure = procura_tbsimb(token,FUN);
+              if(procedure == NULL){
+                tempItemArmz = cria_valores_armz(VS);
+              }
+              no_proc=1;
             }
           }
           parse_comando
@@ -544,7 +588,7 @@ comando:  IDENT
 parse_comando:
           
           ATRIBUICAO {
-            if(procedure!=NULL){
+            if(procedure!=NULL && !no_proc){
               yyerror("Tipo de operação nao permitida");
             }
           }
@@ -557,9 +601,18 @@ parse_comando:
             }
           }
           |
+          procedure_function_call
+;
+
+procedure_function_call:
           {
-            if(procedure==NULL){ 
-              yyerror("Tipo de operação nao permitida");
+            if(procedure==NULL){
+                yyerror("Tipo de operação nao permitida");
+            }
+            if(procedure->categoria==FUN){
+              param1Aux = (char *) malloc (4 * sizeof(char));
+              sprintf(param1Aux, "%d", 1);
+              geraCodigo (NULL, "AMEM",param1Aux,NULL);
             }
           }
           ABRE_PARENTESES{
@@ -574,8 +627,12 @@ parse_comando:
             verifica_chama_proc();
           }
           |
-          { n_param_atual=0;
-            verifica_chama_proc();
+          { 
+            
+            if(procedure!=NULL && do_verify){
+              n_param_atual=0;
+              verifica_chama_proc();
+            }
           }
 ;
 
@@ -614,20 +671,41 @@ termo      : //ABRE_PARENTESES expressao_simples FECHA_PARENTESES|
              fator
 ;
 
-fator      :  ABRE_PARENTESES expressao_simples FECHA_PARENTESES|
-              IDENT {
-                procura_compara();
-                gera_comando_crvl(VS);
+fator      :  ABRE_PARENTESES expressao_simples FECHA_PARENTESES
+              |IDENT {
+                if(!procura_compara(VS)){
+                  if(!procura_compara(PF)){
+                    if(!procura_compara(FUN)){
+                      printf("Valor %s não encontrado\n\n",token);
+                      yyerror("");
+                    }
+                  }
+                }
+                
+                if(!gera_comando_crvl(VS)){
+                  if(!gera_comando_crvl(PF)){
+                    procedure = procura_tbsimb(token,FUN);
+                    if(procedure == NULL){
+                      printf("Valor %s não encontrado\n\n",token);
+                      yyerror("");
+                    }
+                    do_verify=1;
+                  }
+                  else
+                    do_verify=0;
+                }
+                else{
+                  do_verify=0;
+                }
               }
+              procedure_function_call
               |NUMERO{
                 geraCodigo (NULL, "CRCT",token,NULL,NULL); 
               }
 ;
 
-comando_write : WRITE ABRE_PARENTESES IDENT {
-                  printf("\n\n\nIdent:%s\n\n",token);
-                  param_chamada=0;
-                  carrega_valor_imprime(VS);
+comando_write : WRITE ABRE_PARENTESES expressao_simples {
+                  carrega_valor_imprime();
                 } FECHA_PARENTESES |
                 WRITE ABRE_PARENTESES NUMERO FECHA_PARENTESES
 ;
@@ -648,23 +726,17 @@ if_then     : IF expressao {
 ;
 
 cond_else   : ELSE{
-                char rtn[4];
-                sprintf(rtn, "%d", rotNumber);
-                char rot[]="R";
-                strcat(rot, rtn);
-                char *strRot = (char *) malloc (256 * sizeof(char));
-                strcpy(strRot,rot);
-                
-                geraCodigo (NULL, "DSVS",strRot,NULL,NULL);
-                geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
-                if(lr->fim->itemAnt != NULL)
-                  lr->fim=lr->fim->itemAnt;
-                adiciona_item_lista();
-              } internal 
+                define_else();
+              } 
+              internal 
+              
             | %prec LOWER_THAN_ELSE
+            | PONTO_E_VIRGULA
+            
+              
 ;
 
-internal: comando| comando_composto PONTO_E_VIRGULA ;
+internal: comando  | comando_composto  ;
 
 comando_repetitivo:
                      com_while ;
@@ -684,22 +756,18 @@ com_while:    {
                         }
 ;
 
-expressao   : ABRE_PARENTESES prior2 FECHA_PARENTESES ;
+expressao   : ABRE_PARENTESES prior2 FECHA_PARENTESES | prior2;
 
 prior2  :     prior2 IGUAL prior1 {geraCodigo (NULL, "CMIG",NULL,NULL,NULL);}|
               prior2 DIFE  prior1 {geraCodigo (NULL, "CMDG",NULL,NULL,NULL);}|
               prior1
 ;
 
-prior1  :     prior1 MAIOR final {geraCodigo (NULL, "CMMA",NULL,NULL,NULL);}|
-              prior1 MENOR final {geraCodigo (NULL, "CMME",NULL,NULL,NULL);}|
-              prior1 MAEG  final {geraCodigo (NULL, "CMAG",NULL,NULL,NULL);}| 
-              prior1 MEEG  final {geraCodigo (NULL, "CMEG",NULL,NULL,NULL);}|
-              final
-;
-
-final   :     IDENT{gera_comando_crvl(VS);} |
-              NUMERO{geraCodigo (NULL, "CRCT",token,NULL,NULL);}
+prior1  :     prior1 MAIOR expressao_simples {geraCodigo (NULL, "CMMA",NULL,NULL,NULL);}|
+              prior1 MENOR expressao_simples {geraCodigo (NULL, "CMME",NULL,NULL,NULL);}|
+              prior1 MAEG  expressao_simples {geraCodigo (NULL, "CMAG",NULL,NULL,NULL);}| 
+              prior1 MEEG  expressao_simples {geraCodigo (NULL, "CMEG",NULL,NULL,NULL);}|
+              expressao_simples
 ;
 
 %%
