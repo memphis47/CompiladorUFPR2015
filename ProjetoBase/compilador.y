@@ -186,18 +186,39 @@ void remove_item_lista(char *token){
 int remove_ts(){
   item *itemAtual = tbs->topo_pilha;
   int count = 0;
-  while(itemAtual!= NULL && (itemAtual->nivel_lexico > nivel_lexico_atual || itemAtual->categoria == VS || itemAtual->categoria == PF)){
+  while(itemAtual!= NULL 
+  && (itemAtual->nivel_lexico > nivel_lexico_atual 
+  || itemAtual->categoria == VS || itemAtual->categoria == PF)){
     item *aux = itemAtual;
-    itemAtual = itemAtual->itemAnt;
-    free(aux);
     if(itemAtual->categoria==VS)
       count++;
+    itemAtual = itemAtual->itemAnt;
+    free(aux);
+    
   }
   tbs->topo_pilha = itemAtual;
   return count;
 }
 
+
+void verifica_existencia(){
+  item* item=procura_tbsimb(token,VS);
+  if(item == NULL){
+    item=procura_tbsimb(token,PF);
+    if(item!= NULL){
+      if(item->nivel_lexico == nivel_lexico_atual)
+        yyerror("Variavel já declarada\n");
+    }
+  }
+  else{
+    if(item->nivel_lexico == nivel_lexico_atual)
+        yyerror("Variavel já declarada\n");
+  }
+}
+
+
 void adiciona_ts(categorias cat,char *rot){
+  verifica_existencia();
   item *auxItem = (item *) malloc (sizeof(item));
   auxItem->itemAnt = tbs->topo_pilha;
   auxItem->itemProx = NULL;
@@ -576,10 +597,14 @@ proc_com: IDENT{
             char lexico[4];
             sprintf(lexico, "%d", nivel_lexico_atual);
             char np[4];
+            
             procedure = procura_tbsimb(ident,PROC);
             if(procedure == NULL)
               procedure = procura_tbsimb(ident,FUN);
-            sprintf(np, "%d", procedure->param->n_param);
+            if(procedure->param!=NULL)
+              sprintf(np, "%d", procedure->param->n_param);
+            else
+              sprintf(np, "%d", 0);
             geraCodigo (NULL, "RTPR",lexico,np,NULL); 
             nivel_lexico_atual--;
           }
@@ -592,6 +617,8 @@ parse_proc_decl: ABRE_PARENTESES
                     memcpy(procedure->param,lp,sizeof(lista_params)); //Procedure definido com os par
                     adiciona_deslocamento_param();
                  }
+                 func_type
+                 |
                  func_type
 ;
 
@@ -638,7 +665,6 @@ blocoProc:
 parte_declara_vars:  var 
 ;
 
-
 var         : VAR declara_vars
 ;
 
@@ -682,6 +708,7 @@ comando:  IDENT
           {
             procedure = procura_tbsimb(token,PROC);
             no_proc=0;
+            
             if(procedure==NULL){
               procedure = procura_tbsimb(token,FUN);
               if(procedure == NULL){
@@ -689,6 +716,8 @@ comando:  IDENT
               }
               no_proc=1;
             }
+            else
+              do_verify=1;
           }
           parse_comando
           | comando_write
@@ -903,7 +932,7 @@ com_while:    {
                         }
 ;
 
-expressao   : ABRE_PARENTESES prior2 FECHA_PARENTESES | prior2;
+expressao   :  prior2;
 
 prior2  :     prior2 IGUAL prior1 {geraCodigo (NULL, "CMIG",NULL,NULL,NULL);}|
               prior2 DIFE  prior1 {geraCodigo (NULL, "CMDG",NULL,NULL,NULL);}|

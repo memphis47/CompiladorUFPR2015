@@ -1,6 +1,6 @@
 program exemplo75 (input, output);
 label 100,200;
-var m,n :  integer;
+var m,n : integer;
     procedure p(var k:integer; s:integer);
     var x,z : integer;
     begin

@@ -186,6 +186,7 @@ else   {  simbolo = simb_else;
 
 }
 
+
 {maior}   {  simbolo = simb_maior;
         strncpy (token, yytext, TAM_TOKEN);
         IMPRIME(" > ");
@@ -205,7 +206,6 @@ else   {  simbolo = simb_else;
         strncpy (token, yytext, TAM_TOKEN);
         IMPRIME(" < ");
         return MENOR;
-
 }
 
 {menor_igual}  {  simbolo = simb_menor_igual;
@@ -229,18 +229,6 @@ else   {  simbolo = simb_else;
 
 }
 
-{ident} { simbolo = simb_identificador; 
-          strncpy (token, yytext, TAM_TOKEN);
-          IMPRIME(" ident  ");
-          return IDENT;
-        }
-
-{numero} { simbolo = simb_numero; 
-          strncpy (token, yytext, TAM_TOKEN);
-          IMPRIME(" numero  ");
-          return NUMERO;
-        }
-
 \+    { simbolo = simb_soma;
         strncpy (token, yytext, TAM_TOKEN);
         IMPRIME(" soma ");
@@ -256,10 +244,27 @@ else   {  simbolo = simb_else;
         IMPRIME(" multiplicacao ");
         return MUL;  }
 
-\/    { simbolo = simb_div;
+
+div    { simbolo = simb_div;
         strncpy (token, yytext, TAM_TOKEN);
-        IMPRIME(" divisao ");
+        IMPRIME("div ");
         return DIV;  }
+
+{ident} { simbolo = simb_identificador; 
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" ident  ");
+          return IDENT;
+        }
+
+{numero} { simbolo = simb_numero; 
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" numero  ");
+          return NUMERO;
+        }
+
+
+
+
 
 
 
