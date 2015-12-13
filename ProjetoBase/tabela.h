@@ -7,6 +7,8 @@ struct item
   char *rotulo;
   int  nivel_lexico;
   int  deslocamento;
+  int  pendente;
+  int  decl;
   categorias categoria;
   tipo_parametro passagem;
   tipo_variavel tipo; // mudar depois para enum

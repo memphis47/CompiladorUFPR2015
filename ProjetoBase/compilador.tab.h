@@ -76,7 +76,10 @@ extern int yydebug;
     MEEG = 286,
     PROCEDURE = 287,
     FUNCTION = 288,
-    LOWER_THAN_ELSE = 289
+    LABEL = 289,
+    GOTO = 290,
+    READ = 291,
+    LOWER_THAN_ELSE = 292
   };
 #endif
 

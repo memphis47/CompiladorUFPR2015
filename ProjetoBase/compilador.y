@@ -12,7 +12,6 @@
 #include "tabela.h"
 
 int num_vars;
-int desl;
 typedef struct itemLista itemLista;
 
 struct itemLista
@@ -31,6 +30,8 @@ typedef struct lista_rotulos
 
 
 tabela_simbolos *tbs;
+tabela_simbolos *tbgoto;
+tabela_simbolos *tbgotopendentes;
 lista_rotulos *lr;
 lista_params *lp;
 lista_params *temp;
@@ -81,6 +82,18 @@ tipo_variavel retornaTipo(){
 
 item * procura_tbsimb(char * token, categorias cat){
   item *itemAtual = tbs->topo_pilha;
+  while(itemAtual != NULL){
+    if(strcmp (token, itemAtual->identificador) == 0 
+    && itemAtual->categoria == cat){
+      return itemAtual;
+    }
+    itemAtual = itemAtual->itemAnt;
+  }
+  return NULL;
+}
+
+item * procura_tbgoto(char * token, categorias cat){
+  item *itemAtual = tbgoto->topo_pilha;
   while(itemAtual != NULL){
     if(strcmp (token, itemAtual->identificador) == 0 
     && itemAtual->categoria == cat){
@@ -173,12 +186,12 @@ void remove_item_lista(char *token){
 int remove_ts(){
   item *itemAtual = tbs->topo_pilha;
   int count = 0;
-  while(itemAtual!= NULL && itemAtual->categoria == VS 
-  && itemAtual->nivel_lexico == nivel_lexico_atual){
+  while(itemAtual!= NULL && (itemAtual->nivel_lexico > nivel_lexico_atual || itemAtual->categoria == VS || itemAtual->categoria == PF)){
     item *aux = itemAtual;
     itemAtual = itemAtual->itemAnt;
     free(aux);
-    count++;
+    if(itemAtual->categoria==VS)
+      count++;
   }
   tbs->topo_pilha = itemAtual;
   return count;
@@ -194,7 +207,10 @@ void adiciona_ts(categorias cat,char *rot){
   strcpy(auxItem->identificador,token);
   auxItem->categoria = cat;
   auxItem->nivel_lexico = nivel_lexico_atual;
-  auxItem->deslocamento = desl;
+  if(cat==VS){
+    auxItem->deslocamento = desl;
+    desl ++;
+  }
   auxItem->passagem = -1;
   if(rot!=NULL){
     auxItem->rotulo = (char *) malloc (256 * sizeof(char));
@@ -205,9 +221,26 @@ void adiciona_ts(categorias cat,char *rot){
     procedure=auxItem;
   }
   tbs->topo_pilha = auxItem;
-  desl ++;
+  
 }
 
+void adiciona_label(){
+  item *auxItem = (item *) malloc (sizeof(item));
+  auxItem->itemAnt = tbgoto->topo_pilha;
+  auxItem->itemProx = NULL;
+  auxItem->tipo = -1;
+  auxItem->identificador = (char *) malloc (256 * sizeof(char));
+  strcpy(auxItem->identificador,token);
+  auxItem->rotulo = (char *) malloc (256 * sizeof(char));
+  strcpy(auxItem->rotulo,lr->fim->identificador);
+  auxItem->categoria = LAB;
+  auxItem->nivel_lexico = nivel_lexico_atual;
+  auxItem->passagem = -1;
+  auxItem->decl = 0;
+  auxItem->pendente = 1;
+  tbgoto->n_itens = tbgoto->n_itens++;
+  tbgoto->topo_pilha = auxItem;
+}
 
 void adiciona_param_ts(categorias cat,char *rot, tipo_parametro passagem){
   item *auxItem = (item *) malloc (sizeof(item));
@@ -242,9 +275,7 @@ void adiciona_param_ts(categorias cat,char *rot, tipo_parametro passagem){
     lp->fim->itemProx=fim;
     lp->fim = fim;
   }
-  desl ++;
 }
-
 
 void adiciona_tipo_ts(int nvars){
   item *itemAtual = tbs->topo_pilha;
@@ -255,8 +286,6 @@ void adiciona_tipo_ts(int nvars){
     itemAtual = itemAtual->itemAnt;
   }
 }
-
-
 
 void adiciona_deslocamento_param(){
   item *itemAtual = tbs->topo_pilha;
@@ -309,7 +338,19 @@ void reza(){
   }  
 }
 
+void verifyLabels(){
+  item *itemAtual = tbgoto->topo_pilha;
+  while(itemAtual!= NULL && itemAtual->nivel_lexico == nivel_lexico_atual){
+      if(itemAtual->pendente){
+        printf("ERRO: Label %s foi chamada porem não foi instanciada\n",itemAtual->identificador);
+        yyerror("");
+      }
+    itemAtual = itemAtual->itemAnt;
+  }
+}
+
 void doDmem(){
+  verifyLabels();
   num_vars=remove_ts();
   if(num_vars>0){
     param1 = (char *) malloc (4 * sizeof(char));
@@ -348,11 +389,6 @@ item* cria_valores_armz(categorias cat){
   return item;
 }
 
-void carrega_valor_imprime(){
-  
-  geraCodigo (NULL, "IMPR",NULL,NULL,NULL);
-}
-
 void verifica_chama_proc(){
   if(procedure->param!=NULL &&  n_param_atual!=procedure->param->n_param){
     printf("ERRO: Número de parametros passados: %d\n",n_param_atual);
@@ -382,6 +418,55 @@ void define_else(){
   adiciona_item_lista();
 }
 
+int getNumVars(){
+  item *itemAtual = tbs->topo_pilha;
+  int vars=0;
+  while(itemAtual!= NULL 
+        && itemAtual->nivel_lexico <= nivel_lexico_atual){
+    
+    if(itemAtual->categoria == VS && itemAtual->nivel_lexico == nivel_lexico_atual)
+      vars++;
+    itemAtual = itemAtual->itemAnt;
+  }
+  return vars;
+}
+
+void define_enrt(){
+  item* item = procura_tbgoto(token,LAB);
+  
+  if(item!=NULL){
+    if(!item->decl){
+      char lexico[4];
+      char nVars[4];
+      sprintf(lexico, "%d", nivel_lexico_atual);
+      item->pendente=0;
+      sprintf(nVars, "%d", getNumVars());
+      geraCodigo(item->rotulo,"ENRT",lexico,nVars,NULL);
+      item->decl=1;
+    }
+    else
+      yyerror("Label declarado anteriormente\n");
+  }
+  else
+    yyerror("Label não encontrada\n");
+}
+
+void desv_rot(){
+  item* item = procura_tbgoto(token,LAB);
+  
+  if(item!=NULL){
+    char atLexico[4];
+    char destlexico[4];
+    sprintf(atLexico, "%d", nivel_lexico_atual);
+    sprintf(destlexico, "%d", item->nivel_lexico);
+    if(!item->decl)
+      item->pendente=1;
+    geraCodigo(NULL,"DSVR",item->rotulo,destlexico,atLexico);
+  }
+}
+
+
+
 %}
 
 %token PROGRAM ABRE_PARENTESES FECHA_PARENTESES WRITE
@@ -393,6 +478,8 @@ void define_else(){
 %token DIFE IGUAL MAEG MAIOR MENOR MEEG
 %token PROCEDURE
 %token FUNCTION
+%token LABEL GOTO
+%token READ
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
 
@@ -413,10 +500,26 @@ programa    :{
 ;
 
 bloco       : 
+              parte_declara_labels
               parte_declara_vars { 
                 reza();
               }
               parse_bloco
+;
+
+parte_declara_labels:
+              LABEL le_label le_label_loop PONTO_E_VIRGULA|
+;
+
+le_label_loop: VIRGULA le_label le_label_loop |
+;
+
+le_label:
+          NUMERO {
+            adiciona_item_lista();
+            adiciona_label();
+            remove_item_lista(lr->fim->identificador);
+          }
 ;
 
 parse_bloco:
@@ -526,6 +629,7 @@ parse_declaracao:
 ;
 
 blocoProc: 
+              parte_declara_labels
               {desl=0;}parte_declara_vars { reza(); } 
               parse_bloco|
               parse_bloco
@@ -569,9 +673,9 @@ lista_idents: lista_idents VIRGULA IDENT
 
 // Comandos a serem executados.
 
-comando_composto: T_BEGIN comando comando_composto_loop T_END ;
+comando_composto: T_BEGIN verify_goto comando comando_composto_loop T_END ;
 
-comando_composto_loop: PONTO_E_VIRGULA comando comando_composto_loop | PONTO_E_VIRGULA | 
+comando_composto_loop: PONTO_E_VIRGULA verify_goto comando comando_composto_loop | PONTO_E_VIRGULA | 
 ; 
 
 comando:  IDENT
@@ -588,9 +692,24 @@ comando:  IDENT
           }
           parse_comando
           | comando_write
+          | comando_le
           | cond_if
           | comando_repetitivo
+          | comando_goto
 
+;
+
+
+
+
+verify_goto:
+            NUMERO {
+              define_enrt();
+            } DOIS_PONTOS | 
+;
+
+comando_goto:
+            GOTO NUMERO {desv_rot();}
 ;
 
 parse_comando:
@@ -712,12 +831,32 @@ fator      :  ABRE_PARENTESES expressao_simples FECHA_PARENTESES
               }
 ;
 
-comando_write : WRITE ABRE_PARENTESES expressao_simples {
-                  carrega_valor_imprime();
-                } FECHA_PARENTESES |
-                WRITE ABRE_PARENTESES NUMERO FECHA_PARENTESES
+comando_write : WRITE ABRE_PARENTESES comando_write_once comando_write_loop 
+                FECHA_PARENTESES
 ;
 
+comando_write_loop : VIRGULA comando_write_once comando_write_loop |
+;
+
+comando_write_once :  expressao_simples {
+                        geraCodigo (NULL, "IMPR",NULL,NULL,NULL);
+                      }
+;
+
+comando_le:
+            READ ABRE_PARENTESES le_simples le_loop FECHA_PARENTESES
+;
+
+le_loop:
+        VIRGULA le_simples le_loop |
+;
+
+le_simples:
+            IDENT{
+              geraCodigo(NULL,"LEIT",NULL,NULL,NULL);
+              cria_valores_armz(VS);
+              geraCodigo (NULL, "ARMZ",param1Aux,param2Aux,NULL);
+            }
 
 cond_if     : if_then cond_else 
             { 
@@ -800,17 +939,25 @@ main (int argc, char** argv) {
  *  Inicia a Tabela de Símbolos
  * ------------------------------------------------------------------- */
    tbs = (tabela_simbolos *) malloc (sizeof(tabela_simbolos));
+   tbgoto = (tabela_simbolos *) malloc (sizeof(tabela_simbolos));
+   tbgotopendentes = (tabela_simbolos *) malloc (sizeof(tabela_simbolos));
    lr = (lista_rotulos *) malloc (sizeof(lista_rotulos));
    lp = (lista_params *) malloc (sizeof(lista_params));
    tbs->topo_pilha = NULL;
+   tbgoto->topo_pilha = NULL;
+   tbgotopendentes->topo_pilha = NULL;
    lr->inicio = NULL;
    lp->inicio = NULL;
 
    tbs->fim_pilha = NULL;
+   tbgoto->fim_pilha = NULL;
+   tbgotopendentes->fim_pilha = NULL;
    lr->fim = NULL;
    lp->fim = NULL;
 
    tbs->itens = NULL;
+   tbgoto->itens = NULL;
+   tbgotopendentes->itens = NULL;
 
    tbs->n_itens = 0;
    lr->n_rotulos = 0;

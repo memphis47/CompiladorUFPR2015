@@ -49,6 +49,12 @@ program { simbolo  = simb_program;
           IMPRIME("program ");
           return PROGRAM;
  }
+ 
+label  {  simbolo = simb_label;  
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME("label  ");
+          return LABEL;
+        }
 
 var      { simbolo = simb_var;  
           strncpy (token, yytext, TAM_TOKEN);
@@ -74,11 +80,25 @@ end { simbolo = simb_end;
           return ATRIBUICAO;  
 }
 
+goto  {  simbolo = simb_goto;  
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME("goto  ");
+          return GOTO;
+        }
+
+
 write {
      simbolo = simb_write;
      strncpy (token, yytext, TAM_TOKEN);
      IMPRIME(" write  ");
      return WRITE;  
+}
+
+read {
+     simbolo = simb_read;
+     strncpy (token, yytext, TAM_TOKEN);
+     IMPRIME(" read  ");
+     return READ;  
 }
 
 while {

@@ -24,7 +24,9 @@ typedef enum simbolos {
   simb_menor_igual, simb_igual, simb_diferente,
   simb_while, simb_do,
   simb_procedure,
-  simb_function
+  simb_function,
+  simb_label, simb_goto,
+  simb_read
 
 } simbolos;
 
@@ -35,6 +37,7 @@ typedef enum categorias {
   PROC, // Procedure 3
   PROG, // Program 4
   ROT, // Rotulo 5
+  LAB
 } categorias;
 
 typedef enum tipo_parametro {
