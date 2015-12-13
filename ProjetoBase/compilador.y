@@ -450,6 +450,9 @@ proc_func_def_choose:
 ;
 
 proc_com: IDENT{
+            free(ident);
+            ident = (char *) malloc (256*sizeof(char));
+            strcpy(ident,token);
             nivel_lexico_atual++;
             free(rots);
             rots=(char *) malloc (5* sizeof(char));
@@ -469,7 +472,12 @@ proc_com: IDENT{
             remove_item_lista(lr->fim->identificador);
             char lexico[4];
             sprintf(lexico, "%d", nivel_lexico_atual);
-            geraCodigo (NULL, "RTPR",lexico,"0",NULL); 
+            char np[4];
+            procedure = procura_tbsimb(ident,PROC);
+            if(procedure == NULL)
+              procedure = procura_tbsimb(ident,FUN);
+            sprintf(np, "%d", procedure->param->n_param);
+            geraCodigo (NULL, "RTPR",lexico,np,NULL); 
             nivel_lexico_atual--;
           }
 ;

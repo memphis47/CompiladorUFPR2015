@@ -14,7 +14,7 @@ R1: ENPR 1
     CRVL 0,1
     IMPR
     DMEM 2
-    RTPR 1,0
+    RTPR 1,2
 R2: ENPR 1
     CRVL 1,-4
     CRCT 0
@@ -37,7 +37,7 @@ R3: NADA
 R4: NADA 
     CRVL 1,-4
     IMPR
-    RTPR 1,0
+    RTPR 1,1
 R0: NADA 
     CRCT 2
     ARMZ 0,1
