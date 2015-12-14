@@ -34,6 +34,7 @@ tabela_simbolos *tbs;
 tabela_simbolos *tbgoto;
 tabela_simbolos *tbgotopendentes;
 lista_rotulos *lr;
+lista_rotulos *lista_comparacoes;
 lista_params *lp;
 lista_params *temp;
 char *param1;
@@ -55,8 +56,10 @@ int param_chamada = 0;
 int do_verify = 0;
 int no_proc=0;
 int rtprdone= 0;
+int compara=0;
 tipo_parametro passado;
 tipo_variavel  compItem = -1;
+tipo_variavel  resultExpected = -1;
 
 item *procedure;
 item *procedureSimpleExpr;
@@ -106,7 +109,6 @@ item * procura_tbsimb_categoria(categorias cat){
   return NULL;
 }
 
-
 item * procura_tbgoto(char * token, categorias cat){
   item *itemAtual = tbgoto->topo_pilha;
   while(itemAtual != NULL){
@@ -118,7 +120,6 @@ item * procura_tbgoto(char * token, categorias cat){
   }
   return NULL;
 }
-
 
 int gera_comando_crvl(categorias cat){
   item *item = procura_tbsimb(token);
@@ -192,6 +193,26 @@ void adiciona_item_lista(){
   rotNumber++;
 }
 
+
+void adiciona_item_lista_comparacao(char *comp){
+  itemLista *auxItem = (itemLista *) malloc (sizeof(itemLista));
+
+
+  auxItem->identificador = (char *) malloc (256 * sizeof(char));
+  strcpy(auxItem->identificador,comp);
+  
+
+  if(lista_comparacoes->inicio == NULL){
+    lista_comparacoes->inicio = auxItem; 
+    lista_comparacoes->fim = auxItem;
+  }
+  else{
+    lista_comparacoes->fim->itemProx = auxItem;
+    auxItem->itemAnt = lista_comparacoes->fim;
+    lista_comparacoes->fim = auxItem;
+  }
+}
+
 void remove_item_lista(char *token){
   itemLista *itemAtual = lr->fim;
   while(itemAtual != NULL){
@@ -206,6 +227,26 @@ void remove_item_lista(char *token){
       }
       else{
         lr->fim = itemAtual->itemAnt;
+      }
+    }
+    itemAtual = itemAtual->itemAnt;
+  }
+}
+
+void remove_item_lista_comparacoes(char *token){
+  itemLista *itemAtual = lista_comparacoes->fim;
+  while(itemAtual != NULL){
+    if(strcmp (token, itemAtual->identificador) == 0){
+      if(itemAtual->itemAnt!=NULL)
+        itemAtual->itemAnt->itemProx = itemAtual->itemProx;
+      else{
+        lista_comparacoes->inicio = itemAtual->itemProx;
+      }
+      if(itemAtual->itemProx!=NULL){
+        itemAtual->itemProx->itemAnt = itemAtual->itemAnt;
+      }
+      else{
+        lista_comparacoes->fim = itemAtual->itemAnt;
       }
     }
     itemAtual = itemAtual->itemAnt;
@@ -229,7 +270,6 @@ int remove_ts(){
   return count;
 }
 
-
 void verifica_existencia(){
   item* item=procura_tbsimb(token);
   if(item == NULL){
@@ -244,7 +284,6 @@ void verifica_existencia(){
         yyerror("Variavel já declarada\n");
   }
 }
-
 
 void adiciona_ts(categorias cat,char *rot){
   verifica_existencia();
@@ -541,8 +580,7 @@ void armi_armz(){
 }
 
 void define_comp(char * value){
-  comparacao=(char* ) malloc (4*sizeof(char));
-  strcpy(comparacao,value);    
+  adiciona_item_lista_comparacao(value);    
 }
 
 %}
@@ -558,6 +596,7 @@ void define_comp(char * value){
 %token FUNCTION
 %token LABEL GOTO
 %token READ
+%token AND OR TRUEV FALSEV
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
 
@@ -781,14 +820,16 @@ comando:  IDENT
               if(procedure->categoria != FUN){
                 procedure=NULL;
                 tempItemArmz = cria_valores_armz(VS);
-                
+                resultExpected= tempItemArmz->tipo;
               }
               else{
                 tempItemArmz=NULL;
+                resultExpected= procedure->tipo;
               }
               no_proc=1;
             }
             else{
+              resultExpected= procedure->tipo;
               do_verify=1;
               tempItemArmz=NULL;
             }
@@ -819,8 +860,12 @@ parse_comando:
               yyerror("Tipo de operação nao permitida");
             }
           }
-          expressao_simples { 
+          expressaoAT {
+            if(resultExpected != compItem){
+              yyerror("Operação não permitida\n");
+            }
             armi_armz();
+            compItem=-1;
           }
           |
           procedure_function_call
@@ -864,6 +909,7 @@ le_params:
 
 get_param_loop: 
           VIRGULA{
+            compItem=-1;
             temp->inicio=temp->inicio->itemProx;
           }
           le_params |
@@ -873,36 +919,98 @@ get_param:
           expressao_simples{n_param_atual++;}
 ;
 
+
+
+expressaoAT :
+            expressao_simples 
+            parse_expressao
+
+;
+
+parse_expressao:
+    compara 
+    expressao_simples {
+      compItem=BOOLEAN;
+      geraCodigo(NULL,lista_comparacoes->fim->identificador,NULL,NULL);
+      remove_item_lista_comparacoes(lista_comparacoes->fim->identificador);
+    }
+    |
+
+;
+
+expressao   :
+               expressao_simples 
+               compara 
+               expressao_simples {
+                 compItem=BOOLEAN;
+                 geraCodigo(NULL,lista_comparacoes->fim->identificador,NULL,NULL);
+                 remove_item_lista_comparacoes(lista_comparacoes->fim->identificador);
+               }
+               |
+               expressao_simples 
+;
+
 expressao_simples ://ABRE_PARENTESES expressao_simples FECHA_PARENTESES|
             expressao_simples SOMA termo {
+              if(compItem!=-1 && compItem!=INTEGER){
+                  yyerror("Operação não permitida\n");
+                }
+              compItem=INTEGER;
               geraCodigo (NULL, "SOMA",NULL,NULL,NULL); 
               printf ("+\n"); }
             |expressao_simples SUB termo {
+              if(compItem!=-1 && compItem!=INTEGER){
+                  yyerror("Operação não permitida\n");
+                }
+              compItem=INTEGER;
               geraCodigo (NULL, "SUBT",NULL,NULL,NULL); 
               printf ("-"); } 
+            |expressao_simples OR termo {
+              if(compItem!=-1 && compItem!=BOOLEAN){
+                  yyerror("Operação não permitida\n");
+                }
+              compItem=BOOLEAN;
+              geraCodigo (NULL, "DISJ",NULL,NULL,NULL); 
+              printf ("OR"); }
             |termo
 ;
 
 termo      : //ABRE_PARENTESES expressao_simples FECHA_PARENTESES|
              termo MUL fator  {
+               if(compItem!=-1 && compItem!=INTEGER){
+                  yyerror("Operação não permitida\n");
+                }
+               compItem=INTEGER;
               geraCodigo (NULL, "MULT",NULL,NULL,NULL); 
               printf ("*"); }| 
              termo DIV fator  {
+               if(compItem!=-1 && compItem!=INTEGER){
+                  yyerror("Operação não permitida\n");
+                }
+               compItem=INTEGER;
               geraCodigo (NULL, "DIVI",NULL,NULL,NULL); 
               printf ("/"); }|
+             termo AND fator  {
+               if(compItem!=-1 && compItem!=BOOLEAN){
+                  yyerror("Operação não permitida\n");
+                }
+               compItem=BOOLEAN;
+              geraCodigo (NULL, "CONJ",NULL,NULL,NULL); 
+              printf ("AND"); }|
              fator
 ;
 
-fator      :  ABRE_PARENTESES expressao_simples FECHA_PARENTESES
-              |IDENT {
-                if(!procura_compara(VS)){
-                  if(!procura_compara(PF)){
-                    if(!procura_compara(FUN)){
-                      printf("Valor %s não encontrado\n\n",token);
-                      yyerror("");
+fator      :  ABRE_PARENTESES{compItem=-1;} expressaoAT FECHA_PARENTESES
+              | 
+              IDENT {
+                  if(!procura_compara(VS)){
+                    if(!procura_compara(PF)){
+                      if(!procura_compara(FUN)){
+                        printf("Valor %s não encontrado\n\n",token);
+                        yyerror("");
+                      }
                     }
                   }
-                }
                 if(!gera_comando_crvl(VS)){
                   if(!gera_comando_crvl(PF)){
                     procedure = procura_tbsimb(token);
@@ -918,14 +1026,40 @@ fator      :  ABRE_PARENTESES expressao_simples FECHA_PARENTESES
                 else{
                   do_verify=0;
                 }
-                
               }
               procedure_function_call
               |NUMERO{
+                if(compItem!=-1 && compItem!=INTEGER){
+                  yyerror("Operação não permitida");
+                }
+                compItem = INTEGER;
                 geraCodigo (NULL, "CRCT",token,NULL,NULL); 
+              }
+              |TRUEV{
+                if(compItem!=-1 && compItem!=BOOLEAN){
+                  yyerror("Operação não permitida");
+                }
+                compItem = BOOLEAN;
+                geraCodigo (NULL, "CRCT","1",NULL,NULL); 
+              }
+              |FALSEV{
+                if(compItem!=-1 && compItem!=BOOLEAN){
+                  yyerror("Operação não permitida");
+                }
+                compItem = BOOLEAN;
+                geraCodigo(NULL, "CRCT","0",NULL,NULL); 
               }
 ;
 
+
+compara:
+        IGUAL{define_comp("CMIG");}|
+        DIFE {define_comp("CMDG");}|
+        MAIOR{define_comp("CMMA");}|
+        MENOR{define_comp("CMME");}|
+        MAEG {define_comp("CMAG");}|
+        MEEG {define_comp("CMEG");}  
+        
 comando_write : WRITE ABRE_PARENTESES comando_write_once comando_write_loop 
                 FECHA_PARENTESES
 ;
@@ -961,7 +1095,10 @@ cond_if     : if_then cond_else
             }
 ;
 
-if_then     : IF expressao {
+if_then     : IF {resultExpected=BOOLEAN;} expressao {
+                if(resultExpected!=compItem){
+                  yyerror("Operação não permitida, é necessario que o retorno da expressao do if seja booleano");
+                }
                 adiciona_item_lista();
                 geraCodigo (NULL, "DSVF",lr->fim->identificador,NULL,NULL);
               }
@@ -991,7 +1128,7 @@ com_while:    {
               WHILE expressao {
                 adiciona_item_lista();
                 geraCodigo (NULL, "DSVF",lr->fim->identificador,NULL,NULL);
-              } DO internal { geraCodigo (NULL, "DSVS",lr->fim->itemAnt->identificador,NULL,NULL);
+              } DO  internal { geraCodigo (NULL, "DSVS",lr->fim->itemAnt->identificador,NULL,NULL);
                               remove_item_lista(lr->fim->itemAnt->identificador);
                               geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
                               lr->fim->decl=1;
@@ -999,16 +1136,6 @@ com_while:    {
                                 lr->fim=lr->fim->itemAnt;
                         }
 ;
-
-expressao   :  expressao_simples compara expressao_simples {geraCodigo(NULL,comparacao,NULL,NULL);};
-
-compara:
-        IGUAL{define_comp("CMIG");}|
-        DIFE {define_comp("CMDG");}|
-        MAIOR{define_comp("CMMA");}|
-        MENOR{define_comp("CMME");}|
-        MAEG {define_comp("CMAG");}|
-        MEEG {define_comp("CMEG");}  
 
 
 %%
@@ -1036,17 +1163,20 @@ main (int argc, char** argv) {
    tbgoto = (tabela_simbolos *) malloc (sizeof(tabela_simbolos));
    tbgotopendentes = (tabela_simbolos *) malloc (sizeof(tabela_simbolos));
    lr = (lista_rotulos *) malloc (sizeof(lista_rotulos));
+   lista_comparacoes = (lista_rotulos *) malloc (sizeof(lista_rotulos));
    lp = (lista_params *) malloc (sizeof(lista_params));
    tbs->topo_pilha = NULL;
    tbgoto->topo_pilha = NULL;
    tbgotopendentes->topo_pilha = NULL;
    lr->inicio = NULL;
+   lista_comparacoes->inicio = NULL;
    lp->inicio = NULL;
 
    tbs->fim_pilha = NULL;
    tbgoto->fim_pilha = NULL;
    tbgotopendentes->fim_pilha = NULL;
    lr->fim = NULL;
+   lista_comparacoes->fim = NULL;
    lp->fim = NULL;
 
    tbs->itens = NULL;

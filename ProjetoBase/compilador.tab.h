@@ -79,7 +79,11 @@ extern int yydebug;
     LABEL = 289,
     GOTO = 290,
     READ = 291,
-    LOWER_THAN_ELSE = 292
+    AND = 292,
+    OR = 293,
+    TRUEV = 294,
+    FALSEV = 295,
+    LOWER_THAN_ELSE = 296
   };
 #endif
 

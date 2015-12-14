@@ -250,6 +250,26 @@ div    { simbolo = simb_div;
         IMPRIME("div ");
         return DIV;  }
 
+and    { simbolo = simb_and;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME("and ");
+        return AND;  }
+
+or    { simbolo = simb_or;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME("or ");
+        return OR;  }
+
+true    { simbolo = simb_true;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME("true ");
+        return TRUEV;  }
+        
+false { simbolo = simb_false;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME("false ");
+        return FALSEV;  }
+
 {ident} { simbolo = simb_identificador; 
           strncpy (token, yytext, TAM_TOKEN);
           IMPRIME(" ident  ");

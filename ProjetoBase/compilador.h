@@ -26,7 +26,8 @@ typedef enum simbolos {
   simb_procedure,
   simb_function,
   simb_label, simb_goto,
-  simb_read
+  simb_read,
+  simb_true,simb_false,simb_and,simb_or
 
 } simbolos;
 
@@ -49,7 +50,7 @@ typedef enum tipo_variavel {
 } tipo_variavel;
 
 /* -------------------------------------------------------------------
- * vari�veis globais
+ * variáveis globais
  * ------------------------------------------------------------------- */
 
 extern simbolos simbolo, relacao;
