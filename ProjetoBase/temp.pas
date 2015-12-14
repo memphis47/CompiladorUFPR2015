@@ -1,16 +1,31 @@
-program exemplo6(input, output);
-var x, y :  integer;
-   procedure p;
-   var z : integer;
-   begin 
-      z:=x; x:=x-1;
-      if z>1
-         then p
-      else y:=1;
-      y:=y*z
+program exemplo74 (input, output);
+var z, x: integer;
+   procedure g(t:integer);
+   var y : integer;
+   begin
+      y:=t*t; z:=z+x+y;
+      write(z)
+   end;
+
+   procedure h (y : integer);
+   var x : integer;
+      procedure f(y : integer);
+      var t : integer;
+      begin
+         t:=z+x+y; g(t);
+         z:=t
+      end;
+   begin
+      x:=y+1;
+      f(x);
+      g(z+x)
    end;
 begin
-   read (x);
-   p;
-   write (x,y)
+   z:=1;
+   x:=3;
+   h(x);
+   g(x);
+   write(x,z)
 end.
+   
+

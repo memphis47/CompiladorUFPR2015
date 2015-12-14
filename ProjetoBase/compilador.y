@@ -17,6 +17,7 @@ typedef struct itemLista itemLista;
 struct itemLista
 {
   char *identificador;
+  int decl;
   itemLista *itemAnt;
   itemLista *itemProx;
 };
@@ -52,6 +53,7 @@ int n_param_atual;
 int param_chamada = 0;
 int do_verify = 0;
 int no_proc=0;
+int rtprdone= 0;
 tipo_parametro passado;
 tipo_variavel  compItem = -1;
 
@@ -108,12 +110,6 @@ item * procura_tbgoto(char * token, categorias cat){
 int gera_comando_crvl(categorias cat){
   item *item = procura_tbsimb(token);
   if(item!=NULL && item->categoria == cat){
-    
-    if(param1)
-      free(param1);
-    if(param2)
-      free(param2);
-    
     param1 = (char *) malloc (4 * sizeof(char));
     param2 = (char *) malloc (4 * sizeof(char));
     sprintf(param1, "%d", item->nivel_lexico);
@@ -163,6 +159,7 @@ void adiciona_item_lista(){
     auxItem->itemAnt = lr->fim;
     lr->fim = auxItem;
   }
+  lr->fim->decl=0;
   rotNumber++;
 }
 
@@ -437,8 +434,8 @@ void define_else(){
   geraCodigo (NULL, "DSVS",strRot,NULL,NULL);
   geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
   remove_item_lista(lr->fim->identificador);
-  if(lr->fim->itemAnt != NULL)
-    lr->fim=lr->fim->itemAnt;
+  // if(lr->fim->itemAnt != NULL)
+  //   lr->fim=lr->fim->itemAnt;
   adiciona_item_lista();
 }
 
@@ -584,15 +581,19 @@ parse_bloco:
 ;
 
 proc_func_def_loop:
-            {
-              adiciona_item_lista();
-              geraCodigo (NULL, "DSVS",lr->fim->identificador,NULL,NULL);
+            { 
+              if(!rtprdone){
+                adiciona_item_lista();
+                geraCodigo (NULL, "DSVS",lr->fim->identificador,NULL,NULL);
+              }
             } 
             proc_func_def 
             proc_func_def_loop 
             {
-              
-              geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
+              if(!lr->fim->decl){
+                geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
+                lr->fim->decl=1;
+              }
             }
             |
 ;
@@ -607,6 +608,7 @@ proc_func_def_choose:
 ;
 
 proc_com: IDENT{
+            rtprdone=0;
             free(ident);
             ident = (char *) malloc (256*sizeof(char));
             strcpy(ident,token);
@@ -622,6 +624,7 @@ proc_com: IDENT{
             sprintf(lexico, "%d", nivel_lexico_atual);
             geraCodigo (rots, "ENPR",lexico,NULL,NULL); 
             adiciona_item_lista();
+            lr->fim->decl=1;
           } 
           
           blocoProc PONTO_E_VIRGULA
@@ -630,16 +633,16 @@ proc_com: IDENT{
             char lexico[4];
             sprintf(lexico, "%d", nivel_lexico_atual);
             char np[4];
-            
             procedure = procura_tbsimb(ident);
-            if(procedure == NULL)
-              procedure = procura_tbsimb(ident);
+            if(procedure==NULL)
+              yyerror("Valor nao encontrado\n\n");
             if(procedure->param!=NULL)
               sprintf(np, "%d", procedure->param->n_param);
             else
               sprintf(np, "%d", 0);
             geraCodigo (NULL, "RTPR",lexico,np,NULL); 
             nivel_lexico_atual--;
+            rtprdone=1;
           }
 ;
 
@@ -695,7 +698,7 @@ blocoProc:
               parse_bloco
 ;
 
-parte_declara_vars:  var 
+parte_declara_vars:  {num_vars=0;}var 
 ;
 
 var         : VAR declara_vars
@@ -872,7 +875,6 @@ fator      :  ABRE_PARENTESES expressao_simples FECHA_PARENTESES
                     }
                   }
                 }
-                
                 if(!gera_comando_crvl(VS)){
                   if(!gera_comando_crvl(PF)){
                     procedure = procura_tbsimb(token);
@@ -888,6 +890,7 @@ fator      :  ABRE_PARENTESES expressao_simples FECHA_PARENTESES
                 else{
                   do_verify=0;
                 }
+                
               }
               procedure_function_call
               |NUMERO{
@@ -924,8 +927,9 @@ le_simples:
 
 cond_if     : if_then cond_else 
             { 
-               geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
-                lr->fim=lr->fim->itemAnt;
+              geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
+              lr->fim->decl=1;
+              remove_item_lista(lr->fim->identificador);
             }
 ;
 
@@ -955,6 +959,7 @@ comando_repetitivo:
 com_while:    {
                 adiciona_item_lista();
                 geraCodigo (lr->fim->identificador, "NADA",NULL,NULL,NULL);
+                lr->fim->decl=1;
               }
               WHILE expressao {
                 adiciona_item_lista();
@@ -962,6 +967,7 @@ com_while:    {
               } DO internal { geraCodigo (NULL, "DSVS",lr->fim->itemAnt->identificador,NULL,NULL);
                               remove_item_lista(lr->fim->itemAnt->identificador);
                               geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
+                              lr->fim->decl=1;
                               if(lr->fim->itemAnt != NULL)
                                 lr->fim=lr->fim->itemAnt;
                         }
