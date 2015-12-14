@@ -56,6 +56,7 @@ tipo_parametro passado;
 tipo_variavel  compItem = -1;
 
 item *procedure;
+item *procedureSimpleExpr;
 item *tempItemArmz;
 item *tempFunc;
 categorias tempCategoria;
@@ -80,11 +81,10 @@ tipo_variavel retornaTipo(){
     yyerror("Tipo não definido");
 }
 
-item * procura_tbsimb(char * token, categorias cat){
+item * procura_tbsimb(char * token){
   item *itemAtual = tbs->topo_pilha;
   while(itemAtual != NULL){
-    if(strcmp (token, itemAtual->identificador) == 0 
-    && itemAtual->categoria == cat){
+    if(strcmp (token, itemAtual->identificador) == 0){
       return itemAtual;
     }
     itemAtual = itemAtual->itemAnt;
@@ -106,11 +106,14 @@ item * procura_tbgoto(char * token, categorias cat){
 
 
 int gera_comando_crvl(categorias cat){
-  item *item = procura_tbsimb(token,cat);
-  if(item!=NULL){
-    free(param1);
-    free(param2);
-    free(param3);
+  item *item = procura_tbsimb(token);
+  if(item!=NULL && item->categoria == cat){
+    
+    if(param1)
+      free(param1);
+    if(param2)
+      free(param2);
+    
     param1 = (char *) malloc (4 * sizeof(char));
     param2 = (char *) malloc (4 * sizeof(char));
     sprintf(param1, "%d", item->nivel_lexico);
@@ -202,9 +205,9 @@ int remove_ts(){
 
 
 void verifica_existencia(){
-  item* item=procura_tbsimb(token,VS);
+  item* item=procura_tbsimb(token);
   if(item == NULL){
-    item=procura_tbsimb(token,PF);
+    item=procura_tbsimb(token);
     if(item!= NULL){
       if(item->nivel_lexico == nivel_lexico_atual)
         yyerror("Variavel já declarada\n");
@@ -331,7 +334,7 @@ void adiciona_deslocamento_param(){
   */
 
 int procura_compara(categorias cat){
-  item *itemAtual=procura_tbsimb(token,cat);
+  item *itemAtual=procura_tbsimb(token);
   if(compItem!=-1 && itemAtual!=NULL){
     if(compItem != itemAtual->tipo){
       yyerror("\n\nOperação não permitida, valores com tipos diferentes\n\n");
@@ -392,8 +395,10 @@ char * retornaRotulo(){
 }
 
 item* cria_valores_armz(categorias cat){
-  item *item = procura_tbsimb(token,cat);
-  if(item!=NULL){
+  
+  item *item = procura_tbsimb(token);
+  
+  if(item!=NULL && item->categoria == cat){
     
     free(param1Aux);
     free(param2Aux);
@@ -403,9 +408,7 @@ item* cria_valores_armz(categorias cat){
     param2Aux = (char *) malloc (4 * sizeof(char));
     sprintf(param1Aux, "%d", item->nivel_lexico);
     sprintf(param2Aux, "%d", item->deslocamento);
-  }
-  else if(cat != PF){
-    return cria_valores_armz(PF);
+    
   }
   return item;
 }
@@ -486,6 +489,37 @@ void desv_rot(){
   }
 }
 
+void armi_armz(){
+  compItem = -1;
+  if(procedure==NULL && tempItemArmz!=NULL && tempItemArmz->passagem == REFERENCIA){
+    free(param1Aux);
+      free(param2Aux);
+      param1Aux = (char *) malloc (4 * sizeof(char));
+      param2Aux = (char *) malloc (4 * sizeof(char));
+    if(tempItemArmz!=NULL){
+      sprintf(param1Aux, "%d", tempItemArmz->nivel_lexico);
+      sprintf(param2Aux, "%d", tempItemArmz->deslocamento);
+    }  
+    geraCodigo (NULL, "ARMI",param1Aux,param2Aux,NULL);
+  }
+  else{
+      free(param1Aux);
+      free(param2Aux);
+      param1Aux = (char *) malloc (4 * sizeof(char));
+      param2Aux = (char *) malloc (4 * sizeof(char));
+    if(procedure!=NULL && tempItemArmz==NULL){
+      sprintf(param1Aux, "%d", procedure->nivel_lexico);
+      sprintf(param2Aux, "%d", procedure->deslocamento);
+    }
+    else if(tempItemArmz!=NULL){
+      sprintf(param1Aux, "%d", tempItemArmz->nivel_lexico);
+      sprintf(param2Aux, "%d", tempItemArmz->deslocamento);
+    }
+    geraCodigo (NULL, "ARMZ",param1Aux,param2Aux,NULL);
+    procedure==NULL;
+    tempItemArmz=NULL;
+  }
+}
 
 
 %}
@@ -544,24 +578,23 @@ le_label:
 ;
 
 parse_bloco:
-            {
-              adiciona_item_lista();
-              geraCodigo (NULL, "DSVS",lr->fim->identificador,NULL,NULL);
-            } 
-            proc_func_def_loop
-            {
-              geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
-            }
-            
-            comando_composto{ doDmem(); }
-            |
-            comando_composto{ doDmem(); }
+            proc_func_def_loop  comando_composto{ doDmem(); }
 
 
 ;
 
 proc_func_def_loop:
-                  proc_func_def proc_func_def_loop |
+            {
+              adiciona_item_lista();
+              geraCodigo (NULL, "DSVS",lr->fim->identificador,NULL,NULL);
+            } 
+            proc_func_def 
+            proc_func_def_loop 
+            {
+              
+              geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
+            }
+            |
 ;
 
 proc_func_def:
@@ -598,9 +631,9 @@ proc_com: IDENT{
             sprintf(lexico, "%d", nivel_lexico_atual);
             char np[4];
             
-            procedure = procura_tbsimb(ident,PROC);
+            procedure = procura_tbsimb(ident);
             if(procedure == NULL)
-              procedure = procura_tbsimb(ident,FUN);
+              procedure = procura_tbsimb(ident);
             if(procedure->param!=NULL)
               sprintf(np, "%d", procedure->param->n_param);
             else
@@ -699,25 +732,32 @@ lista_idents: lista_idents VIRGULA IDENT
 
 // Comandos a serem executados.
 
-comando_composto: T_BEGIN verify_goto comando comando_composto_loop T_END ;
+comando_composto:  T_BEGIN verify_goto comando comando_composto_loop T_END ;
 
 comando_composto_loop: PONTO_E_VIRGULA verify_goto comando comando_composto_loop | PONTO_E_VIRGULA | 
 ; 
 
 comando:  IDENT
           {
-            procedure = procura_tbsimb(token,PROC);
+            
+            procedure = procura_tbsimb(token);
             no_proc=0;
             
-            if(procedure==NULL){
-              procedure = procura_tbsimb(token,FUN);
-              if(procedure == NULL){
+            if(procedure != NULL && procedure->categoria !=PROC){
+              if(procedure->categoria != FUN){
+                procedure=NULL;
                 tempItemArmz = cria_valores_armz(VS);
+                
+              }
+              else{
+                tempItemArmz=NULL;
               }
               no_proc=1;
             }
-            else
+            else{
               do_verify=1;
+              tempItemArmz=NULL;
+            }
           }
           parse_comando
           | comando_write
@@ -749,12 +789,7 @@ parse_comando:
             }
           }
           expressao_simples { 
-            compItem = -1;
-            if(tempItemArmz->passagem == REFERENCIA)
-              geraCodigo (NULL, "ARMI",param1Aux,param2Aux,NULL);
-            else{
-              geraCodigo (NULL, "ARMZ",param1Aux,param2Aux,NULL);
-            }
+            armi_armz();
           }
           |
           procedure_function_call
@@ -840,8 +875,8 @@ fator      :  ABRE_PARENTESES expressao_simples FECHA_PARENTESES
                 
                 if(!gera_comando_crvl(VS)){
                   if(!gera_comando_crvl(PF)){
-                    procedure = procura_tbsimb(token,FUN);
-                    if(procedure == NULL){
+                    procedure = procura_tbsimb(token);
+                    if(procedure->categoria != FUN){
                       printf("Valor %s não encontrado\n\n",token);
                       yyerror("");
                     }
