@@ -1,29 +1,8 @@
-program exemplo7(input, output);
-var x, y :  integer;
-procedure p;
-var z : integer;
+program dsadsa (input, output);
+var n, k      : integer;
 begin
-   z:=x; x:=x-1;
-   if z>1
-      then p
-   else y:=1;
-   y:=y*z
-end;
-
-procedure q;
-var s, t : integer;
-begin
-   s:=x; t:=x-1; x:=t;
-   if s=0 then y:=1
-   else
-      if ( (s div 2)*2) = s
-         then q
-      else p;
-   y:=y*s
-end;
-
-begin
-   read(x);
-   q;
-   write(y)
+   read (n);
+   read (k);
+   if (n+1) then n:=1;
+   write (n)
 end.

@@ -42,6 +42,7 @@ char *param3;
 char *param1Aux;
 char *param2Aux;
 char *param3Aux;
+char *comparacao;
 char *ident;
 char* rots;
 char* paramName;
@@ -128,7 +129,23 @@ int gera_comando_crvl(categorias cat){
     sprintf(param2, "%d", item->deslocamento);
     if(param_chamada && temp->inicio->passagem == REFERENCIA){ //chamada de parametro passado por referencia
       if(item->tipo == temp->inicio->tipo){
-        geraCodigo (NULL, "CREN",param1,param2,NULL);
+        if(item->passagem==VALOR || item->passagem==-1)
+          geraCodigo (NULL, "CREN",param1,param2,NULL);
+        else if(item->passagem == REFERENCIA)
+          geraCodigo (NULL, "CRVL",param1,param2,NULL);
+      }
+      else{
+        printf("ERRO: Tipo passado: %d\n",item->tipo);
+        printf("Tipo esperado %d\n",temp->inicio->tipo);
+        yyerror("");
+      }
+    }
+    else if(param_chamada && temp->inicio->passagem == VALOR){ //chamada de parametro passado por referencia
+      if(item->tipo == temp->inicio->tipo){
+        if(item->passagem==VALOR || item->passagem==-1)
+          geraCodigo (NULL, "CRVL",param1,param2,NULL);
+        else if(item->passagem == REFERENCIA)
+          geraCodigo (NULL, "CRVI",param1,param2,NULL);
       }
       else{
         printf("ERRO: Tipo passado: %d\n",item->tipo);
@@ -447,13 +464,16 @@ void define_else(){
 int getNumVars(){
   item *itemAtual = tbs->topo_pilha;
   int vars=0;
+  printf("\n\n\nNivel Lexico Atual: %d\n",nivel_lexico_atual);
+   printf("Item nl: %d\n",itemAtual->nivel_lexico);
   while(itemAtual!= NULL 
-        && itemAtual->nivel_lexico <= nivel_lexico_atual){
-    
+        && itemAtual->nivel_lexico >= nivel_lexico_atual){
+    printf("Item Identificador: %s\n",itemAtual->identificador);
     if(itemAtual->categoria == VS && itemAtual->nivel_lexico == nivel_lexico_atual)
       vars++;
     itemAtual = itemAtual->itemAnt;
   }
+  printf("\n\n\n\n");
   return vars;
 }
 
@@ -520,6 +540,10 @@ void armi_armz(){
   }
 }
 
+void define_comp(char * value){
+  comparacao=(char* ) malloc (4*sizeof(char));
+  strcpy(comparacao,value);    
+}
 
 %}
 
@@ -594,8 +618,6 @@ proc_func_def_loop:
             proc_func_def 
             proc_func_def_loop 
             {
-              printf("TOAQUI\n\n");
-              printf("Identificador: %s\n\n",lr->fim->identificador);
               if(!lr->fim->decl){
                 geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
                 lr->fim->decl=1;
@@ -780,9 +802,6 @@ comando:  IDENT
 
 ;
 
-
-
-
 verify_goto:
             NUMERO {
               define_enrt();
@@ -955,7 +974,6 @@ cond_else   : ELSE{
               internal 
               
             | %prec LOWER_THAN_ELSE
-            | PONTO_E_VIRGULA
             
               
 ;
@@ -982,19 +1000,16 @@ com_while:    {
                         }
 ;
 
-expressao   :  prior2;
+expressao   :  expressao_simples compara expressao_simples {geraCodigo(NULL,comparacao,NULL,NULL);};
 
-prior2  :     prior2 IGUAL prior1 {geraCodigo (NULL, "CMIG",NULL,NULL,NULL);}|
-              prior2 DIFE  prior1 {geraCodigo (NULL, "CMDG",NULL,NULL,NULL);}|
-              prior1
-;
+compara:
+        IGUAL{define_comp("CMIG");}|
+        DIFE {define_comp("CMDG");}|
+        MAIOR{define_comp("CMMA");}|
+        MENOR{define_comp("CMME");}|
+        MAEG {define_comp("CMAG");}|
+        MEEG {define_comp("CMEG");}  
 
-prior1  :     prior1 MAIOR expressao_simples {geraCodigo (NULL, "CMMA",NULL,NULL,NULL);}|
-              prior1 MENOR expressao_simples {geraCodigo (NULL, "CMME",NULL,NULL,NULL);}|
-              prior1 MAEG  expressao_simples {geraCodigo (NULL, "CMAG",NULL,NULL,NULL);}| 
-              prior1 MEEG  expressao_simples {geraCodigo (NULL, "CMEG",NULL,NULL,NULL);}|
-              expressao_simples
-;
 
 %%
 
