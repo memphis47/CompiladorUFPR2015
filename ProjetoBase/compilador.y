@@ -94,6 +94,18 @@ item * procura_tbsimb(char * token){
   return NULL;
 }
 
+item * procura_tbsimb_categoria(categorias cat){
+  item *itemAtual = tbs->topo_pilha;
+  while(itemAtual != NULL){
+    if(itemAtual->categoria == cat){
+      return itemAtual;
+    }
+    itemAtual = itemAtual->itemAnt;
+  }
+  return NULL;
+}
+
+
 item * procura_tbgoto(char * token, categorias cat){
   item *itemAtual = tbgoto->topo_pilha;
   while(itemAtual != NULL){
@@ -349,9 +361,6 @@ int procura_compara(categorias cat){
 
 void reza(){
   if(num_vars>0){
-    free(param1);
-    free(param2);
-    free(param3);
     param1 = (char *) malloc (4 * sizeof(char));
     sprintf(param1, "%d", num_vars);
     num_vars=0;
@@ -397,9 +406,6 @@ item* cria_valores_armz(categorias cat){
   
   if(item!=NULL && item->categoria == cat){
     
-    free(param1Aux);
-    free(param2Aux);
-    free(param3Aux);
     
     param1Aux = (char *) malloc (4 * sizeof(char));
     param2Aux = (char *) malloc (4 * sizeof(char));
@@ -416,7 +422,6 @@ void verifica_chama_proc(){
     printf("Número de parametros esperados: %d\n",procedure->param->n_param);
     yyerror("");
   }
-  free(param2);
   param2 = (char *) malloc (4 * sizeof(char));
   sprintf(param2, "%d", nivel_lexico_atual);
   
@@ -489,8 +494,7 @@ void desv_rot(){
 void armi_armz(){
   compItem = -1;
   if(procedure==NULL && tempItemArmz!=NULL && tempItemArmz->passagem == REFERENCIA){
-    free(param1Aux);
-      free(param2Aux);
+    
       param1Aux = (char *) malloc (4 * sizeof(char));
       param2Aux = (char *) malloc (4 * sizeof(char));
     if(tempItemArmz!=NULL){
@@ -500,8 +504,6 @@ void armi_armz(){
     geraCodigo (NULL, "ARMI",param1Aux,param2Aux,NULL);
   }
   else{
-      free(param1Aux);
-      free(param2Aux);
       param1Aux = (char *) malloc (4 * sizeof(char));
       param2Aux = (char *) malloc (4 * sizeof(char));
     if(procedure!=NULL && tempItemArmz==NULL){
@@ -583,6 +585,8 @@ parse_bloco:
 proc_func_def_loop:
             { 
               if(!rtprdone){
+                if(lr!=NULL && lr->fim!=NULL)
+                 remove_item_lista(lr->fim->identificador);
                 adiciona_item_lista();
                 geraCodigo (NULL, "DSVS",lr->fim->identificador,NULL,NULL);
               }
@@ -590,6 +594,8 @@ proc_func_def_loop:
             proc_func_def 
             proc_func_def_loop 
             {
+              printf("TOAQUI\n\n");
+              printf("Identificador: %s\n\n",lr->fim->identificador);
               if(!lr->fim->decl){
                 geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
                 lr->fim->decl=1;
@@ -633,9 +639,12 @@ proc_com: IDENT{
             char lexico[4];
             sprintf(lexico, "%d", nivel_lexico_atual);
             char np[4];
-            procedure = procura_tbsimb(ident);
-            if(procedure==NULL)
-              yyerror("Valor nao encontrado\n\n");
+            procedure = procura_tbsimb_categoria(PROC);
+            if(procedure==NULL){
+              procedure = procura_tbsimb_categoria(FUN);
+              if(procedure==NULL)
+                yyerror("Valor nao encontrado\n\n");
+            }
             if(procedure->param!=NULL)
               sprintf(np, "%d", procedure->param->n_param);
             else
