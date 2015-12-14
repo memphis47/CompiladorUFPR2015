@@ -253,7 +253,6 @@ void adiciona_item_lista(){
   rotNumber++;
 }
 
-
 void adiciona_item_lista_comparacao(char *comp){
   itemLista *auxItem = (itemLista *) malloc (sizeof(itemLista));
 
@@ -294,23 +293,14 @@ void remove_item_lista(char *token){
 }
 
 void remove_item_lista_comparacoes(char *token){
-  itemLista *itemAtual = lista_comparacoes->fim;
-  while(itemAtual != NULL){
-    if(strcmp (token, itemAtual->identificador) == 0){
-      if(itemAtual->itemAnt!=NULL)
-        itemAtual->itemAnt->itemProx = itemAtual->itemProx;
-      else{
-        lista_comparacoes->inicio = itemAtual->itemProx;
-      }
-      if(itemAtual->itemProx!=NULL){
-        itemAtual->itemProx->itemAnt = itemAtual->itemAnt;
-      }
-      else{
-        lista_comparacoes->fim = itemAtual->itemAnt;
-      }
-    }
-    itemAtual = itemAtual->itemAnt;
+  
+  lista_comparacoes->fim=lista_comparacoes->fim->itemAnt;
+  if(lista_comparacoes->fim !=NULL)
+    lista_comparacoes->fim->itemProx=NULL;
+  else{
+    lista_comparacoes->inicio=NULL;
   }
+  
 }
 
 int remove_ts(){
@@ -644,7 +634,7 @@ void define_comp(char * value){
 }
 
 
-#line 648 "compilador.tab.c" /* yacc.c:339  */
+#line 638 "compilador.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -737,7 +727,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 741 "compilador.tab.c" /* yacc.c:358  */
+#line 731 "compilador.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -1038,19 +1028,19 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   605,   605,   612,   605,   621,   620,   628,   628,   631,
-     631,   635,   643,   649,   649,   665,   669,   673,   674,   677,
-     689,   677,   721,   719,   728,   732,   738,   744,   744,   748,
-     748,   750,   750,   755,   755,   766,   766,   765,   768,   771,
-     771,   774,   778,   779,   785,   783,   791,   796,   802,   803,
-     808,   810,   810,   810,   814,   813,   838,   839,   840,   841,
-     842,   847,   847,   849,   853,   858,   858,   871,   875,   885,
-     875,   897,   907,   911,   911,   915,   919,   925,   931,   937,
-     942,   950,   954,   961,   968,   975,   979,   986,   993,  1000,
-    1003,  1003,  1005,  1005,  1031,  1038,  1045,  1056,  1057,  1058,
-    1059,  1060,  1061,  1063,  1067,  1067,  1070,  1076,  1080,  1080,
-    1084,  1090,  1098,  1098,  1098,  1108,  1108,  1113,  1118,  1118,
-    1121,  1123,  1128,  1123
+       0,   595,   595,   602,   595,   611,   610,   618,   618,   621,
+     621,   625,   633,   639,   639,   655,   659,   663,   664,   667,
+     679,   667,   711,   709,   718,   722,   728,   734,   734,   738,
+     738,   740,   740,   745,   745,   756,   756,   755,   758,   761,
+     761,   764,   768,   769,   775,   773,   781,   786,   792,   793,
+     798,   800,   800,   800,   804,   803,   829,   830,   831,   832,
+     833,   838,   838,   840,   844,   849,   849,   863,   867,   877,
+     867,   889,   899,   903,   903,   907,   911,   917,   923,   929,
+     934,   942,   946,   953,   960,   967,   971,   978,   985,   992,
+     995,   995,   997,   997,  1023,  1030,  1037,  1048,  1049,  1050,
+    1051,  1052,  1053,  1055,  1059,  1059,  1062,  1068,  1072,  1072,
+    1076,  1082,  1090,  1090,  1090,  1100,  1100,  1105,  1110,  1110,
+    1113,  1115,  1120,  1115
 };
 #endif
 
@@ -1961,7 +1951,7 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 605 "compilador.y" /* yacc.c:1646  */
+#line 595 "compilador.y" /* yacc.c:1646  */
     { 
                 nivel_lexico_atual=0;
                 num_vars=0;
@@ -1969,49 +1959,49 @@ yyreduce:
                 nivel=0;
                 geraCodigo (NULL, "INPP",NULL,NULL,NULL); 
              }
-#line 1973 "compilador.tab.c" /* yacc.c:1646  */
+#line 1963 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 612 "compilador.y" /* yacc.c:1646  */
+#line 602 "compilador.y" /* yacc.c:1646  */
     {adiciona_ts(PROG,NULL);}
-#line 1979 "compilador.tab.c" /* yacc.c:1646  */
+#line 1969 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 614 "compilador.y" /* yacc.c:1646  */
+#line 604 "compilador.y" /* yacc.c:1646  */
     {
               geraCodigo (NULL, "PARA",NULL,NULL,NULL); 
              }
-#line 1987 "compilador.tab.c" /* yacc.c:1646  */
+#line 1977 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 621 "compilador.y" /* yacc.c:1646  */
+#line 611 "compilador.y" /* yacc.c:1646  */
     { 
                 reza();
               }
-#line 1995 "compilador.tab.c" /* yacc.c:1646  */
+#line 1985 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 635 "compilador.y" /* yacc.c:1646  */
+#line 625 "compilador.y" /* yacc.c:1646  */
     {
             adiciona_item_lista();
             adiciona_label();
             remove_item_lista(lr->fim->identificador);
           }
-#line 2005 "compilador.tab.c" /* yacc.c:1646  */
+#line 1995 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 643 "compilador.y" /* yacc.c:1646  */
+#line 633 "compilador.y" /* yacc.c:1646  */
     { doDmem(); }
-#line 2011 "compilador.tab.c" /* yacc.c:1646  */
+#line 2001 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 649 "compilador.y" /* yacc.c:1646  */
+#line 639 "compilador.y" /* yacc.c:1646  */
     { 
               if(!rtprdone){
                 if(lr!=NULL && lr->fim!=NULL)
@@ -2020,34 +2010,34 @@ yyreduce:
                 geraCodigo (NULL, "DSVS",lr->fim->identificador,NULL,NULL);
               }
             }
-#line 2024 "compilador.tab.c" /* yacc.c:1646  */
+#line 2014 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 659 "compilador.y" /* yacc.c:1646  */
+#line 649 "compilador.y" /* yacc.c:1646  */
     {
               if(!lr->fim->decl){
                 geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
                 lr->fim->decl=1;
               }
             }
-#line 2035 "compilador.tab.c" /* yacc.c:1646  */
+#line 2025 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 673 "compilador.y" /* yacc.c:1646  */
+#line 663 "compilador.y" /* yacc.c:1646  */
     {tempCategoria=PROC;}
-#line 2041 "compilador.tab.c" /* yacc.c:1646  */
+#line 2031 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 674 "compilador.y" /* yacc.c:1646  */
+#line 664 "compilador.y" /* yacc.c:1646  */
     {tempCategoria=FUN;}
-#line 2047 "compilador.tab.c" /* yacc.c:1646  */
+#line 2037 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 677 "compilador.y" /* yacc.c:1646  */
+#line 667 "compilador.y" /* yacc.c:1646  */
     {
             rtprdone=0;
             free(ident);
@@ -2059,11 +2049,11 @@ yyreduce:
             rots=retornaRotulo(); 
             adiciona_ts(tempCategoria,rots);
           }
-#line 2063 "compilador.tab.c" /* yacc.c:1646  */
+#line 2053 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 689 "compilador.y" /* yacc.c:1646  */
+#line 679 "compilador.y" /* yacc.c:1646  */
     {
             char lexico[4];
             sprintf(lexico, "%d", nivel_lexico_atual);
@@ -2071,11 +2061,11 @@ yyreduce:
             adiciona_item_lista();
             lr->fim->decl=1;
           }
-#line 2075 "compilador.tab.c" /* yacc.c:1646  */
+#line 2065 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 698 "compilador.y" /* yacc.c:1646  */
+#line 688 "compilador.y" /* yacc.c:1646  */
     {
             remove_item_lista(lr->fim->identificador);
             char lexico[4];
@@ -2095,113 +2085,113 @@ yyreduce:
             nivel_lexico_atual--;
             rtprdone=1;
           }
-#line 2099 "compilador.tab.c" /* yacc.c:1646  */
+#line 2089 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 721 "compilador.y" /* yacc.c:1646  */
+#line 711 "compilador.y" /* yacc.c:1646  */
     {
                     procedure->param=(lista_params *) malloc(sizeof(lista_params));
                     memcpy(procedure->param,lp,sizeof(lista_params)); //Procedure definido com os par
                     adiciona_deslocamento_param();
                  }
-#line 2109 "compilador.tab.c" /* yacc.c:1646  */
+#line 2099 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 732 "compilador.y" /* yacc.c:1646  */
+#line 722 "compilador.y" /* yacc.c:1646  */
     {
             tipo_variavel tipo= retornaTipo();
             procedure->tipo = tipo;
             lp->inicio=NULL;
             lp->fim=NULL;
           }
-#line 2120 "compilador.tab.c" /* yacc.c:1646  */
+#line 2110 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 738 "compilador.y" /* yacc.c:1646  */
+#line 728 "compilador.y" /* yacc.c:1646  */
     {
             lp->inicio=NULL;
             lp->fim=NULL;
           }
-#line 2129 "compilador.tab.c" /* yacc.c:1646  */
+#line 2119 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 29:
-#line 748 "compilador.y" /* yacc.c:1646  */
+#line 738 "compilador.y" /* yacc.c:1646  */
     {passado=REFERENCIA;}
-#line 2135 "compilador.tab.c" /* yacc.c:1646  */
+#line 2125 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 31:
-#line 750 "compilador.y" /* yacc.c:1646  */
+#line 740 "compilador.y" /* yacc.c:1646  */
     {passado=VALOR;}
-#line 2141 "compilador.tab.c" /* yacc.c:1646  */
+#line 2131 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 33:
-#line 755 "compilador.y" /* yacc.c:1646  */
+#line 745 "compilador.y" /* yacc.c:1646  */
     {
               free(paramName);
               paramName = (char *) malloc (256 * sizeof(char));
               strcpy(paramName,token);
             }
-#line 2151 "compilador.tab.c" /* yacc.c:1646  */
+#line 2141 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 34:
-#line 761 "compilador.y" /* yacc.c:1646  */
+#line 751 "compilador.y" /* yacc.c:1646  */
     {adiciona_param_ts(PF,NULL,passado);}
-#line 2157 "compilador.tab.c" /* yacc.c:1646  */
+#line 2147 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 35:
-#line 766 "compilador.y" /* yacc.c:1646  */
+#line 756 "compilador.y" /* yacc.c:1646  */
     {desl=0;}
-#line 2163 "compilador.tab.c" /* yacc.c:1646  */
+#line 2153 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 36:
-#line 766 "compilador.y" /* yacc.c:1646  */
+#line 756 "compilador.y" /* yacc.c:1646  */
     { reza(); }
-#line 2169 "compilador.tab.c" /* yacc.c:1646  */
+#line 2159 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 39:
-#line 771 "compilador.y" /* yacc.c:1646  */
+#line 761 "compilador.y" /* yacc.c:1646  */
     {num_vars=0;}
-#line 2175 "compilador.tab.c" /* yacc.c:1646  */
+#line 2165 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 44:
-#line 785 "compilador.y" /* yacc.c:1646  */
+#line 775 "compilador.y" /* yacc.c:1646  */
     { 
                 adiciona_tipo_ts(num_vars);
               }
-#line 2183 "compilador.tab.c" /* yacc.c:1646  */
+#line 2173 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 46:
-#line 792 "compilador.y" /* yacc.c:1646  */
+#line 782 "compilador.y" /* yacc.c:1646  */
     { /* insere última vars na tabela de símbolos */ 
                adiciona_ts(VS,NULL);
                num_vars++;
               }
-#line 2192 "compilador.tab.c" /* yacc.c:1646  */
+#line 2182 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 47:
-#line 796 "compilador.y" /* yacc.c:1646  */
+#line 786 "compilador.y" /* yacc.c:1646  */
     { /* insere vars na tabela de símbolos */
                 adiciona_ts(VS,NULL);
                 num_vars++;
               }
-#line 2201 "compilador.tab.c" /* yacc.c:1646  */
+#line 2191 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 54:
-#line 814 "compilador.y" /* yacc.c:1646  */
+#line 804 "compilador.y" /* yacc.c:1646  */
     {
             
             procedure = procura_tbsimb(token);
@@ -2224,36 +2214,38 @@ yyreduce:
               do_verify=1;
               tempItemArmz=NULL;
             }
+            compItem=-1;
           }
-#line 2229 "compilador.tab.c" /* yacc.c:1646  */
+#line 2220 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 61:
-#line 847 "compilador.y" /* yacc.c:1646  */
+#line 838 "compilador.y" /* yacc.c:1646  */
     {
               define_enrt();
             }
-#line 2237 "compilador.tab.c" /* yacc.c:1646  */
+#line 2228 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 64:
-#line 853 "compilador.y" /* yacc.c:1646  */
+#line 844 "compilador.y" /* yacc.c:1646  */
     {desv_rot();}
-#line 2243 "compilador.tab.c" /* yacc.c:1646  */
+#line 2234 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 65:
-#line 858 "compilador.y" /* yacc.c:1646  */
+#line 849 "compilador.y" /* yacc.c:1646  */
     {
+            
             if(procedure!=NULL && !no_proc){
               yyerror("Tipo de operação nao permitida");
             }
           }
-#line 2253 "compilador.tab.c" /* yacc.c:1646  */
+#line 2245 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 66:
-#line 863 "compilador.y" /* yacc.c:1646  */
+#line 855 "compilador.y" /* yacc.c:1646  */
     {
             if(resultExpected != compItem){
               yyerror("Operação não permitida\n");
@@ -2261,11 +2253,11 @@ yyreduce:
             armi_armz();
             compItem=-1;
           }
-#line 2265 "compilador.tab.c" /* yacc.c:1646  */
+#line 2257 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 68:
-#line 875 "compilador.y" /* yacc.c:1646  */
+#line 867 "compilador.y" /* yacc.c:1646  */
     {
             if(procedure==NULL){
                 yyerror("Tipo de operação nao permitida");
@@ -2276,32 +2268,32 @@ yyreduce:
               geraCodigo (NULL, "AMEM",param1Aux,NULL);
             }
           }
-#line 2280 "compilador.tab.c" /* yacc.c:1646  */
+#line 2272 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 69:
-#line 885 "compilador.y" /* yacc.c:1646  */
+#line 877 "compilador.y" /* yacc.c:1646  */
     {
             n_param_atual=0;
             param_chamada=1;
             temp=(lista_params *) malloc(sizeof(lista_params));
             memcpy(temp,procedure->param,sizeof(lista_params));
           }
-#line 2291 "compilador.tab.c" /* yacc.c:1646  */
+#line 2283 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 70:
-#line 891 "compilador.y" /* yacc.c:1646  */
+#line 883 "compilador.y" /* yacc.c:1646  */
     {
             free(temp);
             param_chamada=0;
             verifica_chama_proc();
           }
-#line 2301 "compilador.tab.c" /* yacc.c:1646  */
+#line 2293 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 71:
-#line 897 "compilador.y" /* yacc.c:1646  */
+#line 889 "compilador.y" /* yacc.c:1646  */
     { 
             
             if(procedure!=NULL && do_verify){
@@ -2309,46 +2301,46 @@ yyreduce:
               verifica_chama_proc();
             }
           }
-#line 2313 "compilador.tab.c" /* yacc.c:1646  */
+#line 2305 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 73:
-#line 911 "compilador.y" /* yacc.c:1646  */
+#line 903 "compilador.y" /* yacc.c:1646  */
     {
             compItem=-1;
             temp->inicio=temp->inicio->itemProx;
           }
-#line 2322 "compilador.tab.c" /* yacc.c:1646  */
+#line 2314 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 76:
-#line 919 "compilador.y" /* yacc.c:1646  */
+#line 911 "compilador.y" /* yacc.c:1646  */
     {n_param_atual++;}
-#line 2328 "compilador.tab.c" /* yacc.c:1646  */
+#line 2320 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 78:
-#line 932 "compilador.y" /* yacc.c:1646  */
+#line 924 "compilador.y" /* yacc.c:1646  */
     {
       compItem=BOOLEAN;
       geraCodigo(NULL,lista_comparacoes->fim->identificador,NULL,NULL);
       remove_item_lista_comparacoes(lista_comparacoes->fim->identificador);
     }
-#line 2338 "compilador.tab.c" /* yacc.c:1646  */
+#line 2330 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 80:
-#line 944 "compilador.y" /* yacc.c:1646  */
+#line 936 "compilador.y" /* yacc.c:1646  */
     {
                  compItem=BOOLEAN;
                  geraCodigo(NULL,lista_comparacoes->fim->identificador,NULL,NULL);
                  remove_item_lista_comparacoes(lista_comparacoes->fim->identificador);
                }
-#line 2348 "compilador.tab.c" /* yacc.c:1646  */
+#line 2340 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 82:
-#line 954 "compilador.y" /* yacc.c:1646  */
+#line 946 "compilador.y" /* yacc.c:1646  */
     {
               if(compItem!=-1 && compItem!=INTEGER){
                   yyerror("Operação não permitida\n");
@@ -2356,11 +2348,11 @@ yyreduce:
               compItem=INTEGER;
               geraCodigo (NULL, "SOMA",NULL,NULL,NULL); 
               printf ("+\n"); }
-#line 2360 "compilador.tab.c" /* yacc.c:1646  */
+#line 2352 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 83:
-#line 961 "compilador.y" /* yacc.c:1646  */
+#line 953 "compilador.y" /* yacc.c:1646  */
     {
               if(compItem!=-1 && compItem!=INTEGER){
                   yyerror("Operação não permitida\n");
@@ -2368,11 +2360,11 @@ yyreduce:
               compItem=INTEGER;
               geraCodigo (NULL, "SUBT",NULL,NULL,NULL); 
               printf ("-"); }
-#line 2372 "compilador.tab.c" /* yacc.c:1646  */
+#line 2364 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 84:
-#line 968 "compilador.y" /* yacc.c:1646  */
+#line 960 "compilador.y" /* yacc.c:1646  */
     {
               if(compItem!=-1 && compItem!=BOOLEAN){
                   yyerror("Operação não permitida\n");
@@ -2380,11 +2372,11 @@ yyreduce:
               compItem=BOOLEAN;
               geraCodigo (NULL, "DISJ",NULL,NULL,NULL); 
               printf ("OR"); }
-#line 2384 "compilador.tab.c" /* yacc.c:1646  */
+#line 2376 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 86:
-#line 979 "compilador.y" /* yacc.c:1646  */
+#line 971 "compilador.y" /* yacc.c:1646  */
     {
                if(compItem!=-1 && compItem!=INTEGER){
                   yyerror("Operação não permitida\n");
@@ -2392,11 +2384,11 @@ yyreduce:
                compItem=INTEGER;
               geraCodigo (NULL, "MULT",NULL,NULL,NULL); 
               printf ("*"); }
-#line 2396 "compilador.tab.c" /* yacc.c:1646  */
+#line 2388 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 87:
-#line 986 "compilador.y" /* yacc.c:1646  */
+#line 978 "compilador.y" /* yacc.c:1646  */
     {
                if(compItem!=-1 && compItem!=INTEGER){
                   yyerror("Operação não permitida\n");
@@ -2404,11 +2396,11 @@ yyreduce:
                compItem=INTEGER;
               geraCodigo (NULL, "DIVI",NULL,NULL,NULL); 
               printf ("/"); }
-#line 2408 "compilador.tab.c" /* yacc.c:1646  */
+#line 2400 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 88:
-#line 993 "compilador.y" /* yacc.c:1646  */
+#line 985 "compilador.y" /* yacc.c:1646  */
     {
                if(compItem!=-1 && compItem!=BOOLEAN){
                   yyerror("Operação não permitida\n");
@@ -2416,17 +2408,17 @@ yyreduce:
                compItem=BOOLEAN;
               geraCodigo (NULL, "CONJ",NULL,NULL,NULL); 
               printf ("AND"); }
-#line 2420 "compilador.tab.c" /* yacc.c:1646  */
+#line 2412 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 90:
-#line 1003 "compilador.y" /* yacc.c:1646  */
+#line 995 "compilador.y" /* yacc.c:1646  */
     {compItem=-1;}
-#line 2426 "compilador.tab.c" /* yacc.c:1646  */
+#line 2418 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 92:
-#line 1005 "compilador.y" /* yacc.c:1646  */
+#line 997 "compilador.y" /* yacc.c:1646  */
     {
                   if(!procura_compara(VS)){
                     if(!procura_compara(PF)){
@@ -2452,11 +2444,11 @@ yyreduce:
                   do_verify=0;
                 }
               }
-#line 2456 "compilador.tab.c" /* yacc.c:1646  */
+#line 2448 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 94:
-#line 1031 "compilador.y" /* yacc.c:1646  */
+#line 1023 "compilador.y" /* yacc.c:1646  */
     {
                 if(compItem!=-1 && compItem!=INTEGER){
                   yyerror("Operação não permitida");
@@ -2464,11 +2456,11 @@ yyreduce:
                 compItem = INTEGER;
                 geraCodigo (NULL, "CRCT",token,NULL,NULL); 
               }
-#line 2468 "compilador.tab.c" /* yacc.c:1646  */
+#line 2460 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 95:
-#line 1038 "compilador.y" /* yacc.c:1646  */
+#line 1030 "compilador.y" /* yacc.c:1646  */
     {
                 if(compItem!=-1 && compItem!=BOOLEAN){
                   yyerror("Operação não permitida");
@@ -2476,11 +2468,11 @@ yyreduce:
                 compItem = BOOLEAN;
                 geraCodigo (NULL, "CRCT","1",NULL,NULL); 
               }
-#line 2480 "compilador.tab.c" /* yacc.c:1646  */
+#line 2472 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 96:
-#line 1045 "compilador.y" /* yacc.c:1646  */
+#line 1037 "compilador.y" /* yacc.c:1646  */
     {
                 if(compItem!=-1 && compItem!=BOOLEAN){
                   yyerror("Operação não permitida");
@@ -2488,81 +2480,81 @@ yyreduce:
                 compItem = BOOLEAN;
                 geraCodigo(NULL, "CRCT","0",NULL,NULL); 
               }
-#line 2492 "compilador.tab.c" /* yacc.c:1646  */
+#line 2484 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 97:
-#line 1056 "compilador.y" /* yacc.c:1646  */
+#line 1048 "compilador.y" /* yacc.c:1646  */
     {define_comp("CMIG");}
-#line 2498 "compilador.tab.c" /* yacc.c:1646  */
+#line 2490 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 98:
-#line 1057 "compilador.y" /* yacc.c:1646  */
+#line 1049 "compilador.y" /* yacc.c:1646  */
     {define_comp("CMDG");}
-#line 2504 "compilador.tab.c" /* yacc.c:1646  */
+#line 2496 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 99:
-#line 1058 "compilador.y" /* yacc.c:1646  */
+#line 1050 "compilador.y" /* yacc.c:1646  */
     {define_comp("CMMA");}
-#line 2510 "compilador.tab.c" /* yacc.c:1646  */
+#line 2502 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 100:
-#line 1059 "compilador.y" /* yacc.c:1646  */
+#line 1051 "compilador.y" /* yacc.c:1646  */
     {define_comp("CMME");}
-#line 2516 "compilador.tab.c" /* yacc.c:1646  */
+#line 2508 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 101:
-#line 1060 "compilador.y" /* yacc.c:1646  */
+#line 1052 "compilador.y" /* yacc.c:1646  */
     {define_comp("CMAG");}
-#line 2522 "compilador.tab.c" /* yacc.c:1646  */
+#line 2514 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 102:
-#line 1061 "compilador.y" /* yacc.c:1646  */
+#line 1053 "compilador.y" /* yacc.c:1646  */
     {define_comp("CMEG");}
-#line 2528 "compilador.tab.c" /* yacc.c:1646  */
+#line 2520 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 106:
-#line 1070 "compilador.y" /* yacc.c:1646  */
+#line 1062 "compilador.y" /* yacc.c:1646  */
     {
                         geraCodigo (NULL, "IMPR",NULL,NULL,NULL);
                       }
-#line 2536 "compilador.tab.c" /* yacc.c:1646  */
+#line 2528 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 110:
-#line 1084 "compilador.y" /* yacc.c:1646  */
+#line 1076 "compilador.y" /* yacc.c:1646  */
     {
               geraCodigo(NULL,"LEIT",NULL,NULL,NULL);
               cria_valores_armz(VS);
               geraCodigo (NULL, "ARMZ",param1Aux,param2Aux,NULL);
             }
-#line 2546 "compilador.tab.c" /* yacc.c:1646  */
+#line 2538 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 111:
-#line 1091 "compilador.y" /* yacc.c:1646  */
+#line 1083 "compilador.y" /* yacc.c:1646  */
     { 
               geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
               lr->fim->decl=1;
               remove_item_lista(lr->fim->identificador);
             }
-#line 2556 "compilador.tab.c" /* yacc.c:1646  */
+#line 2548 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 112:
-#line 1098 "compilador.y" /* yacc.c:1646  */
-    {resultExpected=BOOLEAN;}
-#line 2562 "compilador.tab.c" /* yacc.c:1646  */
+#line 1090 "compilador.y" /* yacc.c:1646  */
+    {resultExpected=BOOLEAN; compItem=-1;}
+#line 2554 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 113:
-#line 1098 "compilador.y" /* yacc.c:1646  */
+#line 1090 "compilador.y" /* yacc.c:1646  */
     {
                 if(resultExpected!=compItem){
                   yyerror("Operação não permitida, é necessario que o retorno da expressao do if seja booleano");
@@ -2570,38 +2562,38 @@ yyreduce:
                 adiciona_item_lista();
                 geraCodigo (NULL, "DSVF",lr->fim->identificador,NULL,NULL);
               }
-#line 2574 "compilador.tab.c" /* yacc.c:1646  */
+#line 2566 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 115:
-#line 1108 "compilador.y" /* yacc.c:1646  */
+#line 1100 "compilador.y" /* yacc.c:1646  */
     {
                 define_else();
               }
-#line 2582 "compilador.tab.c" /* yacc.c:1646  */
+#line 2574 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 121:
-#line 1123 "compilador.y" /* yacc.c:1646  */
+#line 1115 "compilador.y" /* yacc.c:1646  */
     {
                 adiciona_item_lista();
                 geraCodigo (lr->fim->identificador, "NADA",NULL,NULL,NULL);
                 lr->fim->decl=1;
               }
-#line 2592 "compilador.tab.c" /* yacc.c:1646  */
+#line 2584 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 122:
-#line 1128 "compilador.y" /* yacc.c:1646  */
+#line 1120 "compilador.y" /* yacc.c:1646  */
     {
                 adiciona_item_lista();
                 geraCodigo (NULL, "DSVF",lr->fim->identificador,NULL,NULL);
               }
-#line 2601 "compilador.tab.c" /* yacc.c:1646  */
+#line 2593 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
   case 123:
-#line 1131 "compilador.y" /* yacc.c:1646  */
+#line 1123 "compilador.y" /* yacc.c:1646  */
     { geraCodigo (NULL, "DSVS",lr->fim->itemAnt->identificador,NULL,NULL);
                               remove_item_lista(lr->fim->itemAnt->identificador);
                               geraCodigo (lr->fim->identificador, "NADA",NULL,NULL);
@@ -2609,11 +2601,11 @@ yyreduce:
                               if(lr->fim->itemAnt != NULL)
                                 lr->fim=lr->fim->itemAnt;
                         }
-#line 2613 "compilador.tab.c" /* yacc.c:1646  */
+#line 2605 "compilador.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 2617 "compilador.tab.c" /* yacc.c:1646  */
+#line 2609 "compilador.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2841,7 +2833,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 1141 "compilador.y" /* yacc.c:1906  */
+#line 1133 "compilador.y" /* yacc.c:1906  */
 
 
 main (int argc, char** argv) {

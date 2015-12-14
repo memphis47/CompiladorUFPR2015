@@ -6,3 +6,24 @@ R1: ENPR 1
     CRCT 1
     CMIG
     DSVF R2
+    CRCT 1
+    CRCT 2
+    CMMA
+    ARMZ 1,-5
+    DSVS R3
+R2: NADA 
+    CRCT 1
+    CRCT 2
+    CMME
+    ARMZ 1,-5
+R3: NADA 
+    RTPR 1,1
+R0: NADA 
+    AMEM 1
+    CRCT 1
+    CHPR R1,0
+    ARMZ 0,0
+    CRVL 0,0
+    IMPR
+    DMEM 1
+    PARA

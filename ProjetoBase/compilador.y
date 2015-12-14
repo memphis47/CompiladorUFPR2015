@@ -193,7 +193,6 @@ void adiciona_item_lista(){
   rotNumber++;
 }
 
-
 void adiciona_item_lista_comparacao(char *comp){
   itemLista *auxItem = (itemLista *) malloc (sizeof(itemLista));
 
@@ -234,23 +233,14 @@ void remove_item_lista(char *token){
 }
 
 void remove_item_lista_comparacoes(char *token){
-  itemLista *itemAtual = lista_comparacoes->fim;
-  while(itemAtual != NULL){
-    if(strcmp (token, itemAtual->identificador) == 0){
-      if(itemAtual->itemAnt!=NULL)
-        itemAtual->itemAnt->itemProx = itemAtual->itemProx;
-      else{
-        lista_comparacoes->inicio = itemAtual->itemProx;
-      }
-      if(itemAtual->itemProx!=NULL){
-        itemAtual->itemProx->itemAnt = itemAtual->itemAnt;
-      }
-      else{
-        lista_comparacoes->fim = itemAtual->itemAnt;
-      }
-    }
-    itemAtual = itemAtual->itemAnt;
+  
+  lista_comparacoes->fim=lista_comparacoes->fim->itemAnt;
+  if(lista_comparacoes->fim !=NULL)
+    lista_comparacoes->fim->itemProx=NULL;
+  else{
+    lista_comparacoes->inicio=NULL;
   }
+  
 }
 
 int remove_ts(){
@@ -833,6 +823,7 @@ comando:  IDENT
               do_verify=1;
               tempItemArmz=NULL;
             }
+            compItem=-1;
           }
           parse_comando
           | comando_write
@@ -856,6 +847,7 @@ comando_goto:
 parse_comando:
           
           ATRIBUICAO {
+            
             if(procedure!=NULL && !no_proc){
               yyerror("Tipo de operação nao permitida");
             }
@@ -1095,7 +1087,7 @@ cond_if     : if_then cond_else
             }
 ;
 
-if_then     : IF {resultExpected=BOOLEAN;} expressao {
+if_then     : IF {resultExpected=BOOLEAN; compItem=-1;} expressao {
                 if(resultExpected!=compItem){
                   yyerror("Operação não permitida, é necessario que o retorno da expressao do if seja booleano");
                 }
